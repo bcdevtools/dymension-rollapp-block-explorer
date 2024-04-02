@@ -97,6 +97,16 @@ func Test_NewJsonRpcQueryBuilder(t *testing.T) {
     "jsonrpc": "2.0"
 }`, qb.(*jsonRpcQueryBuilder).requestId), qb.String())
 	})
+	t.Run("request id on json should maintains full-sized when big", func(t *testing.T) {
+		curReqId = math.MaxUint64 - 10
+		qb := NewJsonRpcQueryBuilder("x_req")
+		require.Equal(t, `{
+    "method": "x_req",
+    "params": [],
+    "id": 18446744073709551606,
+    "jsonrpc": "2.0"
+}`, qb.String())
+	})
 }
 
 func Test_JsonRpcIntegerQueryParam(t *testing.T) {
