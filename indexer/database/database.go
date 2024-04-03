@@ -1,6 +1,10 @@
 package database
 
-import "context"
+import (
+	"context"
+	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
+	_ "github.com/lib/pq"
+)
 
 // Database represents an abstract database that can be used to CRUD
 type Database interface {
@@ -15,4 +19,12 @@ type Database interface {
 
 	// Close closes the underlying database connection
 	Close()
+
+	// InsertRecordChainInfo inserts a new chain info record into the database.
+	// If the chain info already exists, it will not be inserted.
+	InsertRecordChainInfo(chainInfo dbtypes.RecordChainInfo) (inserted bool, err error)
+
+	// UpdateBeJsonRpcUrlsIfExists updates the be_json_rpc_urls field of the chain info record with the given chain ID.
+	// If the chain info does not exist, nothing will be updated.
+	UpdateBeJsonRpcUrlsIfExists(chainId string, urls []string) (updated bool, err error)
 }

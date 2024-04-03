@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	libapp "github.com/EscanBE/go-lib/app"
+	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
 	querysvc "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query"
 	querytypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/types"
@@ -57,7 +58,9 @@ func NewIndexer(
 }
 
 func (d *defaultIndexer) Start() {
-	logger := types.UnwrapIndexerContext(d.ctx).GetLogger()
+	indexerCtx := types.UnwrapIndexerContext(d.ctx)
+	logger := indexerCtx.GetLogger()
+	db := indexerCtx.GetDatabase()
 
 	defer libapp.TryRecoverAndExecuteExitFunctionIfRecovered(logger)
 
@@ -65,8 +68,13 @@ func (d *defaultIndexer) Start() {
 
 	d.ensureNotStartedWithRLock()
 
+	var isChainInfoRecordExists bool // is a flag indicate the is record chain info exists in the database so no need to call insert
+
 	for !d.isShuttingDownWithRLock() {
 		time.Sleep(d.indexingCfg.IndexBlockInterval)
+
+		var beGetChainInfo *querytypes.ResponseBeGetChainInfo
+		var err error
 
 		// check if active json rpc url is still valid, and use the most up-to-date, the fastest one
 		activeJsonRpcUrl, lastUrlCheck := d.getActiveJsonRpcUrlAndLastCheck()
@@ -93,8 +101,25 @@ func (d *defaultIndexer) Start() {
 			if !found {
 				logger.Error("failed to get chain info from all json-rpc urls", "chain-id", d.chainConfig.ChainId)
 				d.forceResetActiveJsonRpcUrl(true)
+
+				_, err := db.UpdateBeJsonRpcUrlsIfExists(d.chainConfig.ChainId, []string{})
+				if err != nil {
+					logger.Error("failed to clear be_json_rpc_urls from chains_info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+				}
 			} else {
 				d.updateActiveJsonRpcUrlAndLastCheckWithLock(theBestResponse.url, time.Now())
+				beGetChainInfo = theBestResponse.res
+
+				// update URLs into the database
+				var urls []string
+				for _, res := range responsesByJsonRpcUrl {
+					urls = append(urls, res.url)
+				}
+
+				_, err := db.UpdateBeJsonRpcUrlsIfExists(d.chainConfig.ChainId, urls)
+				if err != nil {
+					logger.Error("failed to update be_json_rpc_urls from chains_info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+				}
 			}
 		}
 
@@ -109,6 +134,42 @@ func (d *defaultIndexer) Start() {
 
 		// use the active url
 		d.querySvc.SetQueryEndpoint(activeJsonRpcUrl)
+
+		if beGetChainInfo == nil {
+			beGetChainInfo, _, err = d.querySvc.BeGetChainInfo()
+			if err != nil {
+				logger.Error("failed to get chain info, waiting for next round", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+				continue
+			}
+		}
+
+		// validate chain info
+		// Even tho the validation was performed earlier, it's better to double-check and provide more context
+		if beGetChainInfo.ChainId != d.chainConfig.ChainId {
+			logger.Error("chain-id mismatch", "expected", d.chainConfig.ChainId, "got", beGetChainInfo.ChainId)
+			d.forceResetActiveJsonRpcUrl(true)
+			continue
+		}
+
+		// insert chain info record
+		if !isChainInfoRecordExists {
+			chainInfoRecord := dbtypes.RecordChainInfo{
+				ChainId:       beGetChainInfo.ChainId,
+				Name:          d.chainName,
+				ChainType:     beGetChainInfo.ChainType,
+				Bech32:        beGetChainInfo.Bech32,
+				Denoms:        beGetChainInfo.Denom,
+				BeJsonRpcUrls: []string{activeJsonRpcUrl},
+			}
+			_, err := db.InsertRecordChainInfo(chainInfoRecord)
+			if err != nil {
+				logger.Error("failed to insert chain info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+				continue
+			}
+			isChainInfoRecordExists = true
+		}
+
+		// perform indexing
 	}
 
 	logger.Info("shutting down indexer", "name", d.chainName)

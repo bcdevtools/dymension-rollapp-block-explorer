@@ -56,8 +56,11 @@ var startCmd = &cobra.Command{
 			conf.TelegramConfig.ErrChannelID,
 		)
 		libutils.ExitIfErr(err, "failed to initialize Telegram bot")
-		telegramBot = telegramBot.WithLogger(logger).EnableDebug(conf.Logging.Level == logtypes.LOG_LEVEL_DEBUG)
-		ctx = ctx.WithTelegramBot(telegramBot)
+
+		if telegramBot != nil {
+			telegramBot = telegramBot.WithLogger(logger).EnableDebug(conf.Logging.Level == logtypes.LOG_LEVEL_DEBUG)
+			ctx = ctx.WithTelegramBot(telegramBot)
+		}
 
 		// Initialize database connection
 		db, err := postgres.NewPostgresDatabase(conf.Endpoints.Database, logger)
@@ -67,7 +70,9 @@ var startCmd = &cobra.Command{
 		ctx = ctx.Sealed()
 		logger.Debug("Application starts")
 
-		_, _ = telegramBot.SendTelegramLogMessage(fmt.Sprintf("[%s] Application Start", constants.APP_NAME))
+		if telegramBot != nil {
+			_, _ = telegramBot.SendTelegramLogMessage(fmt.Sprintf("[%s] Application Start", constants.APP_NAME))
+		}
 
 		// Increase the waitGroup by one and decrease within trapExitSignal
 		waitGroup.Add(1)

@@ -64,7 +64,7 @@ func (d defaultBeJsonRpcQueryService) BeGetChainInfo() (res *querytypes.Response
 		return
 	}
 
-	responseBeGetChainInfo := resAny.(querytypes.ResponseBeGetChainInfo)
+	responseBeGetChainInfo := resAny.(*querytypes.ResponseBeGetChainInfo)
 	if err = responseBeGetChainInfo.ValidateBasic(); err != nil {
 		err = errors.Wrap(err, "response validation failed")
 		return
@@ -75,7 +75,7 @@ func (d defaultBeJsonRpcQueryService) BeGetChainInfo() (res *querytypes.Response
 		return
 	}
 
-	res = &responseBeGetChainInfo
+	res = responseBeGetChainInfo
 	return
 }
 

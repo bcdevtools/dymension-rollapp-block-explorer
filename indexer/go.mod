@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/EscanBE/go-lib v1.0.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
+	github.com/lib/pq v1.10.6
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
