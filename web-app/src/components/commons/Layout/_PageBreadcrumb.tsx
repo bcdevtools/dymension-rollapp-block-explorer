@@ -4,12 +4,12 @@ import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import React from 'react';
-import { usePathname } from 'next/navigation';
 import { getNewPathOnMenuClick } from '@/utils/common';
 import { BreadcrumbName, Path } from '@/consts/path';
 
-export default function PageBreadcrumb() {
-  const pathname = usePathname();
+export default React.memo(function PageBreadcrumb({
+  pathname,
+}: Readonly<{ pathname: string }>) {
   const splittedPath = pathname.split('/').filter(path => path);
 
   return (
@@ -42,4 +42,4 @@ export default function PageBreadcrumb() {
       })}
     </Breadcrumbs>
   );
-}
+});

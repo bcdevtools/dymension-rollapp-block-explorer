@@ -12,6 +12,7 @@ import { THEME_COOKIE_NAME, ThemeMode } from '@/consts/theme';
 import { usePathname } from 'next/navigation';
 import { useRollappStore } from '@/stores/rollappStore';
 import { RollappActionTypes } from '@/consts/actionTypes';
+import PageBreadcrumb from './_PageBreadcrumb';
 
 const SIDER_WIDTH = 240;
 
@@ -77,6 +78,7 @@ export default function Layout({ children, initialThemeMode }: LayoutProps) {
               },
             }}>
             <CustomToolbar />
+            <PageBreadcrumb pathname={pathname} />
             {children}
           </Box>
         </Box>
