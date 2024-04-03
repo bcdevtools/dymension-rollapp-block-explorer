@@ -17,6 +17,9 @@ import Select from '@mui/material/Select';
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
+import { useRollappStore } from '@/stores/rollappStore';
+import { rollapps } from '@/consts/rollapps';
+import { getNewPathOnMenuClick } from '@/utils/common';
 
 type SiderProps = Readonly<{
   menuOpen: boolean;
@@ -39,24 +42,45 @@ export default React.memo(function Sider({
 }: SiderProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const [{ chainPath }] = useRollappStore(true);
+
+  const handleMenuItemClick = (path: string) => {
+    router.push(getNewPathOnMenuClick(pathname, path));
+    handleMenuClose();
+  };
+
+  const isSelecting = (path: string) => {
+    const splittedPath = pathname.split('/');
+    return (
+      (path === '/' && splittedPath.length === 2) ||
+      `/${splittedPath[2]}` === path
+    );
+  };
+
   const drawer = (
     <>
       <Toolbar sx={{ display: { xs: 'none', md: 'flex' } }} />
       <List>
         <ListItem>
           <FormControl fullWidth>
-            <Select value={10} onChange={() => {}}>
-              <MenuItem value={10}>Roll App 1</MenuItem>
-              <MenuItem value={20}>Roll App 2</MenuItem>
-              <MenuItem value={30}>Roll App 3</MenuItem>
+            <Select
+              value={chainPath}
+              onChange={e =>
+                void router.push(pathname.replace(/^\/[^\/]*/, e.target.value))
+              }>
+              {rollapps.map(rollapp => (
+                <MenuItem key={rollapp.chainId} value={rollapp.path}>
+                  {rollapp.name}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </ListItem>
         {MENU_ITEMS.map((menuItem, index) => (
           <ListItem key={index} disablePadding>
             <ListItemButton
-              onClick={() => void router.push(menuItem.path)}
-              selected={pathname.startsWith(menuItem.path)}>
+              onClick={() => handleMenuItemClick(menuItem.path)}
+              selected={isSelecting(menuItem.path)}>
               <ListItemIcon>{menuItem.icon}</ListItemIcon>
               <ListItemText primary={menuItem.name} />
             </ListItemButton>
@@ -65,8 +89,10 @@ export default React.memo(function Sider({
       </List>
     </>
   );
+
   const container =
     typeof window !== 'undefined' ? () => window.document.body : undefined;
+
   return (
     <Box
       component="nav"

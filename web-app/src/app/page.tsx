@@ -1,10 +1,6 @@
 import Typography from '@mui/material/Typography';
 
 export default async function Home() {
-  // const res = await new Promise(
-  //   resolve => void setTimeout(() => resolve('ahihi'), 5000)
-  // );
-  // return <>{res}</>;
   return (
     <Typography paragraph>
       Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
