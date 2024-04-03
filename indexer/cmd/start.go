@@ -10,10 +10,12 @@ import (
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/constants"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/postgres"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/types"
+	indexer "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/work/per_chain_indexer"
 	"github.com/spf13/cobra"
 	"os"
 	"os/signal"
 	"sync"
+	"time"
 )
 
 var (
@@ -29,9 +31,15 @@ var startCmd = &cobra.Command{
 		conf, err := loadConfig(homeDir)
 		libutils.ExitIfErr(err, "unable to load configuration")
 
+		chainList, err := loadChainList(homeDir)
+		libutils.ExitIfErr(err, "unable to load chain list configuration")
+
 		// Perform validation
 		err = conf.Validate()
 		libutils.ExitIfErr(err, "failed to validate configuration")
+
+		err = chainList.Validate()
+		libutils.ExitIfErr(err, "failed to validate chain list")
 
 		ctx := types.NewContext()
 
@@ -83,6 +91,26 @@ var startCmd = &cobra.Command{
 		trapExitSignal(ctx)
 
 		// Create workers
+
+		indexerManager := indexer.NewIndexerManager(ctx)
+		indexerManager.Reload(chainList)
+
+		go func() {
+			defer libapp.TryRecoverAndExecuteExitFunctionIfRecovered(logger)
+
+			for true {
+				time.Sleep(30 * time.Second)
+
+				chainList, err := loadChainList(homeDir)
+				if err != nil {
+					logger.Error("chain list invalid, hot-reload failed", "error", err.Error())
+					continue
+				}
+
+				indexerManager.Reload(chainList)
+				time.Sleep(90 * time.Second)
+			}
+		}()
 
 		// end
 		waitGroup.Wait()

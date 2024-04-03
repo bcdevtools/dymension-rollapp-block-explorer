@@ -65,6 +65,7 @@ func TestParseJsonRpcResponse(t *testing.T) {
 
 	type complexResultL4 struct {
 		Message string `json:"message"`
+		Number  int64  `json:"number"`
 	}
 	type complexResultL3 struct {
 		Level41 complexResultL4  `json:"level41"`
@@ -92,7 +93,9 @@ func TestParseJsonRpcResponse(t *testing.T) {
 			"level3": {
 				"message": "l3",
 				"level41": {
-					"message": "l4"
+					"message": "l4",
+					"number": 77,
+					"float": 1.6
 				}
 			}
 		}
@@ -106,6 +109,7 @@ func TestParseJsonRpcResponse(t *testing.T) {
 		require.Equal(t, "l2", cr.Level2.Message)
 		require.Equal(t, "l3", cr.Level2.Level3.Message)
 		require.Equal(t, "l4", cr.Level2.Level3.Level41.Message)
+		require.Equal(t, int64(77), cr.Level2.Level3.Level41.Number)
 		require.Nil(t, cr.Level2.Level3.Level42)
 		require.Empty(t, cr.Level2.Level3.Level43.Message)
 	})

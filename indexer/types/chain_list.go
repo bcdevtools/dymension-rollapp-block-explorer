@@ -20,7 +20,7 @@ type ChainConfig struct {
 }
 
 // LoadConfig load the configuration from `chains.yaml` file within the specified application's home directory
-func (cl *ChainList) LoadConfig(homeDir string) error {
+func (cl ChainList) LoadConfig(homeDir string) error {
 	cfgFile := path.Join(homeDir, constants.DEFAULT_CHAIN_LIST_FILE_NAME)
 
 	var fileStats os.FileInfo

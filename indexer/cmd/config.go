@@ -13,8 +13,8 @@ func loadConfig(homeDir string) (*types.Config, error) {
 	return cfg, nil
 }
 
-func loadChainList(homeDir string) (*types.ChainList, error) {
-	cfg := &types.ChainList{}
+func loadChainList(homeDir string) (types.ChainList, error) {
+	cfg := types.ChainList{}
 	err := cfg.LoadConfig(homeDir)
 	if err != nil {
 		return nil, err
