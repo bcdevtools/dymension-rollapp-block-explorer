@@ -1,5 +1,0 @@
-{
-  "directory": ["./src/consts"],
-  "exclude": ["__mock__", "__mocks__", ".spec.ts"],
-  "delete": true
-}
