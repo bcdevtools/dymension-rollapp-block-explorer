@@ -13,6 +13,9 @@ import { usePathname } from 'next/navigation';
 import { useRollappStore } from '@/stores/rollappStore';
 import { RollappActionTypes } from '@/consts/actionTypes';
 import PageBreadcrumb from './_PageBreadcrumb';
+import Container from '@mui/material/Container';
+import Divider from '@mui/material/Divider';
+import Paper from '@mui/material/Paper';
 
 const SIDER_WIDTH = 240;
 
@@ -70,16 +73,20 @@ export default function Layout({ children, initialThemeMode }: LayoutProps) {
             component="main"
             sx={{
               flexGrow: 1,
-              p: 3,
-              width: { md: `calc(100vh - ${SIDER_WIDTH}px)` },
+              // width: { md: `calc(100vh - ${SIDER_WIDTH}px)` },
               height: {
                 xs: `calc(100vh - ${128}px)`,
                 md: `calc(100vh - ${64}px)`,
               },
             }}>
             <CustomToolbar />
-            <PageBreadcrumb pathname={pathname} />
-            {children}
+            <Container>
+              <PageBreadcrumb pathname={pathname} />
+              <Divider />
+              <Paper sx={{ my: 1, p: 2 }} elevation={1}>
+                {children}
+              </Paper>
+            </Container>
           </Box>
         </Box>
       </ThemeProvider>
