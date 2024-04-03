@@ -98,8 +98,14 @@ var startCmd = &cobra.Command{
 		go func() {
 			defer libapp.TryRecoverAndExecuteExitFunctionIfRecovered(logger)
 
+			const primaryWait = 30 * time.Second
+			var secondaryWait = ctx.GetConfig().IndexingConfig.HotReloadInterval - primaryWait
+			if secondaryWait < 5*time.Second {
+				secondaryWait = 5 * time.Second
+			}
+
 			for true {
-				time.Sleep(30 * time.Second)
+				time.Sleep(primaryWait)
 
 				chainList, err := loadChainList(homeDir)
 				if err != nil {
@@ -108,7 +114,7 @@ var startCmd = &cobra.Command{
 				}
 
 				indexerManager.Reload(chainList)
-				time.Sleep(90 * time.Second)
+				time.Sleep(secondaryWait)
 			}
 		}()
 

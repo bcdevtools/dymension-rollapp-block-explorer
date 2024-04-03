@@ -9,14 +9,24 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"path"
+	"time"
 )
 
 // Config is the structure representation of configuration from `config.yaml` file
 type Config struct {
+	IndexingConfig Indexing               `mapstructure:"indexing"`
 	Logging        logtypes.LoggingConfig `mapstructure:"logging"`
 	SecretConfig   Secret                 `mapstructure:"secrets"`
 	Endpoints      Endpoints              `mapstructure:"endpoints"`
 	TelegramConfig Telegram               `mapstructure:"telegram"`
+}
+
+// Indexing is the structure representation of configuration from `config.yaml` file, at `indexing` section.
+// Configuration for indexing on-chain data can be putted here
+type Indexing struct {
+	HotReloadInterval  time.Duration `mapstructure:"hot-reload"`
+	UrlCheckInterval   time.Duration `mapstructure:"url-check"`
+	IndexBlockInterval time.Duration `mapstructure:"index-block"`
 }
 
 // Secret is the structure representation of configuration from `config.yaml` file, at `secret` section.
@@ -73,6 +83,10 @@ func (c *Config) LoadConfig(homeDir string) error {
 
 // PrintOptions prints the configuration in the `config.yaml` in a nice way, human-readable
 func (c Config) PrintOptions() {
+	headerPrintln("- Indexing configuration:")
+	headerPrintf("  + Hot-reload chain-list every: %s\n", c.IndexingConfig.HotReloadInterval)
+	headerPrintf("  + Json-RPC URL health-check every: %s\n", c.IndexingConfig.UrlCheckInterval)
+	headerPrintf("  + Index new block every: %s\n", c.IndexingConfig.IndexBlockInterval)
 	headerPrintln("- Tokens configuration:")
 	if len(c.SecretConfig.TelegramToken) > 0 {
 		headerPrintln("  + Telegram bot token has set")
@@ -129,6 +143,24 @@ func headerPrintln(a string) {
 
 // Validate performs validation on the configuration specified in the `config.yaml` within application's home directory
 func (c Config) Validate() error {
+	// validate Indexing section
+	if c.IndexingConfig.HotReloadInterval < time.Minute {
+		return fmt.Errorf("hot-reload interval can not be less than 1 minute")
+	}
+	if c.IndexingConfig.UrlCheckInterval < time.Minute {
+		return fmt.Errorf("Json-RPC health-check interval can not be less than 1 minute")
+	}
+	if c.IndexingConfig.UrlCheckInterval > 10*time.Minute {
+		return fmt.Errorf("Json-RPC health-check interval can not be far more than 10 minutes")
+	}
+	if c.IndexingConfig.IndexBlockInterval < 3*time.Second {
+		return fmt.Errorf("indexing new blocks interval can not be less than 3 seconds")
+	}
+	if c.IndexingConfig.IndexBlockInterval > 30*time.Second {
+		return fmt.Errorf("indexing new blocks interval can not be far more than 30 seconds")
+	}
+
+	// validate Secret section
 	if len(c.SecretConfig.TelegramToken) > 0 {
 		if c.TelegramConfig.LogChannelID == 0 {
 			return fmt.Errorf("missing telegram log channel ID")

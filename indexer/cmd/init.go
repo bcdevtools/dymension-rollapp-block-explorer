@@ -45,6 +45,10 @@ func initConfigFile() {
 		_, err = file.WriteString(
 			// trailing style: 2 spaces
 			fmt.Sprintf(`# %s's configuration file
+indexing:
+  hot-reload: 3m # interval reload configuration
+  url-check: 5m # interval health-check Json-RPC urls
+  index-block: 10s # interval indexing new block each chain
 logging:
   level: info # debug || info || error
   format: text # text || json

@@ -25,7 +25,8 @@ var _ Indexer = &defaultIndexer{}
 type defaultIndexer struct {
 	sync.RWMutex
 
-	ctx context.Context
+	ctx         context.Context
+	indexingCfg types.Indexing
 
 	chainName   string
 	chainConfig types.ChainConfig
@@ -38,8 +39,10 @@ func NewIndexer(
 	ctx context.Context,
 	chainName string, chainConfig types.ChainConfig,
 ) Indexer {
+	indexingConfig := types.UnwrapIndexerContext(ctx).GetConfig().IndexingConfig
 	return &defaultIndexer{
 		ctx:         ctx,
+		indexingCfg: indexingConfig,
 		chainName:   chainName,
 		chainConfig: chainConfig,
 	}
@@ -55,7 +58,7 @@ func (d *defaultIndexer) Start() {
 	d.ensureNotStartedWithRLock()
 
 	for !d.isShuttingDownWithRLock() {
-		time.Sleep(5 * time.Second) // TODO implement config?
+		time.Sleep(d.indexingCfg.IndexBlockInterval)
 	}
 
 	logger.Info("shutting down indexer", "name", d.chainName)

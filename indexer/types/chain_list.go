@@ -45,7 +45,7 @@ func (cl ChainList) LoadConfig(homeDir string) error {
 		return errors.Wrap(err, "unable to read chain list file")
 	}
 
-	err = viper.Unmarshal(cl)
+	err = viper.Unmarshal(&cl)
 	if err != nil {
 		return errors.Wrap(err, "unable to deserialize chain list file")
 	}
