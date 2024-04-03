@@ -90,6 +90,7 @@ func (cc ChainConfig) Validate() error {
 		return fmt.Errorf("require at least one URL for Block Explorer Json-RPC")
 	}
 	var err error
+	uniqueTracker := make(map[string]bool)
 	for _, ep := range cc.BeJsonRpcUrls {
 		if len(ep) < 1 {
 			err = utils.MergeError(err, fmt.Errorf("empty record for URL of Block Explorer Json-RPC"))
@@ -98,6 +99,11 @@ func (cc ChainConfig) Validate() error {
 		if !utils.IsUrl(ep) {
 			err = utils.MergeError(err, fmt.Errorf("invalid URL for Block Explorer Json-RPC: %s", ep))
 			continue
+		}
+		if _, found := uniqueTracker[ep]; found {
+			err = utils.MergeError(err, fmt.Errorf("duplicated URL for Block Explorer Json-RPC: %s", ep))
+		} else {
+			uniqueTracker[ep] = true
 		}
 	}
 	return err
