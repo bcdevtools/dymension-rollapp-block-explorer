@@ -70,16 +70,23 @@ CREATE TABLE ref_account_to_recent_tx (
     height          BIGINT  NOT NULL,
     hash            TEXT    NOT NULL,
 
-    CONSTRAINT ref_account_to_recent_tx_pkey PRIMARY KEY (chain_id, bech32_address, height, hash),
-    CONSTRAINT ref_recent_acc_tx_to_account_fkey FOREIGN KEY (chain_id, bech32_address)
-        REFERENCES account(chain_id, bech32_address),
-    CONSTRAINT ref_recent_acc_tx_to_recent_tx_fkey FOREIGN KEY (chain_id, height, hash)
-        REFERENCES recent_accounts_transaction(chain_id, height, hash)
+    erc20           BOOLEAN NOT NULL DEFAULT FALSE, -- true if the tx is erc20/cw20 tx
+    nft             BOOLEAN NOT NULL DEFAULT FALSE, -- true if the tx is nft tx
+
+    CONSTRAINT ref_account_to_recent_tx_pkey PRIMARY KEY (chain_id, bech32_address, height, hash)
+
+    -- Due to trigger functions, the following constraints are not able to be added.
+    -- But they are being kept on purpose for understanding the relationship between tables.
+
+    -- CONSTRAINT ref_recent_acc_tx_to_account_fkey FOREIGN KEY (chain_id, bech32_address)
+    --  REFERENCES account(chain_id, bech32_address)
+    -- CONSTRAINT ref_recent_acc_tx_to_recent_tx_fkey FOREIGN KEY (chain_id, height, hash)
+    --  REFERENCES recent_accounts_transaction(chain_id, height, hash)
 ) PARTITION BY LIST(chain_id);
 -- index for lookup recent tx by account, as well as for pruning
 CREATE INDEX ref_account_to_recent_tx_by_account_index ON ref_account_to_recent_tx(chain_id, bech32_address);
--- trigger functions for updating reference to tables account and recent_accounts_transaction
-CREATE OR REPLACE FUNCTION func_trigger_after_insert_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
+-- trigger functions for updating reference to tables account and recent_accounts_transaction after insert ref_account_to_recent_tx record
+CREATE OR REPLACE FUNCTION func_trigger_00100_after_insert_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
 BEGIN
     -- increase reference count to account
     UPDATE account SET continous_insert_ref_cur_tx_counter = continous_insert_ref_cur_tx_counter + 1
@@ -91,11 +98,63 @@ BEGIN
 
     RETURN NULL; -- result is ignored since this is an AFTER trigger
 END;$$ LANGUAGE plpgsql;
-CREATE TRIGGER trigger_after_insert_ref_account_to_recent_tx
+CREATE TRIGGER trigger_00100_after_insert_ref_account_to_recent_tx
     AFTER INSERT ON ref_account_to_recent_tx
-    FOR EACH ROW EXECUTE FUNCTION func_trigger_after_insert_ref_account_to_recent_tx();
--- trigger functions for pruning recent_accounts_transaction
-CREATE OR REPLACE FUNCTION func_trigger_after_delete_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
+    FOR EACH ROW EXECUTE FUNCTION func_trigger_00100_after_insert_ref_account_to_recent_tx();
+-- trigger functions for pruning recent_accounts_transaction after continous_insert_ref_cur_tx_counter reaches a specific number
+CREATE OR REPLACE FUNCTION func_trigger_00200_after_insert_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
+DECLARE
+    later_continous_insert_ref_cur_tx_counter SMALLINT;
+    pruning_after_X_continous_insert CONSTANT INTEGER := 3; -- 10
+    pruning_keep_recent CONSTANT INTEGER := 2; -- 100
+BEGIN
+    -- check if the counter reaches a specific number
+    SELECT acc.continous_insert_ref_cur_tx_counter INTO later_continous_insert_ref_cur_tx_counter
+    FROM account acc WHERE acc.chain_id = NEW.chain_id AND acc.bech32_address = NEW.bech32_address;
+    IF later_continous_insert_ref_cur_tx_counter >= pruning_after_X_continous_insert THEN
+        -- prune the oldest ref_account_to_recent_tx record
+        DELETE FROM ref_account_to_recent_tx
+        WHERE chain_id = NEW.chain_id AND bech32_address = NEW.bech32_address
+        AND height NOT IN (
+            SELECT DISTINCT(hs.height) FROM (
+                -- keep most recent normal txs
+                (
+                    SELECT height FROM ref_account_to_recent_tx
+                    WHERE chain_id = NEW.chain_id AND bech32_address = NEW.bech32_address
+                    ORDER BY height DESC
+                    LIMIT pruning_keep_recent
+                )
+                -- keep most recent erc20/cw20 txs
+                UNION
+                (
+                    SELECT height FROM ref_account_to_recent_tx
+                    WHERE chain_id = NEW.chain_id AND bech32_address = NEW.bech32_address AND erc20 IS TRUE
+                    ORDER BY height DESC
+                    LIMIT pruning_keep_recent
+                )
+                -- keep most recent nft txs
+                UNION
+                (
+                    SELECT height FROM ref_account_to_recent_tx
+                    WHERE chain_id = NEW.chain_id AND bech32_address = NEW.bech32_address AND nft IS TRUE
+                    ORDER BY height DESC
+                    LIMIT pruning_keep_recent
+                )
+            ) hs
+        );
+
+        -- reset the counter
+        UPDATE account SET continous_insert_ref_cur_tx_counter = 0
+        WHERE chain_id = NEW.chain_id AND bech32_address = NEW.bech32_address;
+    END IF;
+
+    RETURN NULL; -- result is ignored since this is an AFTER trigger
+END;$$ LANGUAGE plpgsql;
+CREATE TRIGGER trigger_00200_after_insert_ref_account_to_recent_tx
+    AFTER INSERT ON ref_account_to_recent_tx
+    FOR EACH ROW EXECUTE FUNCTION func_trigger_00200_after_insert_ref_account_to_recent_tx();
+-- trigger functions for pruning recent_accounts_transaction after delete ref_account_to_recent_tx record
+CREATE OR REPLACE FUNCTION func_trigger_00100_after_delete_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
 DECLARE
     later_ref_count SMALLINT;
 BEGIN
@@ -115,7 +174,7 @@ BEGIN
 END;$$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_after_delete_ref_account_to_recent_tx
     AFTER DELETE ON ref_account_to_recent_tx
-    FOR EACH ROW EXECUTE FUNCTION func_trigger_after_delete_ref_account_to_recent_tx();
+    FOR EACH ROW EXECUTE FUNCTION func_trigger_00100_after_delete_ref_account_to_recent_tx();
 
 -- table transaction
 -- Page: search multi-chain transactions, search single-chain, showing blocks & transactions list
