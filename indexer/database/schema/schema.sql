@@ -27,31 +27,32 @@ CREATE TABLE account (
 CREATE INDEX account_b32_addr_index ON account (bech32_address);
 
 -- table recent_account_transaction
--- This table keeps the most recent transactions of each account
+-- This table keeps the most recent transactions of each account, data can be permanent or temporary:
+-- - Permanent: the tx is kept forever due to account not having new tx.
+-- - Temporary: when new txs are inserted, the oldest txs are pruned.
 CREATE TABLE recent_account_transaction (
+    -- main columns
     chain_id            TEXT    NOT NULL,
     bech32_address      TEXT    NOT NULL, -- normalized: lowercase
     height              BIGINT  NOT NULL,
     hash                TEXT    NOT NULL,
-    message_types       TEXT[]  NOT NULL, -- proto message types of inner messages
-    tx_type             TEXT    NOT NULL, -- tx type, eg: cosmos or evm
 
+    -- view-only columns
+    epoch               BIGINT  NOT NULL, -- epoch UTC seconds
+    message_types       TEXT[]  NOT NULL, -- proto message types of inner messages
+
+    -- category columns
     erc20               BOOL    NOT NULL DEFAULT FALSE, -- whether the transaction involves erc20 token transfer
     nft                 BOOL    NOT NULL DEFAULT FALSE, -- whether the transaction involves nft token transfer
 
     CONSTRAINT recent_account_transaction_pkey PRIMARY KEY (chain_id, bech32_address),
     CONSTRAINT recent_account_transaction_to_account_fkey FOREIGN KEY (chain_id, bech32_address) REFERENCES account (chain_id, bech32_address)
 );
--- index for lookup ERC-20 transactions of a specific account
-CREATE INDEX recent_account_transaction_is_erc20_index
-    ON recent_account_transaction(chain_id, bech32_address, erc20)
-    WHERE erc20 IS TRUE;
--- index for lookup NFT transactions of a specific account
-CREATE INDEX recent_account_transaction_is_nft_index
-    ON recent_account_transaction(chain_id, bech32_address, nft)
-    WHERE nft IS TRUE;
+-- Number of txs per account is not much, a few hundreds at most,
+-- so no need to having further index for listing ERC-20 and NFT txs
 
 -- table transaction
+-- Page: search multi-chain transactions, search single-chain, showing blocks & transactions list
 CREATE TABLE transaction (
     -- pk fields
     chain_id            TEXT    NOT NULL,
@@ -60,10 +61,11 @@ CREATE TABLE transaction (
     partition_id        BIGINT  NOT NULL, -- week id = FLOOR(epoch UTC seconds / (3600 sec x 24 hours x 7 days))
 
     -- other fields
+    epoch               BIGINT  NOT NULL, -- epoch UTC seconds
     message_types       TEXT[]  NOT NULL, -- proto message types of inner messages
     tx_type             TEXT    NOT NULL, -- tx type, eg: cosmos or evm
 
     CONSTRAINT transaction_pkey PRIMARY KEY (chain_id, height, hash, partition_id)
 ) PARTITION BY LIST(partition_id);
--- index for lookup transaction by hash, multi-chain
+-- index for lookup transaction by hash, multi-chain & single-chain
 CREATE INDEX transaction_hash_index ON transaction(hash);
