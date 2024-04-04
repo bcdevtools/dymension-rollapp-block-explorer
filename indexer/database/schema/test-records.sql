@@ -26,3 +26,5 @@ INSERT INTO ref_account_to_recent_tx (chain_id, bech32_address, height, hash) VA
     ('chain_1-1', 'addr-1', 5, 'hash-5-1'),
     ('chain_1-1', 'addr-2', 1, 'hash-1-1'),
     ('chain_1-1', 'addr-2', 2, 'hash-2-1');
+
+CALL func_cleanup_zero_ref_count_recent_accounts_transaction();

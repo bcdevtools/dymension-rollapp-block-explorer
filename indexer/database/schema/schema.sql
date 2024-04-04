@@ -63,6 +63,16 @@ CREATE TABLE recent_accounts_transaction (
     CONSTRAINT recent_accounts_transaction_pkey PRIMARY KEY (chain_id, height, hash)
 ) PARTITION BY LIST(chain_id);
 
+-- table reduced_ref_count_recent_accounts_transaction
+-- A table with short-live records, used to cache records which reduced ref_count, then to prune corresponding record.
+CREATE TABLE reduced_ref_count_recent_accounts_transaction(
+    chain_id            TEXT        NOT NULL,
+    height              BIGINT      NOT NULL,
+    hash                TEXT        NOT NULL,
+
+    CONSTRAINT reduced_ref_count_recent_accounts_transaction_pkey PRIMARY KEY (chain_id, height, hash)
+);
+
 -- table ref_account_to_recent_tx
 CREATE TABLE ref_account_to_recent_tx (
     chain_id        TEXT    NOT NULL,   -- also used as partition key
@@ -73,19 +83,15 @@ CREATE TABLE ref_account_to_recent_tx (
     erc20           BOOLEAN NOT NULL DEFAULT FALSE, -- true if the tx is erc20/cw20 tx
     nft             BOOLEAN NOT NULL DEFAULT FALSE, -- true if the tx is nft tx
 
-    CONSTRAINT ref_account_to_recent_tx_pkey PRIMARY KEY (chain_id, bech32_address, height, hash)
-
-    -- Due to trigger functions, the following constraints are not able to be added.
-    -- But they are being kept on purpose for understanding the relationship between tables.
-
-    -- CONSTRAINT ref_recent_acc_tx_to_account_fkey FOREIGN KEY (chain_id, bech32_address)
-    --  REFERENCES account(chain_id, bech32_address)
-    -- CONSTRAINT ref_recent_acc_tx_to_recent_tx_fkey FOREIGN KEY (chain_id, height, hash)
-    --  REFERENCES recent_accounts_transaction(chain_id, height, hash)
+    CONSTRAINT ref_account_to_recent_tx_pkey PRIMARY KEY (chain_id, bech32_address, height, hash),
+    CONSTRAINT ref_recent_acc_tx_to_account_fkey FOREIGN KEY (chain_id, bech32_address)
+     REFERENCES account(chain_id, bech32_address),
+    CONSTRAINT ref_recent_acc_tx_to_recent_tx_fkey FOREIGN KEY (chain_id, height, hash)
+     REFERENCES recent_accounts_transaction(chain_id, height, hash)
 ) PARTITION BY LIST(chain_id);
 -- index for lookup recent tx by account, as well as for pruning
 CREATE INDEX ref_account_to_recent_tx_by_account_index ON ref_account_to_recent_tx(chain_id, bech32_address);
--- trigger functions for updating reference to tables account and recent_accounts_transaction after insert ref_account_to_recent_tx record
+-- trigger function for updating reference to tables account and recent_accounts_transaction after insert ref_account_to_recent_tx record
 CREATE OR REPLACE FUNCTION func_trigger_00100_after_insert_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
 BEGIN
     -- increase reference count to account
@@ -101,7 +107,7 @@ END;$$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_00100_after_insert_ref_account_to_recent_tx
     AFTER INSERT ON ref_account_to_recent_tx
     FOR EACH ROW EXECUTE FUNCTION func_trigger_00100_after_insert_ref_account_to_recent_tx();
--- trigger functions for pruning recent_accounts_transaction after continous_insert_ref_cur_tx_counter reaches a specific number
+-- trigger function for pruning recent_accounts_transaction after continous_insert_ref_cur_tx_counter reaches a specific number
 CREATE OR REPLACE FUNCTION func_trigger_00200_after_insert_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
 DECLARE
     later_continous_insert_ref_cur_tx_counter SMALLINT;
@@ -153,28 +159,40 @@ END;$$ LANGUAGE plpgsql;
 CREATE TRIGGER trigger_00200_after_insert_ref_account_to_recent_tx
     AFTER INSERT ON ref_account_to_recent_tx
     FOR EACH ROW EXECUTE FUNCTION func_trigger_00200_after_insert_ref_account_to_recent_tx();
--- trigger functions for pruning recent_accounts_transaction after delete ref_account_to_recent_tx record
-CREATE OR REPLACE FUNCTION func_trigger_00100_after_delete_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
-DECLARE
-    later_ref_count SMALLINT;
+-- trigger function for reducing reference on recent_accounts_transaction after delete ref_account_to_recent_tx record
+CREATE OR REPLACE FUNCTION func_trigger_00300_after_delete_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
 BEGIN
     -- reduce reference count
     UPDATE recent_accounts_transaction SET ref_count = ref_count - 1
     WHERE chain_id = OLD.chain_id AND height = OLD.height AND hash = OLD.hash;
 
-    -- delete the tx if ref_count is zero
-    SELECT COALESCE(rat.ref_count, 0) INTO later_ref_count FROM recent_accounts_transaction rat
-    WHERE rat.chain_id = OLD.chain_id AND rat.height = OLD.height AND rat.hash = OLD.hash;
-    IF later_ref_count < 1 THEN
-        DELETE FROM recent_accounts_transaction
-        WHERE chain_id = OLD.chain_id AND height = OLD.height AND hash = OLD.hash;
-    END IF;
+    INSERT INTO reduced_ref_count_recent_accounts_transaction(chain_id, height, hash)
+    VALUES (OLD.chain_id, OLD.height, OLD.hash)
+    ON CONFLICT DO NOTHING;
 
     RETURN NULL; -- result is ignored since this is an AFTER trigger
 END;$$ LANGUAGE plpgsql;
-CREATE TRIGGER trigger_after_delete_ref_account_to_recent_tx
+CREATE TRIGGER trigger_00300_after_delete_ref_account_to_recent_tx
     AFTER DELETE ON ref_account_to_recent_tx
-    FOR EACH ROW EXECUTE FUNCTION func_trigger_00100_after_delete_ref_account_to_recent_tx();
+    FOR EACH ROW EXECUTE FUNCTION func_trigger_00300_after_delete_ref_account_to_recent_tx();
+-- procedure for pruning recent_accounts_transaction after update ref count to zero
+CREATE OR REPLACE PROCEDURE func_cleanup_zero_ref_count_recent_accounts_transaction() AS $$
+DECLARE
+    reduced RECORD;
+    current_ref_count SMALLINT;
+BEGIN
+    FOR reduced IN (SELECT rr.chain_id, rr.height, rr.hash FROM reduced_ref_count_recent_accounts_transaction rr)
+    LOOP
+        SELECT ref_count INTO current_ref_count FROM recent_accounts_transaction
+        WHERE chain_id = reduced.chain_id AND height = reduced.height AND hash = reduced.hash;
+        IF current_ref_count < 1 THEN
+            DELETE FROM recent_accounts_transaction
+            WHERE chain_id = reduced.chain_id AND height = reduced.height AND hash = reduced.hash;
+        END IF;
+        DELETE FROM reduced_ref_count_recent_accounts_transaction
+        WHERE chain_id = reduced.chain_id AND height = reduced.height AND hash = reduced.hash;
+    END LOOP;
+END;$$ LANGUAGE plpgsql;
 
 -- table transaction
 -- Page: search multi-chain transactions, search single-chain, showing blocks & transactions list
