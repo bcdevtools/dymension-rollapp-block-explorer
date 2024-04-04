@@ -104,7 +104,7 @@ func (d *defaultIndexer) Start() {
 
 				_, err := db.UpdateBeJsonRpcUrlsIfExists(d.chainConfig.ChainId, []string{})
 				if err != nil {
-					logger.Error("failed to clear be_json_rpc_urls from chains_info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+					logger.Error("failed to clear be_json_rpc_urls from chain_info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
 				}
 			} else {
 				d.updateActiveJsonRpcUrlAndLastCheckWithLock(theBestResponse.url, time.Now())
@@ -118,7 +118,7 @@ func (d *defaultIndexer) Start() {
 
 				_, err := db.UpdateBeJsonRpcUrlsIfExists(d.chainConfig.ChainId, urls)
 				if err != nil {
-					logger.Error("failed to update be_json_rpc_urls from chains_info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+					logger.Error("failed to update be_json_rpc_urls into chain_info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
 				}
 			}
 		}
@@ -153,15 +153,14 @@ func (d *defaultIndexer) Start() {
 
 		// insert chain info record
 		if !isChainInfoRecordExists {
-			chainInfoRecord := dbtypes.RecordChainInfo{
+			_, err := db.InsertRecordChainInfoIfNotExists(dbtypes.RecordChainInfo{
 				ChainId:       beGetChainInfo.ChainId,
 				Name:          d.chainName,
 				ChainType:     beGetChainInfo.ChainType,
 				Bech32:        beGetChainInfo.Bech32,
 				Denoms:        beGetChainInfo.Denom,
 				BeJsonRpcUrls: []string{activeJsonRpcUrl},
-			}
-			_, err := db.InsertRecordChainInfo(chainInfoRecord)
+			})
 			if err != nil {
 				logger.Error("failed to insert chain info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
 				continue

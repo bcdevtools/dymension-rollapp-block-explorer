@@ -22,7 +22,7 @@ type Database interface {
 
 	// InsertRecordChainInfo inserts a new chain info record into the database.
 	// If the chain info already exists, it will not be inserted.
-	InsertRecordChainInfo(chainInfo dbtypes.RecordChainInfo) (inserted bool, err error)
+	InsertRecordChainInfoIfNotExists(chainInfo dbtypes.RecordChainInfo) (inserted bool, err error)
 
 	// UpdateBeJsonRpcUrlsIfExists updates the be_json_rpc_urls field of the chain info record with the given chain ID.
 	// If the chain info does not exist, nothing will be updated.

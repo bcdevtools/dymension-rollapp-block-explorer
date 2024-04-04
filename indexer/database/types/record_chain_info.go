@@ -1,6 +1,6 @@
 package types
 
-// RecordChainInfo represents a record of table `chains_info` in the database.
+// RecordChainInfo represents a record of table `chain_info` in the database.
 type RecordChainInfo struct {
 	ChainId       string            `json:"chain_id"`
 	Name          string            `json:"name"`
