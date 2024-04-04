@@ -68,6 +68,8 @@ func (d *defaultIndexer) Start() {
 
 	d.ensureNotStartedWithRLock()
 
+	// TODO: prepare partition tables which partitioned by chain_id
+
 	var isChainInfoRecordExists bool // is a flag indicate the is record chain info exists in the database so no need to call insert
 
 	for !d.isShuttingDownWithRLock() {

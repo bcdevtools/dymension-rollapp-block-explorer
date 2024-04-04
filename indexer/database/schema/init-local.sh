@@ -27,5 +27,6 @@ PGPASSWORD="$DB_PASS_ADMIN" psql -h "$DB_HOST" -p "$DB_PORT" -d postgres -U "$DB
 PGPASSWORD="$DB_PASS_ADMIN" psql -h "$DB_HOST" -p "$DB_PORT" -d postgres -U "$DB_USER_ADMIN" -c "GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER_LOCAL;"
 PGPASSWORD="$DB_PASS_ADMIN" psql -h "$DB_HOST" -p "$DB_PORT" -d "$DB_NAME" -U "$DB_USER_ADMIN" -c "GRANT ALL PRIVILEGES ON SCHEMA public TO $DB_USER_LOCAL;"
 PGPASSWORD="$DB_PASS_LOCAL" psql -h "$DB_HOST" -p "$DB_PORT" -d "$DB_NAME" -U "$DB_USER_LOCAL" -f "schema.sql"
+PGPASSWORD="$DB_PASS_LOCAL" psql -h "$DB_HOST" -p "$DB_PORT" -d "$DB_NAME" -U "$DB_USER_LOCAL" -f "test-records.sql"
 
 echo 'Initialized schema'

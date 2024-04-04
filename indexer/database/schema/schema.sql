@@ -16,40 +16,106 @@ CREATE TABLE chain_info (
 CREATE TABLE account (
     chain_id                        TEXT        NOT NULL,           -- also used as partition key
     bech32_address                  TEXT        NOT NULL,           -- normalized: lowercase
-    erc20_balance_contracts         TEXT[]      NOT NULL,           -- contracts that the account has erc20 balance
 
-    -- inc by one per record inserted to `recent_account_transaction`, upon reaching 200, prune the oldest txs and reset
-    continous_insert_cur_tx_counter SMALLINT    NOT NULL DEFAULT 0,
+    -- inc by one per record inserted to `ref_account_to_recent_tx`,
+    -- upon reaching specific number, prune the oldest ref and reset
+    continous_insert_ref_cur_tx_counter SMALLINT    NOT NULL DEFAULT 0,
 
     CONSTRAINT account_pkey PRIMARY KEY (chain_id, bech32_address)
 ) PARTITION BY LIST(chain_id);
 -- index for lookup account by bech32 address, multi-chain
 CREATE INDEX account_b32_addr_index ON account (bech32_address);
 
--- table recent_account_transaction
--- This table keeps the most recent transactions of each account, data can be permanent or temporary:
--- - Permanent: the tx is kept forever due to account not having new tx.
--- - Temporary: when new txs are inserted, the oldest txs are pruned.
-CREATE TABLE recent_account_transaction (
+-- table account_erc20_balance
+-- Used for marking account has ERC-20/CW-20 balance, for listing balances
+CREATE TABLE account_erc20_balance (
+    chain_id                        TEXT        NOT NULL,           -- also used as partition key
+    bech32_address                  TEXT        NOT NULL,           -- normalized: lowercase
+    contract_address                TEXT        NOT NULL,           -- normalized: lowercase
+
+     CONSTRAINT account_erc20_balance_pkey PRIMARY KEY (chain_id, bech32_address, contract_address),
+    CONSTRAINT erc20_balance_to_account_fkey FOREIGN KEY (chain_id, bech32_address) REFERENCES account(chain_id, bech32_address)
+) PARTITION BY LIST(chain_id);
+
+-- table account_nft_balance
+-- Used for marking account has NFT balance, for listing balances
+CREATE TABLE account_nft_balance (
+    chain_id                        TEXT        NOT NULL,           -- also used as partition key
+    bech32_address                  TEXT        NOT NULL,           -- normalized: lowercase
+    contract_address                TEXT        NOT NULL,           -- normalized: lowercase
+
+    CONSTRAINT account_nft_balance_pkey PRIMARY KEY (chain_id, bech32_address, contract_address),
+    CONSTRAINT nft_balance_to_account_fkey FOREIGN KEY (chain_id, bech32_address) REFERENCES account(chain_id, bech32_address)
+) PARTITION BY LIST(chain_id);
+
+-- table recent_accounts_transaction
+CREATE TABLE recent_accounts_transaction (
     -- main columns
-    chain_id            TEXT    NOT NULL,
-    bech32_address      TEXT    NOT NULL, -- normalized: lowercase
-    height              BIGINT  NOT NULL,
-    hash                TEXT    NOT NULL,
+    chain_id            TEXT        NOT NULL,   -- also used as partition key
+    height              BIGINT      NOT NULL,
+    hash                TEXT        NOT NULL,
+    ref_count           SMALLINT    NOT NULL DEFAULT 0, -- number of references to this tx when reduced to zero, delete the tx.
 
     -- view-only columns
-    epoch               BIGINT  NOT NULL, -- epoch UTC seconds
-    message_types       TEXT[]  NOT NULL, -- proto message types of inner messages
+    epoch               BIGINT      NOT NULL, -- epoch UTC seconds
+    message_types       TEXT[]      NOT NULL, -- proto message types of inner messages
 
-    -- category columns
-    erc20               BOOL    NOT NULL DEFAULT FALSE, -- whether the transaction involves erc20 token transfer
-    nft                 BOOL    NOT NULL DEFAULT FALSE, -- whether the transaction involves nft token transfer
+    CONSTRAINT recent_accounts_transaction_pkey PRIMARY KEY (chain_id, height, hash)
+) PARTITION BY LIST(chain_id);
 
-    CONSTRAINT recent_account_transaction_pkey PRIMARY KEY (chain_id, bech32_address),
-    CONSTRAINT recent_account_transaction_to_account_fkey FOREIGN KEY (chain_id, bech32_address) REFERENCES account (chain_id, bech32_address)
-);
--- Number of txs per account is not much, a few hundreds at most,
--- so no need to having further index for listing ERC-20 and NFT txs
+-- table ref_account_to_recent_tx
+CREATE TABLE ref_account_to_recent_tx (
+    chain_id        TEXT    NOT NULL,   -- also used as partition key
+    bech32_address  TEXT    NOT NULL,   -- normalized: lowercase
+    height          BIGINT  NOT NULL,
+    hash            TEXT    NOT NULL,
+
+    CONSTRAINT ref_account_to_recent_tx_pkey PRIMARY KEY (chain_id, bech32_address, height, hash),
+    CONSTRAINT ref_recent_acc_tx_to_account_fkey FOREIGN KEY (chain_id, bech32_address)
+        REFERENCES account(chain_id, bech32_address),
+    CONSTRAINT ref_recent_acc_tx_to_recent_tx_fkey FOREIGN KEY (chain_id, height, hash)
+        REFERENCES recent_accounts_transaction(chain_id, height, hash)
+) PARTITION BY LIST(chain_id);
+-- index for lookup recent tx by account, as well as for pruning
+CREATE INDEX ref_account_to_recent_tx_by_account_index ON ref_account_to_recent_tx(chain_id, bech32_address);
+-- trigger functions for updating reference to tables account and recent_accounts_transaction
+CREATE OR REPLACE FUNCTION func_trigger_after_insert_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
+BEGIN
+    -- increase reference count to account
+    UPDATE account SET continous_insert_ref_cur_tx_counter = continous_insert_ref_cur_tx_counter + 1
+    WHERE chain_id = NEW.chain_id AND bech32_address = NEW.bech32_address;
+
+    -- increase reference count to recent_accounts_transaction
+    UPDATE recent_accounts_transaction SET ref_count = ref_count + 1
+    WHERE chain_id = NEW.chain_id AND height = NEW.height AND hash = NEW.hash;
+
+    RETURN NULL; -- result is ignored since this is an AFTER trigger
+END;$$ LANGUAGE plpgsql;
+CREATE TRIGGER trigger_after_insert_ref_account_to_recent_tx
+    AFTER INSERT ON ref_account_to_recent_tx
+    FOR EACH ROW EXECUTE FUNCTION func_trigger_after_insert_ref_account_to_recent_tx();
+-- trigger functions for pruning recent_accounts_transaction
+CREATE OR REPLACE FUNCTION func_trigger_after_delete_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
+DECLARE
+    later_ref_count SMALLINT;
+BEGIN
+    -- reduce reference count
+    UPDATE recent_accounts_transaction SET ref_count = ref_count - 1
+    WHERE chain_id = OLD.chain_id AND height = OLD.height AND hash = OLD.hash;
+
+    -- delete the tx if ref_count is zero
+    SELECT COALESCE(rat.ref_count, 0) INTO later_ref_count FROM recent_accounts_transaction rat
+    WHERE rat.chain_id = OLD.chain_id AND rat.height = OLD.height AND rat.hash = OLD.hash;
+    IF later_ref_count < 1 THEN
+        DELETE FROM recent_accounts_transaction
+        WHERE chain_id = OLD.chain_id AND height = OLD.height AND hash = OLD.hash;
+    END IF;
+
+    RETURN NULL; -- result is ignored since this is an AFTER trigger
+END;$$ LANGUAGE plpgsql;
+CREATE TRIGGER trigger_after_delete_ref_account_to_recent_tx
+    AFTER DELETE ON ref_account_to_recent_tx
+    FOR EACH ROW EXECUTE FUNCTION func_trigger_after_delete_ref_account_to_recent_tx();
 
 -- table transaction
 -- Page: search multi-chain transactions, search single-chain, showing blocks & transactions list
