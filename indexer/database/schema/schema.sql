@@ -1,11 +1,12 @@
 -- table chain_info
 CREATE TABLE chain_info (
-    chain_id            TEXT    NOT NULL,
-    "name"              TEXT    NOT NULL,
-    chain_type          TEXT    NOT NULL, -- "evm", "wasm", "cosmos" or empty. Currently only the first 2 values are available
-    bech32              JSONB   NOT NULL,
-    denoms              JSONB   NOT NULL,
-    be_json_rpc_urls    TEXT[], -- sorted, the best one is the first, might be empty
+    chain_id                TEXT    NOT NULL,
+    "name"                  TEXT    NOT NULL,
+    chain_type              TEXT    NOT NULL, -- "evm", "wasm", "cosmos" or empty. Currently only the first 2 values are available
+    bech32                  JSONB   NOT NULL,
+    denoms                  JSONB   NOT NULL,
+    be_json_rpc_urls        TEXT[], -- sorted, the best one is the first, might be empty
+    latest_indexed_block    BIGINT  NOT NULL DEFAULT 0, -- the latest successfully indexed block height
 
     CONSTRAINT chain_info_pkey PRIMARY KEY (chain_id),
     CONSTRAINT chain_info_unique_chain_name UNIQUE ("name") -- chain name must be unique
@@ -14,8 +15,8 @@ CREATE TABLE chain_info (
 -- table account
 -- Page: search multi-chain accounts, search single-chain, showing account details
 CREATE TABLE account (
-    chain_id                        TEXT        NOT NULL,           -- also used as partition key
-    bech32_address                  TEXT        NOT NULL,           -- normalized: lowercase
+    chain_id        TEXT    NOT NULL,   -- also used as partition key
+    bech32_address  TEXT    NOT NULL,   -- normalized: lowercase
 
     -- inc by one per record inserted to `ref_account_to_recent_tx`,
     -- upon reaching specific number, prune the oldest ref and reset
@@ -227,3 +228,17 @@ CREATE TABLE transaction (
 ) PARTITION BY LIST(partition_id);
 -- index for lookup transaction by hash, multi-chain & single-chain
 CREATE INDEX transaction_hash_index ON transaction(hash);
+
+-- table failed_block
+-- For storing failed to index - blocks
+CREATE TABLE failed_block (
+    -- pk fields
+    chain_id    TEXT    NOT NULL, -- also used as partition key
+    height      BIGINT  NOT NULL,
+
+    -- logic fields
+    retry_count         SMALLINT    NOT NULL DEFAULT 0, -- number of retry to index the block
+    last_retry_epoch    BIGINT      NOT NULL DEFAULT 0, -- last retry UTC seconds
+
+    CONSTRAINT failed_block_pkey PRIMARY KEY (chain_id, height)
+) PARTITION BY LIST(chain_id);
