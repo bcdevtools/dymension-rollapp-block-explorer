@@ -1,7 +1,7 @@
 export const enum Path {
   OVERVIEW = '/',
   BLOCKS = '/blocks',
-  TRANSACTIONS = '/transactions',
+  TRANSACTIONS = '/txs',
 }
 
 export const BreadcrumbName = {

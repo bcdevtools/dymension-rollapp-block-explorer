@@ -13,7 +13,7 @@ export default React.memo(function PageBreadcrumb({
   const splittedPath = pathname.split('/').filter(path => path);
 
   return (
-    <Breadcrumbs aria-label="breadcrumb" sx={{ py: 2 }}>
+    <Breadcrumbs aria-label="breadcrumb" sx={{ py: 1 }}>
       <Link
         underline="hover"
         color="inherit"

@@ -4,18 +4,18 @@ import Typography from '@mui/material/Typography';
 import Label from '@/components/detail/Label';
 import Value from '@/components/detail/Value';
 
-type BlockProps = Readonly<{
-  params: { blockNo: string };
+type TransactionsProps = Readonly<{
+  params: { txHash: string };
 }>;
 
-export default function Block({ params }: BlockProps) {
+export default function Transaction({ params }: TransactionsProps) {
   return (
     <>
-      <PageTitle title="Block detail" />
+      <PageTitle title="Transaction detail" />
       <Grid container sx={{ mt: 2 }}>
         <Label text="Block height" />
         <Value>
-          <Typography>{params.blockNo}</Typography>
+          <Typography>{params.txHash}</Typography>
         </Value>
         <Label text="Status" />
         <Value>

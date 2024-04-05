@@ -14,7 +14,6 @@ import { useRollappStore } from '@/stores/rollappStore';
 import { RollappActionTypes } from '@/consts/actionTypes';
 import PageBreadcrumb from './_PageBreadcrumb';
 import Container from '@mui/material/Container';
-import Divider from '@mui/material/Divider';
 import Paper from '@mui/material/Paper';
 
 const SIDER_WIDTH = 240;
@@ -82,7 +81,6 @@ export default function Layout({ children, initialThemeMode }: LayoutProps) {
             <CustomToolbar />
             <Container>
               <PageBreadcrumb pathname={pathname} />
-              <Divider />
               <Paper sx={{ my: 1, p: 2 }} elevation={1}>
                 {children}
               </Paper>

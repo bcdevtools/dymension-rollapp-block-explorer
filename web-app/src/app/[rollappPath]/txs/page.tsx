@@ -3,11 +3,7 @@ import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
-import Grid from '@mui/material/Grid';
 import TableContainer from '@mui/material/TableContainer';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import Paper from '@mui/material/Paper';
 import PageTitle from '@/components/commons/PageTitle';
 
 function createData(
@@ -28,45 +24,10 @@ const rows = [
   createData('Gingerbread', 356, 16.0, 49, 3.9),
 ];
 
-function BlockSummaryCard({
-  label,
-  children,
-}: Readonly<{ label: string; children: React.ReactNode }>) {
-  return (
-    <Grid item xs={6} md={3}>
-      <Paper sx={{ p: 1 }} elevation={3}>
-        <Grid container>
-          <Grid item xs={12}>
-            <Typography color="gray">{label}</Typography>
-          </Grid>
-          <Grid item xs={12}>
-            {children}
-          </Grid>
-        </Grid>
-      </Paper>
-    </Grid>
-  );
-}
-
-export default function Blocks() {
+export default function Transactions() {
   return (
     <>
-      <PageTitle title="Blocks" />
-      <Grid container spacing={2} sx={{ my: 2 }}>
-        <BlockSummaryCard label="Total blocks">
-          <Typography>test</Typography>
-        </BlockSummaryCard>
-        <BlockSummaryCard label="Total Transactions">
-          <Typography>test</Typography>
-        </BlockSummaryCard>
-        <BlockSummaryCard label="Total blocks">
-          <Typography>test</Typography>
-        </BlockSummaryCard>
-        <BlockSummaryCard label="Total blocks">
-          <Typography>test</Typography>
-        </BlockSummaryCard>
-      </Grid>
-      <Divider sx={{ my: 4 }} />
+      <PageTitle title="Transactions" />
       <TableContainer>
         <Table>
           <TableHead>
