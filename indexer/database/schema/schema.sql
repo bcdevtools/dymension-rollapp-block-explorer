@@ -2,7 +2,7 @@
 CREATE TABLE chain_info (
     chain_id            TEXT    NOT NULL,
     "name"              TEXT    NOT NULL,
-    chain_type          TEXT    NOT NULL,
+    chain_type          TEXT    NOT NULL, -- "evm", "wasm", "cosmos" or empty. Currently only the first 2 values are available
     bech32              JSONB   NOT NULL,
     denoms              JSONB   NOT NULL,
     be_json_rpc_urls    TEXT[], -- sorted, the best one is the first, might be empty
@@ -83,7 +83,7 @@ CREATE TABLE ref_account_to_recent_tx (
     height          BIGINT  NOT NULL,
     hash            TEXT    NOT NULL,
 
-    signer          BOOLEAN NOT NULL DEFAULT FALSE, -- true if the address is the signer of the tx
+    signer          BOOLEAN NOT NULL DEFAULT FALSE, -- true if the address is one of the signers of the tx. `false` is not guaranteed to be the signer.
     erc20           BOOLEAN NOT NULL DEFAULT FALSE, -- true if the tx is erc20/cw20 tx
     nft             BOOLEAN NOT NULL DEFAULT FALSE, -- true if the tx is nft tx
 
@@ -115,8 +115,11 @@ CREATE TRIGGER trigger_00100_after_insert_ref_account_to_recent_tx
 CREATE OR REPLACE FUNCTION func_trigger_00200_after_insert_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
 DECLARE
     later_continous_insert_ref_cur_tx_counter SMALLINT;
+    -- prune the oldest ref_account_to_recent_tx record after X continuous insert,
+    -- keep most recent X records for each type,
+    -- for the corresponding account
     pruning_after_X_continous_insert CONSTANT INTEGER := 10;
-    pruning_keep_recent CONSTANT INTEGER := 100; -- 100
+    pruning_keep_recent CONSTANT INTEGER := 100;
 BEGIN
     -- check if the counter reaches a specific number
     SELECT acc.continous_insert_ref_cur_tx_counter INTO later_continous_insert_ref_cur_tx_counter
@@ -213,7 +216,7 @@ CREATE TABLE transaction (
     chain_id            TEXT    NOT NULL,
     height              BIGINT  NOT NULL,
     hash                TEXT    NOT NULL, -- normalized: Cosmos: uppercase without 0x, Ethereum: lowercase with 0x
-    partition_id        BIGINT  NOT NULL, -- epoch week = FLOOR(epoch UTC seconds / (3600 sec x 24 hours x 7 days))
+    partition_id        INT     NOT NULL, -- epoch week = FLOOR(epoch UTC seconds / (3600 sec x 24 hours x 7 days))
 
     -- other fields
     epoch               BIGINT  NOT NULL, -- epoch UTC seconds
