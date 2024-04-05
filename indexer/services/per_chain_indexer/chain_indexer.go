@@ -68,7 +68,18 @@ func (d *defaultIndexer) Start() {
 
 	d.ensureNotStartedWithRLock()
 
-	// TODO: prepare partition tables which partitioned by chain_id
+	for {
+		err := utils.ObserveLongOperation("create partitioned tables for chain-id", func() error {
+			return db.PreparePartitionedTablesForChainId(d.chainConfig.ChainId)
+		}, time.Minute, logger)
+		if err != nil {
+			logger.Error("failed to create partitioned tables for chain-id", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+			time.Sleep(15 * time.Second)
+			continue
+		}
+		logger.Info("successfully prepared partitioned tables for chain-id", "chain-id", d.chainConfig.ChainId)
+		break
+	}
 
 	var isChainInfoRecordExists bool // is a flag indicate the is record chain info exists in the database so no need to call insert
 

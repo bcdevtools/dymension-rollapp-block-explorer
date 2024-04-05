@@ -20,7 +20,10 @@ type Database interface {
 	// Close closes the underlying database connection
 	Close()
 
-	// InsertRecordChainInfo inserts a new chain info record into the database.
+	// PreparePartitionedTablesForChainId create partitioned tables for the corresponding chain-id.
+	PreparePartitionedTablesForChainId(chainId string) error
+
+	// InsertRecordChainInfoIfNotExists inserts a new chain info record into the database.
 	// If the chain info already exists, it will not be inserted.
 	InsertRecordChainInfoIfNotExists(chainInfo dbtypes.RecordChainInfo) (inserted bool, err error)
 

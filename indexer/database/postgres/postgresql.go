@@ -8,6 +8,7 @@ import (
 	"github.com/EscanBE/go-lib/logging"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database"
 	pgtx "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/postgres_tx"
+	"sync"
 )
 
 // type check to ensure interface is properly implemented
@@ -15,9 +16,9 @@ var _ database.Database = &Database{}
 
 // Database defines a wrapper around a Postgres SQL database and implements functionality
 type Database struct {
-	Config libdbtypes.PostgresDatabaseConfig
-	Sql    *sql.DB
-	Logger logging.Logger
+	muCreatePartitionedTables sync.Mutex
+	Sql                       *sql.DB
+	Logger                    logging.Logger
 }
 
 // NewPostgresDatabase creates a database connection with the given database connection info
@@ -49,8 +50,9 @@ func NewPostgresDatabase(dbCfg libdbtypes.PostgresDatabaseConfig, logger logging
 	postgresDb.SetMaxIdleConns(int(dbCfg.MaxIdleConnectionCount))
 
 	return &Database{
-		Sql:    postgresDb,
-		Logger: logger,
+		muCreatePartitionedTables: sync.Mutex{},
+		Sql:                       postgresDb,
+		Logger:                    logger,
 	}, nil
 }
 
