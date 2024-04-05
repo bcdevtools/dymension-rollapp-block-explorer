@@ -23,6 +23,9 @@ type Database interface {
 	// PreparePartitionedTablesForChainId create partitioned tables for the corresponding chain-id.
 	PreparePartitionedTablesForChainId(chainId string) error
 
+	// PreparePartitionedTablesForEpoch create partitioned tables for the corresponding epoch UTC.
+	PreparePartitionedTablesForEpoch(epochUtcSeconds int64) error
+
 	// InsertRecordChainInfoIfNotExists inserts a new chain info record into the database.
 	// If the chain info already exists, it will not be inserted.
 	InsertRecordChainInfoIfNotExists(chainInfo dbtypes.RecordChainInfo) (inserted bool, err error)

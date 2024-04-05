@@ -111,8 +111,8 @@ CREATE TRIGGER trigger_00100_after_insert_ref_account_to_recent_tx
 CREATE OR REPLACE FUNCTION func_trigger_00200_after_insert_ref_account_to_recent_tx() RETURNS TRIGGER AS $$
 DECLARE
     later_continous_insert_ref_cur_tx_counter SMALLINT;
-    pruning_after_X_continous_insert CONSTANT INTEGER := 3; -- 10
-    pruning_keep_recent CONSTANT INTEGER := 2; -- 100
+    pruning_after_X_continous_insert CONSTANT INTEGER := 10;
+    pruning_keep_recent CONSTANT INTEGER := 100; -- 100
 BEGIN
     -- check if the counter reaches a specific number
     SELECT acc.continous_insert_ref_cur_tx_counter INTO later_continous_insert_ref_cur_tx_counter
