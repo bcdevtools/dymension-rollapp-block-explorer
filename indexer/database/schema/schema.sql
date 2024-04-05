@@ -83,6 +83,7 @@ CREATE TABLE ref_account_to_recent_tx (
     height          BIGINT  NOT NULL,
     hash            TEXT    NOT NULL,
 
+    signer          BOOLEAN NOT NULL DEFAULT FALSE, -- true if the address is the signer of the tx
     erc20           BOOLEAN NOT NULL DEFAULT FALSE, -- true if the tx is erc20/cw20 tx
     nft             BOOLEAN NOT NULL DEFAULT FALSE, -- true if the tx is nft tx
 
@@ -132,6 +133,14 @@ BEGIN
                     WHERE chain_id = NEW.chain_id AND bech32_address = NEW.bech32_address
                     ORDER BY height DESC
                     LIMIT pruning_keep_recent
+                )
+                -- keep most recent sent txs
+                UNION
+                (
+                    SELECT height FROM ref_account_to_recent_tx
+                    WHERE chain_id = NEW.chain_id AND bech32_address = NEW.bech32_address AND signer IS TRUE
+                    ORDER BY height DESC
+                        LIMIT pruning_keep_recent
                 )
                 -- keep most recent erc20/cw20 txs
                 UNION
