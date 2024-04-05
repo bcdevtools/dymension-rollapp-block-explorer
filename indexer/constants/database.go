@@ -1,6 +1,6 @@
 package constants
 
-func GetTablesPartitionedByWeek() []string {
+func GetTablesPartitionedByEpochWeek() []string {
 	return []string{
 		"transaction",
 	}
@@ -9,6 +9,9 @@ func GetTablesPartitionedByWeek() []string {
 func GetTablesPartitionedByChainId() []string {
 	return []string{
 		"account",
-		"recent_account_transaction",
+		"account_erc20_balance",
+		"account_nft_balance",
+		"recent_accounts_transaction",
+		"ref_account_to_recent_tx",
 	}
 }
