@@ -71,9 +71,9 @@ func (d *defaultIndexer) Start() {
 	for {
 		err := utils.ObserveLongOperation("create partitioned tables for chain-id", func() error {
 			return db.PreparePartitionedTablesForChainId(d.chainConfig.ChainId)
-		}, time.Minute, logger)
+		}, 15*time.Second, logger)
 		if err != nil {
-			logger.Error("failed to create partitioned tables for chain-id", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+			logger.Error("failed to create partitioned tables for chain-id, retrying...", "chain-id", d.chainConfig.ChainId, "error", err.Error())
 			time.Sleep(15 * time.Second)
 			continue
 		}

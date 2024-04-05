@@ -9,6 +9,24 @@ INSERT INTO account (chain_id, bech32_address) VALUES
     ('chain_1-1', 'addr-1'),
     ('chain_1-1', 'addr-2');
 
+UPDATE account SET balance_on_erc20_contracts = balance_on_erc20_contracts || '{"erc20-1"}'
+WHERE chain_id = 'chain_1-1' AND bech32_address = 'addr-1';
+UPDATE account SET balance_on_erc20_contracts = balance_on_erc20_contracts || '{"erc20-2"}'
+WHERE chain_id = 'chain_1-1' AND bech32_address = 'addr-1';
+UPDATE account SET balance_on_erc20_contracts = balance_on_erc20_contracts || '{"erc20-3"}'
+WHERE chain_id = 'chain_1-1' AND bech32_address = 'addr-1';
+UPDATE account SET balance_on_erc20_contracts = balance_on_erc20_contracts || '{"erc20-2"}'
+WHERE chain_id = 'chain_1-1' AND bech32_address = 'addr-1';
+
+UPDATE account SET balance_on_nft_contracts = balance_on_nft_contracts || '{"nft-1"}'
+WHERE chain_id = 'chain_1-1' AND bech32_address = 'addr-1';
+UPDATE account SET balance_on_nft_contracts = balance_on_nft_contracts || '{"nft-2"}'
+WHERE chain_id = 'chain_1-1' AND bech32_address = 'addr-1';
+UPDATE account SET balance_on_nft_contracts = balance_on_nft_contracts || '{"nft-3"}'
+WHERE chain_id = 'chain_1-1' AND bech32_address = 'addr-1';
+UPDATE account SET balance_on_nft_contracts = balance_on_nft_contracts || '{"nft-2"}'
+WHERE chain_id = 'chain_1-1' AND bech32_address = 'addr-1';
+
 INSERT INTO recent_accounts_transaction (chain_id, height, hash, epoch, message_types) VALUES
     ('chain_1-1', 1, 'hash-1-1', 1, ARRAY['type-1', 'type-2']),
     ('chain_1-1', 1, 'hash-1-2', 1, ARRAY['type-1', 'type-2', 'type-3']),

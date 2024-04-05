@@ -21,32 +21,35 @@ CREATE TABLE account (
     -- upon reaching specific number, prune the oldest ref and reset
     continous_insert_ref_cur_tx_counter SMALLINT    NOT NULL DEFAULT 0,
 
+    -- contracts which account has balance of
+    balance_on_erc20_contracts  TEXT[], -- normalized: lowercase, for both ERC-20 and CW-20
+    balance_on_nft_contracts    TEXT[], -- normalized: lowercase
+
     CONSTRAINT account_pkey PRIMARY KEY (chain_id, bech32_address)
 ) PARTITION BY LIST(chain_id);
 -- index for lookup account by bech32 address, multi-chain
 CREATE INDEX account_b32_addr_index ON account (bech32_address);
+-- trigger function for distinct the ERC-20 and CW-20 and NFT referenced contracts before insert or update account record
+CREATE OR REPLACE FUNCTION func_trigger_00100_before_insert_or_update_account() RETURNS TRIGGER AS $$
+BEGIN
+    -- distinct the ERC-20 and CW-20 referenced contracts
+    IF NEW.balance_on_erc20_contracts IS NOT NULL THEN
+        NEW.balance_on_erc20_contracts := ARRAY(
+            SELECT DISTINCT unnest(NEW.balance_on_erc20_contracts)
+        );
+    END IF;
 
--- table account_erc20_balance
--- Used for marking account has ERC-20/CW-20 balance, for listing balances
-CREATE TABLE account_erc20_balance (
-    chain_id                        TEXT        NOT NULL,           -- also used as partition key
-    bech32_address                  TEXT        NOT NULL,           -- normalized: lowercase
-    contract_address                TEXT        NOT NULL,           -- normalized: lowercase
-
-     CONSTRAINT account_erc20_balance_pkey PRIMARY KEY (chain_id, bech32_address, contract_address),
-    CONSTRAINT erc20_balance_to_account_fkey FOREIGN KEY (chain_id, bech32_address) REFERENCES account(chain_id, bech32_address)
-) PARTITION BY LIST(chain_id);
-
--- table account_nft_balance
--- Used for marking account has NFT balance, for listing balances
-CREATE TABLE account_nft_balance (
-    chain_id                        TEXT        NOT NULL,           -- also used as partition key
-    bech32_address                  TEXT        NOT NULL,           -- normalized: lowercase
-    contract_address                TEXT        NOT NULL,           -- normalized: lowercase
-
-    CONSTRAINT account_nft_balance_pkey PRIMARY KEY (chain_id, bech32_address, contract_address),
-    CONSTRAINT nft_balance_to_account_fkey FOREIGN KEY (chain_id, bech32_address) REFERENCES account(chain_id, bech32_address)
-) PARTITION BY LIST(chain_id);
+    -- distinct the NFT referenced contracts
+    IF NEW.balance_on_nft_contracts IS NOT NULL THEN
+        NEW.balance_on_nft_contracts := ARRAY(
+            SELECT DISTINCT unnest(NEW.balance_on_nft_contracts)
+        );
+    END IF;
+    RETURN NEW;
+END;$$ LANGUAGE plpgsql;
+CREATE TRIGGER trigger_00100_before_insert_or_update_account
+    BEFORE INSERT OR UPDATE ON account
+    FOR EACH ROW EXECUTE FUNCTION func_trigger_00100_before_insert_or_update_account();
 
 -- table recent_accounts_transaction
 CREATE TABLE recent_accounts_transaction (
