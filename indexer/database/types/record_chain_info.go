@@ -2,7 +2,9 @@ package types
 
 import (
 	"encoding/json"
+	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/utils"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 // RecordChainInfo represents a record of table `chain_info` in the database.
@@ -48,13 +50,57 @@ func NewRecordChainInfoForInsert(
 	}
 
 	res = RecordChainInfo{
-		ChainId:            chainId,
-		Name:               name,
-		ChainType:          chainType,
+		ChainId:            utils.NormalizeChainId(chainId),
+		Name:               utils.NormalizeChainId(name),
+		ChainType:          strings.ToLower(chainType),
 		Bech32:             string(bzBech32),
 		Denoms:             string(bzDenoms),
 		BeJsonRpcUrls:      []string{activeBeJsonRpcUrl},
 		LatestIndexedBlock: 0,
 	}
 	return
+}
+
+// ValidateBasic validates the basic fields of RecordChainInfo
+func (r RecordChainInfo) ValidateBasic() error {
+	normalizedChainId := strings.ToLower(r.ChainId)
+	if normalizedChainId != r.ChainId {
+		return errors.Errorf("chain id must be normalized, expected %s, got %s", normalizedChainId, r.ChainId)
+	}
+
+	if r.ChainId == "" {
+		return errors.New("chain id cannot be empty")
+	}
+
+	normalizedName := strings.ToLower(r.Name)
+	if normalizedName != r.Name {
+		return errors.Errorf("name must be normalized, expected %s, got %s", normalizedName, r.Name)
+	}
+
+	if r.Name == "" {
+		return errors.New("chain name cannot be empty")
+	}
+
+	normalizedChainType := strings.ToLower(r.ChainType)
+	if normalizedChainType != r.ChainType {
+		return errors.Errorf("chain type must be normalized, expected %s, got %s", normalizedChainType, r.ChainType)
+	}
+
+	if r.ChainType == "" {
+		return errors.New("chain type cannot be empty")
+	}
+
+	if r.Bech32 == "" {
+		return errors.New("bech32 information cannot be empty")
+	}
+
+	if r.Denoms == "" {
+		return errors.New("denoms information cannot be empty")
+	}
+
+	if r.LatestIndexedBlock < 0 {
+		return errors.New("latest indexed block cannot be negative")
+	}
+
+	return nil
 }

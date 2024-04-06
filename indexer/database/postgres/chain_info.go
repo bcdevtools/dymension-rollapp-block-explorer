@@ -4,9 +4,15 @@ import (
 	"database/sql"
 	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
 	"github.com/lib/pq"
+	"github.com/pkg/errors"
 )
 
 func (db *Database) InsertOrUpdateRecordChainInfo(chainInfo dbtypes.RecordChainInfo) (insertedOrUpdated bool, err error) {
+	if err = chainInfo.ValidateBasic(); err != nil {
+		err = errors.Wrap(err, "record chain info does not pass basic validation")
+		return
+	}
+
 	var sqlRes sql.Result
 
 	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
