@@ -20,11 +20,15 @@ type Database interface {
 	// Close closes the underlying database connection
 	Close()
 
+	// Partitioning
+
 	// PreparePartitionedTablesForChainId create partitioned tables for the corresponding chain-id.
 	PreparePartitionedTablesForChainId(chainId string) error
 
 	// PreparePartitionedTablesForEpoch create partitioned tables for the corresponding epoch UTC.
 	PreparePartitionedTablesForEpoch(epochUtcSeconds int64) error
+
+	// Chains info
 
 	// InsertOrUpdateRecordChainInfo inserts a new chain info record into the database.
 	// If the chain info already exists, it will be updated.
@@ -33,4 +37,14 @@ type Database interface {
 	// UpdateBeJsonRpcUrlsIfExists updates the be_json_rpc_urls field of the chain info record with the given chain ID.
 	// If the chain info does not exist, nothing will be updated.
 	UpdateBeJsonRpcUrlsIfExists(chainId string, urls []string) (updated bool, err error)
+
+	// Failed blocks
+
+	// InsertOrUpdateFailedBlock inserts a new failed block record into the database.
+	// If the record is already present, the logic fields will be updated.
+	InsertOrUpdateFailedBlock(chainId string, height int64, optionalReason error) error
+
+	// RemoveFailedBlockRecord removes a failed block record from the database.
+	// Typically, this is used when the failed block is successfully processed.
+	RemoveFailedBlockRecord(chainId string, height int64) error
 }

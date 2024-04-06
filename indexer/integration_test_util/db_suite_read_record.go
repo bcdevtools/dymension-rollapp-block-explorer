@@ -144,3 +144,49 @@ FROM "transaction" WHERE hash = $1 AND height = $2 AND chain_id = $3
 
 	return res
 }
+
+// ReadFailedBlockRecord reads a specific failed block record from `failed_block` table in database.
+//
+//goland:noinspection SqlNoDataSourceInspection,SqlDialectInspection,SpellCheckingInspection
+func (suite *DatabaseIntegrationTestSuite) ReadFailedBlockRecord(chainId string, height int64, optionalTx *sql.Tx) itutildbtypes.FailedBlockRecord {
+	statement := `
+SELECT
+	chain_id, -- 1
+	height, -- 2
+	retry_count, -- 3
+	last_retry_epoch, -- 4
+	error_messages -- 5
+FROM failed_block WHERE chain_id = $1 AND height = $2
+`
+
+	var rows *sql.Rows
+	var err error
+	if optionalTx == nil {
+		rows, err = suite.Database.Query(statement, chainId, height)
+	} else {
+		rows, err = optionalTx.Query(statement, chainId, height)
+	}
+
+	suite.Require().NoError(err, "failed to query failed block")
+
+	defer func() {
+		_ = rows.Close()
+	}()
+
+	suite.Require().Truef(rows.Next(), "no record found for failed block %s at %d", chainId, height)
+
+	var res itutildbtypes.FailedBlockRecord
+
+	err = rows.Scan(
+		&res.ChainId,                 // 1
+		&res.Height,                  // 2
+		&res.RetryCount,              // 3
+		&res.LastRetryEpoch,          // 4
+		pq.Array(&res.ErrorMessages), // 5
+	)
+
+	suite.Require().NoError(err, "failed to scan failed block")
+	suite.Require().Falsef(rows.Next(), "more than one record found for failed block %s at %d", chainId, height)
+
+	return res
+}

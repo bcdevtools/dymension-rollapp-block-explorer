@@ -91,5 +91,13 @@ func (suite *IntegrationTestSuite) TestDatabase_AddNewAccountsIfNotExists_IT() {
 		)
 
 		suite.Equal(originalRowsCount, suite.CountRows2("chain_info"))
+
+		// the rest accounts should not be effected
+		record2 := suite.DBITS.ReadAccountRecord(originalRecord2.ChainId, originalRecord2.Bech32Address, tx.Tx)
+		suite.Equal(originalRecord2.ChainId, record2.ChainId)
+		suite.Equal(originalRecord2.Bech32Address, record2.Bech32Address)
+		suite.Equal(int16(0), record2.ContinousInsertReferenceCurrentTxCounter)
+		suite.Equal(originalRecord2.BalanceOnErc20Contracts, record2.BalanceOnErc20Contracts)
+		suite.Equal(originalRecord2.BalanceOnNftContracts, record2.BalanceOnNftContracts)
 	})
 }

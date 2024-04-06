@@ -71,7 +71,7 @@ CREATE TABLE recent_accounts_transaction (
 
 -- table reduced_ref_count_recent_accounts_transaction
 -- A table with short-live records, used to cache records which reduced ref_count, then to prune corresponding record.
-CREATE TABLE reduced_ref_count_recent_accounts_transaction(
+CREATE TABLE reduced_ref_count_recent_accounts_transaction (
     chain_id            TEXT        NOT NULL,
     height              BIGINT      NOT NULL,
     hash                TEXT        NOT NULL,
@@ -241,6 +241,9 @@ CREATE TABLE failed_block (
     -- logic fields
     retry_count         SMALLINT    NOT NULL DEFAULT 0, -- number of retry to index the block
     last_retry_epoch    BIGINT      NOT NULL DEFAULT 0, -- last retry UTC seconds
+
+    -- information fields
+    error_messages       TEXT[]      NOT NULL DEFAULT '{}', -- error messages when failed to index the block
 
     CONSTRAINT failed_block_pkey PRIMARY KEY (chain_id, height)
 ) PARTITION BY LIST(chain_id);
