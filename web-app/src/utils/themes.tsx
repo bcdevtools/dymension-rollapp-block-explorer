@@ -17,6 +17,7 @@ const baseThemeOptions: ThemeOptions = {
   components: {
     MuiLink: {
       defaultProps: {
+        // eslint-disable-next-line react/display-name
         component: forwardRef((props, ref) => <Link ref={ref} {...props} />),
       },
     },

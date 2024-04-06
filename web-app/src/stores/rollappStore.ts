@@ -1,32 +1,36 @@
 import { RollappActionTypes } from '@/consts/actionTypes';
 import { Store, useStore } from '@/hooks/useStore';
-import { getRollappStateByPathname } from '@/utils/store';
+import { RollappInfo } from '@/utils/rollappInfo';
+import { getSelectedRollappInfoByPathname } from '@/utils/store';
 
 export type RollappState = {
-  chainId: string | null;
-  chainPath: string;
+  rollappInfos: RollappInfo[];
+  selectedRollappInfo: RollappInfo | null;
 };
 
 export const defaultRollappState: RollappState = {
-  chainId: null,
-  chainPath: '/',
+  selectedRollappInfo: null,
+  rollappInfos: [],
 };
 
 const actions = {
   [RollappActionTypes.POPULATE_CHAIN_DATA_BY_PATHNAME]: (
-    state: RollappState,
+    currentState: RollappState,
     pathname: string
   ) => {
-    return getRollappStateByPathname(pathname);
+    const selectedRollappInfo = getSelectedRollappInfoByPathname(
+      currentState.rollappInfos,
+      pathname
+    );
+    return { selectedRollappInfo };
   },
 };
 
 let rollappStore: Store<RollappState, typeof actions>;
 
-export function initRollappStore(
-  initialState: RollappState = defaultRollappState
-) {
-  rollappStore = new Store(initialState, actions);
+export function initRollappStore(initialState: Partial<RollappState> = {}) {
+  const state: RollappState = { ...defaultRollappState, ...initialState };
+  rollappStore = new Store(state, actions);
 }
 
 export function useRollappStore(shouldListen?: boolean) {

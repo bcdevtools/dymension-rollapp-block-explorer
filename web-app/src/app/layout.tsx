@@ -4,6 +4,8 @@ import { cookies } from 'next/headers';
 import Layout from '@/components/commons/Layout';
 import { ThemeMode } from '@/consts/theme';
 import { StoreProvider } from '@/components/commons/StoreProvider';
+import { getChainInfos } from '@/services/db/chainInfo';
+import { normalizeRollappsInfo } from '@/utils/rollappInfo';
 
 export const metadata: Metadata = {
   title: 'Blockchain Explorer',
@@ -21,11 +23,17 @@ export default async function RootLayout({
     ? (themeCookie.value as ThemeMode)
     : ThemeMode.LIGHT;
 
+  const chainInfos = await getChainInfos();
+
+  const initialState = {
+    rollappInfos: normalizeRollappsInfo(chainInfos),
+  };
+
   return (
     <html lang="en">
       <body>
         <AppRouterCacheProvider>
-          <StoreProvider>
+          <StoreProvider initialState={initialState}>
             <Layout initialThemeMode={themeMode}>{children}</Layout>
           </StoreProvider>
         </AppRouterCacheProvider>

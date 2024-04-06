@@ -18,7 +18,6 @@ import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
 import { useRollappStore } from '@/stores/rollappStore';
-import { rollapps } from '@/consts/rollapps';
 import { getNewPathOnMenuClick } from '@/utils/common';
 
 type SiderProps = Readonly<{
@@ -42,7 +41,7 @@ export default React.memo(function Sider({
 }: SiderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [{ chainPath }] = useRollappStore(true);
+  const [{ selectedRollappInfo, rollappInfos }] = useRollappStore(true);
 
   const handleMenuItemClick = (path: string) => {
     router.push(getNewPathOnMenuClick(pathname, path));
@@ -64,11 +63,11 @@ export default React.memo(function Sider({
         <ListItem>
           <FormControl fullWidth>
             <Select
-              value={chainPath}
+              value={selectedRollappInfo?.path}
               onChange={e =>
                 void router.push(pathname.replace(/^\/[^\/]*/, e.target.value))
               }>
-              {rollapps.map(rollapp => (
+              {rollappInfos.map(rollapp => (
                 <MenuItem key={rollapp.chainId} value={rollapp.path}>
                   {rollapp.name}
                 </MenuItem>

@@ -1,8 +1,5 @@
-import { rollapps } from '@/consts/rollapps';
-
-export function getChainDataFromPathname(pathname: string) {
-  const rollappPath = pathname.match(/^\/[^\/]*/)![0];
-  return rollapps.find(rollapp => rollapp.path === rollappPath);
+export function getRollappPathFromPathname(pathname: string) {
+  return pathname.match(/^\/[^\/]*/)![0];
 }
 
 export function getNewPathOnMenuClick(pathname: string, path: string) {
