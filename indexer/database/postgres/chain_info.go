@@ -2,23 +2,11 @@ package postgres
 
 import (
 	"database/sql"
-	"encoding/json"
 	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
 	"github.com/lib/pq"
 )
 
 func (db *Database) InsertRecordChainInfoIfNotExists(chainInfo dbtypes.RecordChainInfo) (inserted bool, err error) {
-	var bzBech32, bzDenoms []byte
-	bzBech32, err = json.Marshal(chainInfo.Bech32)
-	if err != nil {
-		return
-	}
-
-	bzDenoms, err = json.Marshal(chainInfo.Denoms)
-	if err != nil {
-		return
-	}
-
 	var sqlRes sql.Result
 
 	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
@@ -26,7 +14,7 @@ func (db *Database) InsertRecordChainInfoIfNotExists(chainInfo dbtypes.RecordCha
 INSERT INTO chain_info (chain_id, "name", chain_type, bech32, denoms, be_json_rpc_urls)
 VALUES ($1, $2, $3, $4, $5, $6)
 ON CONFLICT DO NOTHING;
-`, chainInfo.ChainId, chainInfo.Name, chainInfo.ChainType, string(bzBech32), string(bzDenoms), pq.Array(chainInfo.BeJsonRpcUrls))
+`, chainInfo.ChainId, chainInfo.Name, chainInfo.ChainType, chainInfo.Bech32, chainInfo.Denoms, pq.Array(chainInfo.BeJsonRpcUrls))
 	if err != nil {
 		return
 	}

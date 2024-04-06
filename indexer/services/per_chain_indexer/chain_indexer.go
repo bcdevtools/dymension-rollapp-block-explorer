@@ -166,14 +166,17 @@ func (d *defaultIndexer) Start() {
 
 		// insert chain info record
 		if !isChainInfoRecordExists {
-			_, err := db.InsertRecordChainInfoIfNotExists(dbtypes.RecordChainInfo{
-				ChainId:       beGetChainInfo.ChainId,
-				Name:          d.chainName,
-				ChainType:     beGetChainInfo.ChainType,
-				Bech32:        beGetChainInfo.Bech32,
-				Denoms:        beGetChainInfo.Denom,
-				BeJsonRpcUrls: []string{activeJsonRpcUrl},
-			})
+			record, err := dbtypes.NewRecordChainInfoForInsert(
+				beGetChainInfo.ChainId,
+				d.chainName,
+				beGetChainInfo.ChainType,
+				beGetChainInfo.Bech32,
+				beGetChainInfo.Denom,
+				activeJsonRpcUrl,
+			)
+			if err == nil {
+				_, err = db.InsertRecordChainInfoIfNotExists(record)
+			}
 			if err != nil {
 				logger.Error("failed to insert chain info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
 				continue

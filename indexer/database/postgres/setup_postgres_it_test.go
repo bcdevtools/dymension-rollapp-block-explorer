@@ -92,15 +92,11 @@ func (suite *IntegrationTestSuite) InsertChainInfoRecords() {
 	db := suite.Database()
 	for _, chain := range suite.DBITS.Chains {
 		originalRecord := types.RecordChainInfo{
-			ChainId:   chain.ChainId,
-			Name:      chain.ChainId,
-			ChainType: "cosmos",
-			Bech32: map[string]string{
-				"addr": chain.Bech32AccAddrPrefix,
-			},
-			Denoms: map[string]string{
-				"bond": chain.MinDenom,
-			},
+			ChainId:            chain.ChainId,
+			Name:               chain.ChainId,
+			ChainType:          "cosmos",
+			Bech32:             fmt.Sprintf(`{"addr": "%s"}`, chain.Bech32AccAddrPrefix),
+			Denoms:             fmt.Sprintf(`{"bond": "%s"}`, chain.MinDenom),
 			BeJsonRpcUrls:      nil,
 			LatestIndexedBlock: 0,
 		}
