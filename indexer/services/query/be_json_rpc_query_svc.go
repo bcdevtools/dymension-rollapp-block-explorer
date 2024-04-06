@@ -85,9 +85,13 @@ func (d defaultBeJsonRpcQueryService) getQueryEndpointWithRLock() string {
 	return d.queryEndpoint
 }
 
-func (d defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, timeoutMs uint32) ([]byte, error) {
-	if timeoutMs == 0 {
+func (d defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, optionalTimeoutMs uint32) ([]byte, error) {
+	var timeoutMs = optionalTimeoutMs
+	if optionalTimeoutMs == 0 {
 		timeoutMs = 5_000
+	}
+	if timeoutMs < 1_000 {
+		timeoutMs = 1_000
 	}
 
 	httpClient := http.Client{
