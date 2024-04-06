@@ -81,7 +81,7 @@ func (d *defaultIndexer) Start() {
 		break
 	}
 
-	var isChainInfoRecordExists bool // is a flag indicate the is record chain info exists in the database so no need to call insert
+	var hasInsertedOrUpdatedChainInfoRecord bool // is a flag indicate the is record chain info exists in the database so no need to call insert
 
 	for !d.isShuttingDownWithRLock() {
 		time.Sleep(d.indexingCfg.IndexBlockInterval)
@@ -164,8 +164,8 @@ func (d *defaultIndexer) Start() {
 			continue
 		}
 
-		// insert chain info record
-		if !isChainInfoRecordExists {
+		// insert/update chain info record
+		if !hasInsertedOrUpdatedChainInfoRecord {
 			record, err := dbtypes.NewRecordChainInfoForInsert(
 				beGetChainInfo.ChainId,
 				d.chainName,
@@ -175,13 +175,13 @@ func (d *defaultIndexer) Start() {
 				activeJsonRpcUrl,
 			)
 			if err == nil {
-				_, err = db.InsertRecordChainInfoIfNotExists(record)
+				_, err = db.InsertOrUpdateRecordChainInfo(record)
 			}
 			if err != nil {
-				logger.Error("failed to insert chain info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+				logger.Error("failed to insert/update chain info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
 				continue
 			}
-			isChainInfoRecordExists = true
+			hasInsertedOrUpdatedChainInfoRecord = true
 		}
 
 		// perform indexing
