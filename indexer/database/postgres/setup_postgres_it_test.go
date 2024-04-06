@@ -8,18 +8,17 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/EscanBE/go-lib/logging"
-	libutils "github.com/EscanBE/go-lib/utils"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database"
+	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/integration_test_util"
 	itutildbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/integration_test_util/types/db"
 	itutilutils "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/integration_test_util/utils"
+	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/utils"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
 	"math"
-	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -39,6 +38,7 @@ func TestIntegrationTestSuite(t *testing.T) {
 
 func (suite *IntegrationTestSuite) SetupSuite() {
 	suite.DBITS = integration_test_util.NewDatabaseIntegrationTestSuite(suite.T(), suite.Require())
+	suite.preparePartitionedTables()
 }
 
 func (suite *IntegrationTestSuite) SetupTest() {
@@ -85,6 +85,29 @@ func (suite *IntegrationTestSuite) TX() (tx database.DbTransaction, commit func(
 				fmt.Println("ERR: failed to commit transaction", err)
 			}
 		}
+	}
+}
+
+func (suite *IntegrationTestSuite) InsertChainInfoRecords() {
+	db := suite.Database()
+	for _, chain := range suite.DBITS.Chains {
+		originalRecord := types.RecordChainInfo{
+			ChainId:   chain.ChainId,
+			Name:      chain.ChainId,
+			ChainType: "cosmos",
+			Bech32: map[string]string{
+				"addr": chain.Bech32AccAddrPrefix,
+			},
+			Denoms: map[string]string{
+				"bond": chain.MinDenom,
+			},
+			BeJsonRpcUrls:      nil,
+			LatestIndexedBlock: 0,
+		}
+
+		inserted, err := db.InsertRecordChainInfoIfNotExists(originalRecord)
+		suite.Require().NoError(err)
+		suite.Require().True(inserted)
 	}
 }
 
@@ -194,28 +217,18 @@ func (suite *IntegrationTestSuite) NewBaseCoinWithLow(amountH, amountL int64, ch
 }
 
 //goland:noinspection SqlDialectInspection,SqlNoDataSourceInspection
-func (suite *IntegrationTestSuite) GetHighestPartitionAvailable() int64 {
-	rows, err := suite.DB().Query(`SELECT table_name FROM information_schema.tables WHERE table_name LIKE 'transaction_%'`)
-	suite.Require().NoError(err)
-	defer func() {
-		_ = rows.Close()
-	}()
-	var highest int64
-	for rows.Next() {
-		var tableName string
-		err = rows.Scan(&tableName)
+func (suite *IntegrationTestSuite) preparePartitionedTables() {
+	db := suite.Database()
+	epochWeek := utils.GetEpochWeek(0)
+	for _, chain := range suite.DBITS.Chains {
+		err := db.PreparePartitionedTablesForChainId(chain.ChainId)
 		suite.Require().NoError(err)
 
-		if !regexp.MustCompile("transaction_\\d+").MatchString(tableName) {
-			continue
+		for ew := epochWeek - 20; ew <= epochWeek+20; ew++ {
+			err = db.PreparePartitionedTablesForEpoch(ew)
+			suite.Require().NoError(err)
 		}
-
-		partition, err := strconv.ParseInt(strings.Split(tableName, "_")[1], 10, 64)
-		suite.Require().NoError(err)
-		highest = libutils.MaxInt64(highest, partition)
 	}
-
-	return highest
 }
 
 func randomPositiveInt64() int64 {

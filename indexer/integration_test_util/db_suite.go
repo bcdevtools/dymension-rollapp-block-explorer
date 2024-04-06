@@ -185,12 +185,7 @@ func NewDatabaseIntegrationTestSuite(
 	ensureTestEnv(result.databaseName, result.databaseUser, int(result.databasePort))
 
 	if remakeDb {
-		epochWeek := time.Now().UTC().Unix() / 86400 * 7
-		for _, tableName := range constants.GetTablesPartitionedByEpochWeek() {
-			for ew := epochWeek - 1; ew <= epochWeek+1; ew++ {
-				result.createPartitionedTableForEpochWeek(tableName, ew)
-			}
-		}
+		// do some logic?
 	}
 
 	return result

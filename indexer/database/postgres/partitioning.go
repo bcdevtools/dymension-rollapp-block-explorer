@@ -50,7 +50,7 @@ func (db *Database) PreparePartitionedTablesForEpoch(epochUtcSeconds int64) erro
 	db.muCreatePartitionedTables.Lock()
 	defer db.muCreatePartitionedTables.Unlock()
 
-	epochWeek := epochUtcSeconds / 86400 * 7
+	epochWeek := utils.GetEpochWeek(epochUtcSeconds)
 	for _, tableName := range constants.GetTablesPartitionedByEpochWeek() {
 		err := db.createPartitionedTableForEpochWeekIfNotExists(tableName, epochWeek)
 		if err != nil {
