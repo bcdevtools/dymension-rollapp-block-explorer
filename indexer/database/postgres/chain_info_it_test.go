@@ -5,7 +5,7 @@ import (
 	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
 )
 
-func (suite *IntegrationTestSuite) TestDatabase_InsertOrUpdateRecordChainInfo_IT() {
+func (suite *IntegrationTestSuite) Test_InsertOrUpdateRecordChainInfo_IT() {
 	db := suite.Database()
 
 	originalRowsCount := suite.CountRows2("chain_info")
@@ -67,7 +67,7 @@ func (suite *IntegrationTestSuite) TestDatabase_InsertOrUpdateRecordChainInfo_IT
 	})
 }
 
-func (suite *IntegrationTestSuite) TestDatabase_UpdateBeJsonRpcUrlsIfExists_IT() {
+func (suite *IntegrationTestSuite) Test_UpdateBeJsonRpcUrlsIfExists_IT() {
 	suite.InsertChainInfoRecords()
 
 	db := suite.Database()
@@ -94,4 +94,29 @@ func (suite *IntegrationTestSuite) TestDatabase_UpdateBeJsonRpcUrlsIfExists_IT()
 
 		suite.Equal(originalRowsCount, suite.CountRows2("chain_info"))
 	})
+}
+
+func (suite *IntegrationTestSuite) Test_GetBech32Config_IT() {
+	db := suite.Database()
+
+	const chainId = "cosmoshub-4"
+
+	originalRecord := dbtypes.RecordChainInfo{
+		ChainId:       chainId,
+		Name:          "cosmos",
+		ChainType:     "cosmos",
+		Bech32:        `{"addr": "cosmos","cons": "cosmosvalcons","val": "cosmosvaloper"}`,
+		Denoms:        `{"bond": "uatom"}`,
+		BeJsonRpcUrls: []string{},
+	}
+
+	insertedOrUpdated, err := db.InsertOrUpdateRecordChainInfo(originalRecord)
+	suite.Require().NoError(err)
+	suite.Require().True(insertedOrUpdated)
+
+	cfg, err := db.GetBech32Config(chainId)
+	suite.Require().NoError(err)
+	suite.Equal("cosmos", cfg.Bech32PrefixAccAddr)
+	suite.Equal("cosmosvalcons", cfg.Bech32PrefixCons)
+	suite.Equal("cosmosvaloper", cfg.Bech32PrefixOperator)
 }
