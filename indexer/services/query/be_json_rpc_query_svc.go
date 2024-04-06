@@ -138,7 +138,8 @@ func (d *defaultBeJsonRpcQueryService) BeTransactionsInBlockRange(from, to int64
 	}
 
 	for heightStr := range responseBeTransactionsInBlockRange.Blocks {
-		height, err := strconv.ParseInt(heightStr, 10, 64)
+		var height int64
+		height, err = strconv.ParseInt(heightStr, 10, 64)
 		if err != nil {
 			err = errors.Wrapf(querytypes.ErrBlackList, "malformed block height %s", heightStr)
 			return

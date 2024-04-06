@@ -49,7 +49,8 @@ type defaultIndexer struct {
 
 func NewIndexer(
 	ctx context.Context,
-	chainName string, chainConfig types.ChainConfig,
+	chainName string,
+	chainConfig types.ChainConfig,
 ) Indexer {
 	indexingConfig := types.UnwrapIndexerContext(ctx).GetConfig().IndexingConfig
 	return &defaultIndexer{
