@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -120,6 +121,33 @@ func (d *defaultBeJsonRpcQueryService) BeTransactionsInBlockRange(from, to int64
 	if responseBeTransactionsInBlockRange.ChainId != d.chainId {
 		err = errors.Wrapf(querytypes.ErrBlackListDueToMisMatchChainId, "want %s, got %s", d.chainId, responseBeTransactionsInBlockRange.ChainId)
 		return
+	}
+
+	for _, missingBlock := range responseBeTransactionsInBlockRange.MissingBlocks {
+		if missingBlock < from || missingBlock > to {
+			err = errors.Wrapf(querytypes.ErrBlackList, "missing block %d out of range [%d, %d]", missingBlock, from, to)
+			return
+		}
+	}
+
+	for _, errorBlock := range responseBeTransactionsInBlockRange.ErrorBlocks {
+		if errorBlock < from || errorBlock > to {
+			err = errors.Wrapf(querytypes.ErrBlackList, "error block %d out of range [%d, %d]", errorBlock, from, to)
+			return
+		}
+	}
+
+	for heightStr := range responseBeTransactionsInBlockRange.Blocks {
+		height, err := strconv.ParseInt(heightStr, 10, 64)
+		if err != nil {
+			err = errors.Wrapf(querytypes.ErrBlackList, "malformed block height %s", heightStr)
+			return
+		}
+
+		if height < from || height > to {
+			err = errors.Wrapf(querytypes.ErrBlackList, "block height %d out of range [%d, %d]", height, from, to)
+			return
+		}
 	}
 
 	res = responseBeTransactionsInBlockRange

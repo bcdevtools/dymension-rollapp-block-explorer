@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-func (suite *IntegrationTestSuite) TestDatabase_AddNewAccountsIfNotExists_IT() {
+func (suite *IntegrationTestSuite) Test_InsertOrUpdateRecordsAccount_IT() {
 	suite.InsertChainInfoRecords()
 
 	tx, _ := suite.TX()
@@ -46,7 +46,7 @@ func (suite *IntegrationTestSuite) TestDatabase_AddNewAccountsIfNotExists_IT() {
 		suite.Equal(originalRecord2.BalanceOnErc20Contracts, record2.BalanceOnErc20Contracts)
 		suite.Equal(originalRecord2.BalanceOnNftContracts, record2.BalanceOnNftContracts)
 
-		suite.Equal(originalRowsCount+2, suite.CountRows2("chain_info"))
+		suite.Equal(originalRowsCount+2, suite.CountRows(tx.Tx, "account"))
 		originalRowsCount += 2
 	})
 
@@ -90,7 +90,7 @@ func (suite *IntegrationTestSuite) TestDatabase_AddNewAccountsIfNotExists_IT() {
 			"contracts address should be distinct merged",
 		)
 
-		suite.Equal(originalRowsCount, suite.CountRows2("chain_info"))
+		suite.Equal(originalRowsCount, suite.CountRows(tx.Tx, "account"))
 
 		// the rest accounts should not be effected
 		record2 := suite.DBITS.ReadAccountRecord(originalRecord2.ChainId, originalRecord2.Bech32Address, tx.Tx)

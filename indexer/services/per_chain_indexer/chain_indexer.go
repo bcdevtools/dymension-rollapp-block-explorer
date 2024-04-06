@@ -6,11 +6,14 @@ import (
 	libapp "github.com/EscanBE/go-lib/app"
 	libutils "github.com/EscanBE/go-lib/utils"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/constants"
+	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database"
 	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
 	querysvc "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query"
 	querytypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/utils"
+	"github.com/pkg/errors"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -180,11 +183,80 @@ func (d *defaultIndexer) Start() {
 				}
 			}
 
+			for heightStr, block := range beTransactionsInBlockRange.Blocks {
+				if len(block.Transactions) < 1 {
+					// skip empty block
+					continue
+				}
+
+				blockHeight, err := strconv.ParseInt(heightStr, 10, 64)
+				if err != nil {
+					panic(err)
+				}
+
+				dbTx, err := db.BeginDatabaseTransaction(context.Background())
+				if err != nil {
+					logger.Error("failed to begin transaction", "error", err.Error())
+					return err
+				}
+
+				err = d.insertBlockInformation(blockHeight, block, dbTx)
+				if err != nil {
+					logger.Error("failed to insert block information", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error())
+				}
+
+				if err == nil {
+					err = db.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
+				}
+
+				if err == nil {
+					err = dbTx.RemoveFailedBlockRecord(d.chainConfig.ChainId, blockHeight)
+				}
+
+				if err != nil {
+					_ = dbTx.RollbackTransaction()
+					_ = db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, blockHeight, err)
+					continue
+				}
+
+				err = dbTx.CommitTransaction()
+				if err != nil {
+					logger.Error("failed to commit transaction", "error", err.Error())
+					_ = db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, blockHeight, err)
+					continue
+				}
+
+				logger.Debug("indexed block successfully", "chain-id", d.chainConfig.ChainId, "height", blockHeight)
+			}
+
 			return nil
 		})
 	}
 
 	logger.Info("shutting down indexer", "name", d.chainName)
+}
+
+func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.BlockInResponseBeTransactionsInBlockRange, dbTx database.DbTransaction) error {
+	var recordsTxs dbtypes.RecordsTransaction
+	for _, transaction := range block.Transactions {
+		recordTx := dbtypes.NewRecordTransactionForInsert(
+			d.chainConfig.ChainId,
+			height,
+			transaction.TransactionHash,
+			block.TimeEpochUTC,
+			transaction.MessagesType,
+			transaction.TransactionType,
+		)
+
+		recordsTxs = append(recordsTxs, recordTx)
+	}
+
+	err := dbTx.InsertRecordTransactionsIfNotExists(recordsTxs)
+	if err != nil {
+		return errors.Wrap(err, "failed to insert transactions")
+	}
+
+	return nil
 }
 
 // genericLoop will handle refresh active json rpc url, and perform the provided function.
