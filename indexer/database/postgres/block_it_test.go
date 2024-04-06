@@ -6,6 +6,43 @@ import (
 	"time"
 )
 
+func (suite *IntegrationTestSuite) TestDatabase_GetSetLatestIndexedBlock_IT() {
+	suite.InsertChainInfoRecords()
+
+	db := suite.Database()
+
+	firstChain := suite.DBITS.Chains.Number(1)
+	secondChain := suite.DBITS.Chains.Number(2)
+
+	err := db.SetLatestIndexedBlock(firstChain.ChainId, 5)
+	suite.Require().NoError(err)
+
+	err = db.SetLatestIndexedBlock(secondChain.ChainId, 6)
+	suite.Require().NoError(err)
+
+	height, err := db.GetLatestIndexedBlock(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Equal(int64(5), height)
+
+	height, err = db.GetLatestIndexedBlock(secondChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Equal(int64(6), height)
+
+	err = db.SetLatestIndexedBlock(firstChain.ChainId, 3)
+	suite.Require().NoError(err)
+
+	err = db.SetLatestIndexedBlock(secondChain.ChainId, 9)
+	suite.Require().NoError(err)
+
+	height, err = db.GetLatestIndexedBlock(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Equal(int64(5), height, "must be the greater one")
+
+	height, err = db.GetLatestIndexedBlock(secondChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Equal(int64(9), height, "must be the greater one")
+}
+
 func (suite *IntegrationTestSuite) TestDatabase_InsertOrUpdateFailedBlock_IT() {
 	db := suite.Database()
 
