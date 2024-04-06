@@ -55,6 +55,49 @@ FROM chain_info WHERE chain_id = $1
 	return res
 }
 
+// ReadAccountRecord reads a specific account record from `account` table in database.
+//
+//goland:noinspection SqlNoDataSourceInspection,SqlDialectInspection,SpellCheckingInspection
+func (suite *DatabaseIntegrationTestSuite) ReadAccountRecord(chainId, bech32Address string, optionalTx *sql.Tx) itutildbtypes.AccountRecord {
+	statement := `
+SELECT
+	chain_id, -- 1
+	bech32_address, -- 2
+	continous_insert_ref_cur_tx_counter, -- 3
+	balance_on_erc20_contracts, -- 4
+	balance_on_nft_contracts -- 5
+FROM account WHERE chain_id = $1 AND bech32_address = $2
+`
+	var rows *sql.Rows
+	var err error
+	if optionalTx == nil {
+		rows, err = suite.Database.Query(statement, chainId, bech32Address)
+	} else {
+		rows, err = optionalTx.Query(statement, chainId, bech32Address)
+	}
+
+	suite.Require().NoError(err, "failed to query account")
+	defer func() {
+		_ = rows.Close()
+	}()
+	suite.Require().Truef(rows.Next(), "no record found for account %s at %s", chainId, bech32Address)
+
+	var res itutildbtypes.AccountRecord
+
+	err = rows.Scan(
+		&res.ChainId,       // 1
+		&res.Bech32Address, // 2
+		&res.ContinousInsertReferenceCurrentTxCounter, // 3
+		pq.Array(&res.BalanceOnErc20Contracts),        // 4
+		pq.Array(&res.BalanceOnNftContracts),          // 5
+	)
+
+	suite.Require().NoError(err, "failed to scan account")
+	suite.Require().Falsef(rows.Next(), "more than one record found for account %s at %s", chainId, bech32Address)
+
+	return res
+}
+
 // ReadTransactionRecord reads a specific transaction record from `transaction` table in database.
 //
 //goland:noinspection SqlNoDataSourceInspection,SqlDialectInspection,SpellCheckingInspection

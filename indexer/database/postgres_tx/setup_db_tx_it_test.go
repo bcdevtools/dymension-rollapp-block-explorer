@@ -1,4 +1,4 @@
-package postgres
+package pg_db_tx
 
 //goland:noinspection SpellCheckingInspection
 import (
@@ -7,8 +7,6 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"fmt"
-	"github.com/EscanBE/go-lib/logging"
-	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/integration_test_util"
 	itutildbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/integration_test_util/types/db"
@@ -19,7 +17,6 @@ import (
 	tmcrypto "github.com/tendermint/tendermint/crypto"
 	"math"
 	"strings"
-	"sync"
 	"testing"
 )
 
@@ -48,33 +45,22 @@ func (suite *IntegrationTestSuite) TearDownTest() {
 
 func (suite *IntegrationTestSuite) TearDownSuite() {
 	suite.DBITS.CleanupSuite()
-	func() {
-		suite.Database().Close()
-	}()
 }
 
 func (suite *IntegrationTestSuite) DB() *sql.DB {
 	return suite.DBITS.Database
 }
 
-func (suite *IntegrationTestSuite) Database() *Database {
-	return &Database{
-		muCreatePartitionedTables: sync.Mutex{},
-		Sql:                       suite.DBITS.Database,
-		Logger:                    logging.NewDefaultLogger(),
-	}
-}
-
-func (suite *IntegrationTestSuite) TX() (tx database.DbTransaction, commit func()) {
-	dbTx, err := suite.Database().BeginDatabaseTransaction(context.Background())
+func (suite *IntegrationTestSuite) TX() (tx *dbTxImpl, commit func()) {
+	dbTx, err := suite.DB().Begin()
 	suite.Require().NoError(err, "failed to begin transaction")
 	var commitCalled bool
-	return dbTx, func() {
+	return BeginDatabaseTransaction(context.Background(), dbTx), func() {
 		if commitCalled {
 			return
 		}
 		commitCalled = true
-		err := dbTx.CommitTransaction()
+		err := dbTx.Commit()
 		if err != nil {
 			errMsg := err.Error()
 			if strings.Contains(errMsg, "transaction has already been committed or rolled back") {
@@ -87,7 +73,10 @@ func (suite *IntegrationTestSuite) TX() (tx database.DbTransaction, commit func(
 }
 
 func (suite *IntegrationTestSuite) InsertChainInfoRecords() {
-	db := suite.Database()
+	tx, commit := suite.TX()
+	defer func() {
+		commit()
+	}()
 	for _, chain := range suite.DBITS.Chains {
 		originalRecord := types.RecordChainInfo{
 			ChainId:            chain.ChainId,
@@ -99,9 +88,19 @@ func (suite *IntegrationTestSuite) InsertChainInfoRecords() {
 			LatestIndexedBlock: 0,
 		}
 
-		inserted, err := db.InsertOrUpdateRecordChainInfo(originalRecord)
+		//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
+		res, err := tx.Tx.Exec(`
+INSERT INTO chain_info (chain_id, "name", chain_type, bech32, denoms) VALUES ($1, $2, $3, $4, $5)`,
+			originalRecord.ChainId,   // 1
+			originalRecord.Name,      // 2
+			originalRecord.ChainType, // 3
+			originalRecord.Bech32,    // 4
+			originalRecord.Denoms,    // 5
+		)
 		suite.Require().NoError(err)
-		suite.Require().True(inserted)
+		effected, err := res.RowsAffected()
+		suite.Require().NoError(err)
+		suite.Require().True(effected > 0)
 	}
 }
 

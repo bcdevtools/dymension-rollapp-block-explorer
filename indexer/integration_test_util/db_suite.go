@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/constants"
 	itutiltypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/integration_test_util/types"
+	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/utils"
 	"github.com/stretchr/testify/require"
 	"net"
 	"os"
@@ -185,7 +186,18 @@ func NewDatabaseIntegrationTestSuite(
 	ensureTestEnv(result.databaseName, result.databaseUser, int(result.databasePort))
 
 	if remakeDb {
-		// do some logic?
+		for _, tableName := range constants.GetTablesPartitionedByChainId() {
+			for _, chain := range result.Chains {
+				err := result.createPartitionedTableForChainId(tableName, chain.ChainId)
+				require.NoError(t, err)
+			}
+		}
+		for _, tableName := range constants.GetTablesPartitionedByEpochWeek() {
+			epochWeek := utils.GetEpochWeek(0)
+			for ew := epochWeek - 20; ew <= epochWeek+20; ew++ {
+				result.createPartitionedTableForEpochWeek(tableName, ew)
+			}
+		}
 	}
 
 	return result
@@ -240,6 +252,30 @@ func (suite *DatabaseIntegrationTestSuite) TruncateAll() {
 	suite.Truncate("failed_block")
 	suite.Truncate("account")
 	suite.Truncate("chain_info")
+}
+
+// createPartitionedTableForChainId  creates a new partition for the given chain-id.
+func (suite *DatabaseIntegrationTestSuite) createPartitionedTableForChainId(tableName, chainId string) error {
+	partitionTable := utils.GetPartitionedTableNameByChainId(tableName, chainId)
+
+	stmt := fmt.Sprintf(
+		"CREATE TABLE IF NOT EXISTS %s PARTITION OF %s FOR VALUES IN ('%s')",
+		partitionTable,
+		tableName,
+		chainId,
+	)
+
+	_, err := suite.Database.Exec(stmt)
+
+	if err != nil {
+		content := err.Error()
+		if strings.Contains(content, "pq: relation ") && strings.Contains(content, partitionTable) && strings.Contains(content, " already exists") {
+			return nil
+		}
+		return err
+	}
+
+	return nil
 }
 
 // createPartitionTable creates a new partition table for a given table.

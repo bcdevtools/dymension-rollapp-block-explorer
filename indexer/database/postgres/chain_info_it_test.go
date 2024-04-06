@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"fmt"
-	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
+	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
 )
 
 func (suite *IntegrationTestSuite) TestDatabase_InsertOrUpdateRecordChainInfo_IT() {
@@ -12,7 +12,7 @@ func (suite *IntegrationTestSuite) TestDatabase_InsertOrUpdateRecordChainInfo_IT
 
 	firstChain := suite.DBITS.Chains.Number(1)
 
-	originalRecord := types.RecordChainInfo{
+	originalRecord := dbtypes.RecordChainInfo{
 		ChainId:            firstChain.ChainId,
 		Name:               firstChain.ChainId,
 		ChainType:          fmt.Sprintf("evm-%d", randomPositiveInt64()),
@@ -41,7 +41,7 @@ func (suite *IntegrationTestSuite) TestDatabase_InsertOrUpdateRecordChainInfo_IT
 	})
 
 	suite.Run("inserting the same record again should update", func() {
-		newRecord := types.RecordChainInfo{
+		newRecord := dbtypes.RecordChainInfo{
 			ChainId:            firstChain.ChainId,
 			Name:               firstChain.ChainId + "-altered",
 			ChainType:          fmt.Sprintf("evm-%d", randomPositiveInt64()),
