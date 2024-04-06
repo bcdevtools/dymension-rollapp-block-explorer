@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"database/sql"
+	"encoding/json"
+	"fmt"
 	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
@@ -57,5 +59,52 @@ UPDATE chain_info SET be_json_rpc_urls = $1 WHERE chain_id = $2
 	}
 
 	updated = effected > 0
+	return
+}
+
+func (db *Database) GetBech32Config(chainId string) (bech32Cfg dbtypes.Bech32PrefixOfChainInfo, err error) {
+	var rows *sql.Rows
+
+	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
+	rows, err = db.Sql.Query(`
+SELECT bech32 FROM chain_info WHERE chain_id = $1
+`, chainId)
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		_ = rows.Close()
+	}()
+
+	if !rows.Next() {
+		err = fmt.Errorf("no bech32 config found for chain-id %s", chainId)
+		return
+	}
+
+	var bech32Json string
+
+	err = rows.Scan(&bech32Json)
+	if err != nil {
+		return
+	}
+
+	if bech32Json == "" || bech32Json == "{}" {
+		err = fmt.Errorf("bech32 config is empty for chain-id %s", chainId)
+		return
+	}
+
+	err = json.Unmarshal([]byte(bech32Json), &bech32Cfg)
+	if err != nil {
+		err = errors.Wrap(err, "unable to deserialize bech32 config")
+		return
+	}
+
+	err = bech32Cfg.ValidateBasic()
+	if err != nil {
+		err = errors.Wrap(err, "bech32 config does not pass basic validation")
+		return
+	}
+
 	return
 }

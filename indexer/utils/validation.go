@@ -21,10 +21,10 @@ func UnsafeExtractBech32Hrp(bech32Addr string) (hrp string, success bool) {
 	return parts[0], parts[0] != "" && len(parts[1]) >= 7
 }
 
-var regexpEvmContractAddress = regexp.MustCompile(`^0x[\da-fA-F]{40}$`)
+var regexpEvmAddress = regexp.MustCompile(`^0x[\da-fA-F]{40}$`)
 
-func IsEvmContractAddress(addr string) bool {
-	return regexpEvmContractAddress.MatchString(NormalizeAddress(addr))
+func IsEvmAddress(addr string) bool {
+	return regexpEvmAddress.MatchString(NormalizeAddress(addr))
 }
 
 var regexpCosmosTxHash = regexp.MustCompile(`^[A-Z\d]{64}$`)

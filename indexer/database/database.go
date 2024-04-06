@@ -38,6 +38,9 @@ type Database interface {
 	// If the chain info does not exist, nothing will be updated.
 	UpdateBeJsonRpcUrlsIfExists(chainId string, urls []string) (updated bool, err error)
 
+	// GetBech32Config returns the bech32 config of the chain info record with the given chain ID.
+	GetBech32Config(chainId string) (bech32Cfg dbtypes.Bech32PrefixOfChainInfo, err error)
+
 	// GetLatestIndexedBlock returns the latest indexed block height of the chain info record with the given chain ID.
 	GetLatestIndexedBlock(chainId string) (int64, error)
 

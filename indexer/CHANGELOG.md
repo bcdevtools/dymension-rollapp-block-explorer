@@ -59,3 +59,4 @@ Templates for Unreleased:
 #### Features
 - (indexer) [#1](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/1) Add indexer
 - (indexer,tx) [#8](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/8) Indexing per chain transactions
+- (indexer,tx) [#9](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/9) Indexing transaction involvers as accounts

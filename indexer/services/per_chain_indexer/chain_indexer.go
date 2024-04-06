@@ -13,6 +13,8 @@ import (
 	querytypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/utils"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"strconv"
 	"sync"
@@ -124,6 +126,24 @@ func (d *defaultIndexer) Start() {
 		break
 	}
 
+	var bech32Cfg dbtypes.Bech32PrefixOfChainInfo
+	for !d.isShuttingDownWithRLock() {
+		time.Sleep(10 * time.Second)
+
+		var err error
+		bech32Cfg, err = db.GetBech32Config(d.chainConfig.ChainId)
+		if err != nil {
+			logger.Error("failed to get bech32 config", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+			continue
+		}
+
+		break
+	}
+
+	if err := bech32Cfg.ValidateBasic(); err != nil {
+		panic(err)
+	}
+
 	for !d.isShuttingDownWithRLock() {
 		time.Sleep(d.indexingCfg.IndexBlockInterval)
 
@@ -223,7 +243,7 @@ func (d *defaultIndexer) Start() {
 					return err
 				}
 
-				err = d.insertBlockInformation(blockHeight, block, dbTx)
+				err = d.insertBlockInformation(blockHeight, block, bech32Cfg, dbTx)
 				if err != nil {
 					logger.Error("failed to insert block information", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error())
 				}
@@ -259,9 +279,13 @@ func (d *defaultIndexer) Start() {
 	logger.Info("shutting down indexer", "name", d.chainName)
 }
 
-func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.BlockInResponseBeTransactionsInBlockRange, dbTx database.DbTransaction) error {
+func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.BlockInResponseBeTransactionsInBlockRange, bech32Cfg dbtypes.Bech32PrefixOfChainInfo, dbTx database.DbTransaction) error {
 	var recordsTxs dbtypes.RecordsTransaction
+	mapInvolvedAccounts := make(map[string]dbtypes.RecordAccount)
+
 	for _, transaction := range block.Transactions {
+		// build transaction record
+
 		recordTx := dbtypes.NewRecordTransactionForInsert(
 			d.chainConfig.ChainId,
 			height,
@@ -272,11 +296,60 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 		)
 
 		recordsTxs = append(recordsTxs, recordTx)
+
+		// build involved accounts record
+
+		if len(transaction.Involvers) > 0 {
+			for _, involvers := range transaction.Involvers {
+				for _, involver := range involvers {
+					var bech32Address string
+					var err error
+
+					normalizedAddress := utils.NormalizeAddress(involver)
+					if utils.IsEvmAddress(normalizedAddress) {
+						evmAddr := common.HexToAddress(normalizedAddress)
+						bech32Address, err = sdk.Bech32ifyAddressBytes(bech32Cfg.Bech32PrefixAccAddr, evmAddr.Bytes())
+						if err != nil {
+							return errors.Wrapf(err, "failed to bech32ify address %s", normalizedAddress)
+						}
+						bech32Address = utils.NormalizeAddress(bech32Address)
+					} else if _, possibleBech32Addr := utils.UnsafeExtractBech32Hrp(normalizedAddress); possibleBech32Addr {
+						// ok
+						bech32Address = normalizedAddress
+					} else {
+						// ignore invalid records
+						continue
+					}
+
+					var involvedAccount dbtypes.RecordAccount
+					var found bool
+
+					if involvedAccount, found = mapInvolvedAccounts[bech32Address]; !found {
+						involvedAccount = dbtypes.NewRecordAccountForInsert(
+							d.chainConfig.ChainId,
+							bech32Address,
+						)
+					}
+
+					mapInvolvedAccounts[bech32Address] = involvedAccount
+				}
+			}
+		}
 	}
 
 	err := dbTx.InsertRecordTransactionsIfNotExists(recordsTxs)
 	if err != nil {
 		return errors.Wrap(err, "failed to insert transactions")
+	}
+
+	var involvedAccounts dbtypes.RecordsAccount
+	for _, recordAccount := range mapInvolvedAccounts {
+		involvedAccounts = append(involvedAccounts, recordAccount)
+	}
+
+	err = dbTx.InsertOrUpdateRecordsAccount(involvedAccounts)
+	if err != nil {
+		return errors.Wrap(err, "failed to insert/update involved accounts")
 	}
 
 	return nil
