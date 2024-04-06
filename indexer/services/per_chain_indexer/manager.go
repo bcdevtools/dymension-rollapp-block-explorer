@@ -2,6 +2,7 @@ package per_chain_indexer
 
 import (
 	"context"
+	pcitypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/per_chain_indexer/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/types"
 	"sync"
 )
@@ -20,6 +21,8 @@ type defaultIndexerManager struct {
 	ctx context.Context
 
 	indexerByChainName map[string]Indexer
+
+	sharedCache pcitypes.SharedCache
 }
 
 func NewIndexerManager(ctx context.Context) IndexerManager {
@@ -27,6 +30,7 @@ func NewIndexerManager(ctx context.Context) IndexerManager {
 		RWMutex:            sync.RWMutex{},
 		ctx:                ctx,
 		indexerByChainName: make(map[string]Indexer),
+		sharedCache:        pcitypes.NewSharedCache(),
 	}
 }
 
@@ -62,7 +66,11 @@ func (d *defaultIndexerManager) Reload(cl types.ChainList) {
 		createIndexerForChains = append(createIndexerForChains, name)
 	}
 	for _, chainNameWithoutIndexer := range createIndexerForChains {
-		indexer := NewIndexer(d.ctx, chainNameWithoutIndexer, cl[chainNameWithoutIndexer])
+		indexer := NewIndexer(
+			d.ctx,
+			chainNameWithoutIndexer, cl[chainNameWithoutIndexer],
+			d.sharedCache,
+		)
 		d.indexerByChainName[chainNameWithoutIndexer] = indexer
 		logger.Info("launching new indexer", "name", chainNameWithoutIndexer)
 		go indexer.Start()

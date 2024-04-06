@@ -8,6 +8,7 @@ import (
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/constants"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database"
 	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
+	pcitypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/per_chain_indexer/types"
 	querysvc "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query"
 	querytypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/types"
@@ -45,12 +46,15 @@ type defaultIndexer struct {
 	started      bool // flag to indicate indexer first started indexing or not
 	shutdown     bool // flag to indicate indexer should not continue to do it's work
 	lastUrlCheck time.Time
+
+	sharedCache pcitypes.SharedCache
 }
 
 func NewIndexer(
 	ctx context.Context,
 	chainName string,
 	chainConfig types.ChainConfig,
+	sharedCache pcitypes.SharedCache,
 ) Indexer {
 	indexingConfig := types.UnwrapIndexerContext(ctx).GetConfig().IndexingConfig
 	return &defaultIndexer{
@@ -59,6 +63,8 @@ func NewIndexer(
 		chainName:   chainName,
 		chainConfig: chainConfig,
 		querySvc:    querysvc.NewBeJsonRpcQueryService(chainConfig.ChainId),
+
+		sharedCache: sharedCache,
 	}
 }
 
@@ -193,6 +199,22 @@ func (d *defaultIndexer) Start() {
 				blockHeight, err := strconv.ParseInt(heightStr, 10, 64)
 				if err != nil {
 					panic(err)
+				}
+
+				epochWeek := utils.GetEpochWeek(block.TimeEpochUTC)
+				if !d.sharedCache.IsCreatedPartitionsForEpochWeek(epochWeek) {
+					// prepare partitioned tables for this epoch week
+					err := utils.ObserveLongOperation("create partitioned tables for epoch week", func() error {
+						return db.PreparePartitionedTablesForEpoch(block.TimeEpochUTC)
+					}, 15*time.Second, logger)
+					if err != nil {
+						logger.Error("failed to create partitioned tables for epoch, retrying...", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+						time.Sleep(15 * time.Second)
+						return errors.Wrap(err, fmt.Sprintf("failed to create partitioned tables for epoch week: %d", epochWeek))
+					}
+
+					logger.Info("successfully prepared partitioned tables for epoch week", "chain-id", d.chainConfig.ChainId, "epoch-week", epochWeek)
+					d.sharedCache.MarkCreatedPartitionsForEpochWeek(epochWeek)
 				}
 
 				dbTx, err := db.BeginDatabaseTransaction(context.Background())
