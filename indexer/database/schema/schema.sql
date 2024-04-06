@@ -26,7 +26,9 @@ CREATE TABLE account (
     balance_on_erc20_contracts  TEXT[], -- normalized: lowercase, for both ERC-20 and CW-20
     balance_on_nft_contracts    TEXT[], -- normalized: lowercase
 
-    CONSTRAINT account_pkey PRIMARY KEY (chain_id, bech32_address)
+    CONSTRAINT account_pkey PRIMARY KEY (chain_id, bech32_address),
+    CONSTRAINT account_to_chain_info_fkey FOREIGN KEY (chain_id)
+        REFERENCES chain_info(chain_id)
 ) PARTITION BY LIST(chain_id);
 -- index for lookup account by bech32 address, multi-chain
 CREATE INDEX account_b32_addr_index ON account (bech32_address);
