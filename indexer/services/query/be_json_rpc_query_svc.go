@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -15,8 +16,13 @@ import (
 type BeJsonRpcQueryService interface {
 	SetQueryEndpoint(url string)
 
+	GetQueryEndpoint() string
+
 	// BeGetChainInfo is `be_getChainInfo`
 	BeGetChainInfo() (res *querytypes.ResponseBeGetChainInfo, duration time.Duration, err error)
+
+	// BeTransactionsInBlockRange is `be_getTransactionsInBlockRange`
+	BeTransactionsInBlockRange(from, to int64) (res *querytypes.ResponseBeTransactionsInBlockRange, duration time.Duration, err error)
 }
 
 var _ BeJsonRpcQueryService = &defaultBeJsonRpcQueryService{}
@@ -45,13 +51,17 @@ func (d *defaultBeJsonRpcQueryService) SetQueryEndpoint(url string) {
 	d.queryEndpoint = url
 }
 
-func (d defaultBeJsonRpcQueryService) BeGetChainInfo() (res *querytypes.ResponseBeGetChainInfo, duration time.Duration, err error) {
+func (d *defaultBeJsonRpcQueryService) GetQueryEndpoint() string {
+	return d.getQueryEndpointWithRLock()
+}
+
+func (d *defaultBeJsonRpcQueryService) BeGetChainInfo() (res *querytypes.ResponseBeGetChainInfo, duration time.Duration, err error) {
 	startTime := time.Now().UTC()
 
 	var bz []byte
 	bz, err = d.doQuery(
 		types.NewJsonRpcQueryBuilder("be_getChainInfo"),
-		1_000,
+		1*time.Second,
 	)
 	if err != nil {
 		return
@@ -79,19 +89,89 @@ func (d defaultBeJsonRpcQueryService) BeGetChainInfo() (res *querytypes.Response
 	return
 }
 
-func (d defaultBeJsonRpcQueryService) getQueryEndpointWithRLock() string {
+func (d *defaultBeJsonRpcQueryService) BeTransactionsInBlockRange(from, to int64) (res *querytypes.ResponseBeTransactionsInBlockRange, duration time.Duration, err error) {
+	startTime := time.Now().UTC()
+
+	var bz []byte
+	bz, err = d.doQuery(
+		types.NewJsonRpcQueryBuilder(
+			"be_getTransactionsInBlockRange",
+			types.NewJsonRpcInt64QueryParam(from),
+			types.NewJsonRpcInt64QueryParam(to),
+		),
+		10*time.Second,
+	)
+	if err != nil {
+		return
+	}
+	duration = time.Since(startTime)
+
+	var resAny any
+	resAny, err = types.ParseJsonRpcResponse[querytypes.ResponseBeTransactionsInBlockRange](bz)
+	if err != nil {
+		return
+	}
+
+	responseBeTransactionsInBlockRange := resAny.(*querytypes.ResponseBeTransactionsInBlockRange)
+	if err = responseBeTransactionsInBlockRange.ValidateBasic(); err != nil {
+		err = errors.Wrap(err, "response validation failed")
+		return
+	}
+
+	if responseBeTransactionsInBlockRange.ChainId != d.chainId {
+		err = errors.Wrapf(querytypes.ErrBlackListDueToMisMatchChainId, "want %s, got %s", d.chainId, responseBeTransactionsInBlockRange.ChainId)
+		return
+	}
+
+	for _, missingBlock := range responseBeTransactionsInBlockRange.MissingBlocks {
+		if missingBlock < from || missingBlock > to {
+			err = errors.Wrapf(querytypes.ErrBlackList, "missing block %d out of range [%d, %d]", missingBlock, from, to)
+			return
+		}
+	}
+
+	for _, errorBlock := range responseBeTransactionsInBlockRange.ErrorBlocks {
+		if errorBlock < from || errorBlock > to {
+			err = errors.Wrapf(querytypes.ErrBlackList, "error block %d out of range [%d, %d]", errorBlock, from, to)
+			return
+		}
+	}
+
+	for heightStr := range responseBeTransactionsInBlockRange.Blocks {
+		var height int64
+		height, err = strconv.ParseInt(heightStr, 10, 64)
+		if err != nil {
+			err = errors.Wrapf(querytypes.ErrBlackList, "malformed block height %s", heightStr)
+			return
+		}
+
+		if height < from || height > to {
+			err = errors.Wrapf(querytypes.ErrBlackList, "block height %d out of range [%d, %d]", height, from, to)
+			return
+		}
+	}
+
+	res = responseBeTransactionsInBlockRange
+	return
+}
+
+func (d *defaultBeJsonRpcQueryService) getQueryEndpointWithRLock() string {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.queryEndpoint
 }
 
-func (d defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, timeoutMs uint32) ([]byte, error) {
-	if timeoutMs == 0 {
-		timeoutMs = 5_000
+func (d *defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, optionalTimeout time.Duration) ([]byte, error) {
+	var timeout = optionalTimeout
+	if optionalTimeout == 0 {
+		timeout = 5 * time.Second
+	}
+	if timeout < time.Second {
+		timeout = time.Second
 	}
 
 	httpClient := http.Client{
-		Timeout: time.Duration(timeoutMs) * time.Millisecond,
+		Timeout: timeout * time.Millisecond,
 	}
 
 	resp, err := httpClient.Post(d.getQueryEndpointWithRLock(), "application/json", bytes.NewBuffer([]byte(qb.String())))

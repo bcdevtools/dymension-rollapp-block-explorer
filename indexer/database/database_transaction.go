@@ -15,4 +15,14 @@ type DbTransaction interface {
 	// If the account is exists, it will update the account's balance on erc20 and nft contracts,
 	// the list of contracts address will be appended to the existing list distinctly.
 	InsertOrUpdateRecordsAccount(accounts dbtypes.RecordsAccount) error
+
+	// Transaction
+
+	InsertRecordTransactionsIfNotExists(txs dbtypes.RecordsTransaction) error
+
+	// Failed blocks
+
+	// RemoveFailedBlockRecord removes a failed block record from the database.
+	// Typically, this is used when the failed block is successfully processed.
+	RemoveFailedBlockRecord(chainId string, height int64) error
 }

@@ -26,3 +26,15 @@ var regexpEvmContractAddress = regexp.MustCompile(`^0x[\da-fA-F]{40}$`)
 func IsEvmContractAddress(addr string) bool {
 	return regexpEvmContractAddress.MatchString(NormalizeAddress(addr))
 }
+
+var regexpCosmosTxHash = regexp.MustCompile(`^[A-Z\d]{64}$`)
+
+func IsValidCosmosTransactionHash(hash string) bool {
+	return regexpCosmosTxHash.MatchString(hash)
+}
+
+var regexpEvmTxHash = regexp.MustCompile(`^0x[\da-f]{64}$`)
+
+func IsValidEvmTransactionHash(hash string) bool {
+	return regexpEvmTxHash.MatchString(hash)
+}

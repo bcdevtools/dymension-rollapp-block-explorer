@@ -131,13 +131,13 @@ FROM "transaction" WHERE hash = $1 AND height = $2 AND chain_id = $3
 	var res itutildbtypes.TransactionRecord
 
 	err = rows.Scan(
-		&res.ChainId,      // 1
-		&res.Height,       // 2
-		&res.Hash,         // 3
-		&res.PartitionId,  // 4
-		&res.Epoch,        // 5
-		&res.MessageTypes, // 6
-		&res.TxType,       // 7
+		&res.ChainId,                // 1
+		&res.Height,                 // 2
+		&res.Hash,                   // 3
+		&res.PartitionId,            // 4
+		&res.Epoch,                  // 5
+		pq.Array(&res.MessageTypes), // 6
+		&res.TxType,                 // 7
 	)
 	suite.Require().NoError(err, "failed to scan transaction")
 	suite.Require().Falsef(rows.Next(), "more than one record found for transaction %s at %d", hash, height)

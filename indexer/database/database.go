@@ -38,13 +38,15 @@ type Database interface {
 	// If the chain info does not exist, nothing will be updated.
 	UpdateBeJsonRpcUrlsIfExists(chainId string, urls []string) (updated bool, err error)
 
+	// GetLatestIndexedBlock returns the latest indexed block height of the chain info record with the given chain ID.
+	GetLatestIndexedBlock(chainId string) (int64, error)
+
+	// SetLatestIndexedBlock updates the latest indexed block height of the chain info record with the given chain ID.
+	SetLatestIndexedBlock(chainId string, height int64) error
+
 	// Failed blocks
 
 	// InsertOrUpdateFailedBlock inserts a new failed block record into the database.
 	// If the record is already present, the logic fields will be updated.
 	InsertOrUpdateFailedBlock(chainId string, height int64, optionalReason error) error
-
-	// RemoveFailedBlockRecord removes a failed block record from the database.
-	// Typically, this is used when the failed block is successfully processed.
-	RemoveFailedBlockRecord(chainId string, height int64) error
 }

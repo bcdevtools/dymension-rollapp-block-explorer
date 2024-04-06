@@ -6,6 +6,43 @@ import (
 	"time"
 )
 
+func (suite *IntegrationTestSuite) TestDatabase_GetSetLatestIndexedBlock_IT() {
+	suite.InsertChainInfoRecords()
+
+	db := suite.Database()
+
+	firstChain := suite.DBITS.Chains.Number(1)
+	secondChain := suite.DBITS.Chains.Number(2)
+
+	err := db.SetLatestIndexedBlock(firstChain.ChainId, 5)
+	suite.Require().NoError(err)
+
+	err = db.SetLatestIndexedBlock(secondChain.ChainId, 6)
+	suite.Require().NoError(err)
+
+	height, err := db.GetLatestIndexedBlock(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Equal(int64(5), height)
+
+	height, err = db.GetLatestIndexedBlock(secondChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Equal(int64(6), height)
+
+	err = db.SetLatestIndexedBlock(firstChain.ChainId, 3)
+	suite.Require().NoError(err)
+
+	err = db.SetLatestIndexedBlock(secondChain.ChainId, 9)
+	suite.Require().NoError(err)
+
+	height, err = db.GetLatestIndexedBlock(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Equal(int64(5), height, "must be the greater one")
+
+	height, err = db.GetLatestIndexedBlock(secondChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Equal(int64(9), height, "must be the greater one")
+}
+
 func (suite *IntegrationTestSuite) TestDatabase_InsertOrUpdateFailedBlock_IT() {
 	db := suite.Database()
 
@@ -56,43 +93,4 @@ func (suite *IntegrationTestSuite) TestDatabase_InsertOrUpdateFailedBlock_IT() {
 			suite.Equal(originalRowsCount+1, suite.CountRows2("failed_block"))
 		})
 	}
-}
-
-//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
-func (suite *IntegrationTestSuite) TestDatabase_RemoveFailedBlockRecord_IT() {
-	db := suite.Database()
-
-	originalRowsCount := suite.CountRows2("failed_block")
-
-	firstChain := suite.DBITS.Chains.Number(1)
-
-	err := db.RemoveFailedBlockRecord(firstChain.ChainId, 2)
-	suite.Require().NoError(err)
-	suite.Equal(originalRowsCount, suite.CountRows2("failed_block"), "no change")
-
-	err = db.InsertOrUpdateFailedBlock(firstChain.ChainId, 2, fmt.Errorf("some error"))
-	suite.Require().NoError(err)
-	suite.Require().Equal(originalRowsCount+1, suite.CountRows2("failed_block"), "must be inserted")
-
-	err = db.InsertOrUpdateFailedBlock(firstChain.ChainId, 3, fmt.Errorf("some error"))
-	suite.Require().NoError(err)
-	suite.Require().Equal(originalRowsCount+2, suite.CountRows2("failed_block"), "must be inserted")
-
-	err = db.RemoveFailedBlockRecord(firstChain.ChainId, 2)
-	suite.Require().NoError(err)
-	suite.Equal(originalRowsCount+1, suite.CountRows2("failed_block"), "must be reduced by 1")
-
-	suite.Equal(
-		1,
-		suite.readCountResult(
-			db.Sql.Query("SELECT COUNT(1) FROM failed_block WHERE chain_id = $1 AND height = $2", firstChain.ChainId, 3),
-		),
-		"the rest record should be still there",
-	)
-	suite.Zero(
-		suite.readCountResult(
-			db.Sql.Query("SELECT COUNT(1) FROM failed_block WHERE chain_id = $1 AND height = $2", firstChain.ChainId, 2),
-		),
-		"the deleted record should not be there anymore",
-	)
 }
