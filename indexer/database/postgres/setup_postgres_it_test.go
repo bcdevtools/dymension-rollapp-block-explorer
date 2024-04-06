@@ -101,7 +101,7 @@ func (suite *IntegrationTestSuite) InsertChainInfoRecords() {
 			LatestIndexedBlock: 0,
 		}
 
-		inserted, err := db.InsertRecordChainInfoIfNotExists(originalRecord)
+		inserted, err := db.InsertOrUpdateRecordChainInfo(originalRecord)
 		suite.Require().NoError(err)
 		suite.Require().True(inserted)
 	}

@@ -26,10 +26,6 @@ type Database interface {
 	// PreparePartitionedTablesForEpoch create partitioned tables for the corresponding epoch UTC.
 	PreparePartitionedTablesForEpoch(epochUtcSeconds int64) error
 
-	// InsertRecordChainInfoIfNotExists inserts a new chain info record into the database.
-	// If the chain info already exists, it will not be inserted.
-	InsertRecordChainInfoIfNotExists(chainInfo dbtypes.RecordChainInfo) (inserted bool, err error)
-
 	// InsertOrUpdateRecordChainInfo inserts a new chain info record into the database.
 	// If the chain info already exists, it will be updated.
 	InsertOrUpdateRecordChainInfo(chainInfo dbtypes.RecordChainInfo) (insertedOrUpdated bool, err error)
