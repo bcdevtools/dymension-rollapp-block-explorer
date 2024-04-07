@@ -44,9 +44,6 @@ type Database interface {
 	// GetLatestIndexedBlock returns the latest indexed block height of the chain info record with the given chain ID.
 	GetLatestIndexedBlock(chainId string) (int64, error)
 
-	// SetLatestIndexedBlock updates the latest indexed block height of the chain info record with the given chain ID.
-	SetLatestIndexedBlock(chainId string, height int64) error
-
 	// Failed blocks
 
 	// InsertOrUpdateFailedBlock inserts a new failed block record into the database.

@@ -6,9 +6,9 @@ import (
 )
 
 func TestNewRecordChainInfoForInsert(t *testing.T) {
-	chainId := "chainId-1"
+	chainId := "chain_id-1"
 	name := "name-1"
-	chainType := "chainType-1"
+	chainType := "chain_type-1"
 	bech32 := map[string]string{"key1": "value1"}
 	denoms := map[string]string{"key2": "value2"}
 	activeBeJsonRpcUrl := "activeBeJsonRpcUrl-1"

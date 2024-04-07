@@ -253,7 +253,7 @@ func (d *defaultIndexer) Start() {
 				}
 
 				if err == nil {
-					err = db.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
+					err = dbTx.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
 				}
 
 				if err == nil {

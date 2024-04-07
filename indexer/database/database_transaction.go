@@ -9,6 +9,11 @@ type DbTransaction interface {
 	// RollbackTransaction rollbacks the current transaction instance, returns error if any problem happened using rollback progress
 	RollbackTransaction() error
 
+	// Chain info
+
+	// SetLatestIndexedBlock updates the latest indexed block height of the chain info record with the given chain ID.
+	SetLatestIndexedBlock(chainId string, height int64) error
+
 	// Account
 
 	// InsertOrUpdateRecordsAccount inserts or updates the given accounts into the database.

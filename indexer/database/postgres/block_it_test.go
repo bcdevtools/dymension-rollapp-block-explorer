@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
 func (suite *IntegrationTestSuite) TestDatabase_GetSetLatestIndexedBlock_IT() {
 	suite.InsertChainInfoRecords()
 
@@ -14,11 +15,19 @@ func (suite *IntegrationTestSuite) TestDatabase_GetSetLatestIndexedBlock_IT() {
 	firstChain := suite.DBITS.Chains.Number(1)
 	secondChain := suite.DBITS.Chains.Number(2)
 
-	err := db.SetLatestIndexedBlock(firstChain.ChainId, 5)
-	suite.Require().NoError(err)
+	setLatestIndexedBlock := func(chainId string, height int64) {
+		_, err := db.Sql.Exec(`
+UPDATE chain_info SET latest_indexed_block = $1 WHERE chain_id = $2
+`,
+			height,  // 1
+			chainId, // 2
+		)
+		suite.Require().NoError(err)
+	}
 
-	err = db.SetLatestIndexedBlock(secondChain.ChainId, 6)
-	suite.Require().NoError(err)
+	setLatestIndexedBlock(firstChain.ChainId, 5)
+
+	setLatestIndexedBlock(secondChain.ChainId, 6)
 
 	height, err := db.GetLatestIndexedBlock(firstChain.ChainId)
 	suite.Require().NoError(err)
@@ -28,19 +37,18 @@ func (suite *IntegrationTestSuite) TestDatabase_GetSetLatestIndexedBlock_IT() {
 	suite.Require().NoError(err)
 	suite.Equal(int64(6), height)
 
-	err = db.SetLatestIndexedBlock(firstChain.ChainId, 3)
-	suite.Require().NoError(err)
+	setLatestIndexedBlock(firstChain.ChainId, 11)
 
-	err = db.SetLatestIndexedBlock(secondChain.ChainId, 9)
-	suite.Require().NoError(err)
+	setLatestIndexedBlock(secondChain.ChainId, 9)
 
 	height, err = db.GetLatestIndexedBlock(firstChain.ChainId)
 	suite.Require().NoError(err)
-	suite.Equal(int64(5), height, "must be the greater one")
+	suite.Equal(int64(11), height)
 
 	height, err = db.GetLatestIndexedBlock(secondChain.ChainId)
 	suite.Require().NoError(err)
-	suite.Equal(int64(9), height, "must be the greater one")
+	suite.Equal(int64(9), height)
+
 }
 
 func (suite *IntegrationTestSuite) TestDatabase_InsertOrUpdateFailedBlock_IT() {
