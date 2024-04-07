@@ -1,7 +1,7 @@
 'use client';
 
 import Box from '@mui/material/Box';
-import Header, { CustomToolbar } from './_Header';
+import Header from './_Header';
 import Sider from './_Sider';
 import React, { useEffect, useRef, useState } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
@@ -12,9 +12,6 @@ import { THEME_COOKIE_NAME, ThemeMode } from '@/consts/theme';
 import { usePathname } from 'next/navigation';
 import { useRollappStore } from '@/stores/rollappStore';
 import { RollappActionTypes } from '@/consts/actionTypes';
-import PageBreadcrumb from './_PageBreadcrumb';
-import Container from '@mui/material/Container';
-import Paper from '@mui/material/Paper';
 
 const SIDER_WIDTH = 240;
 
@@ -68,24 +65,7 @@ export default function Layout({ children, initialThemeMode }: LayoutProps) {
             handleMenuClose={handleMenuClose}
             handleDrawerTransitionEnd={handleDrawerTransitionEnd}
           />
-          <Box
-            component="main"
-            sx={{
-              flexGrow: 1,
-              // width: { md: `calc(100vh - ${SIDER_WIDTH}px)` },
-              height: {
-                xs: `calc(100vh - ${128}px)`,
-                md: `calc(100vh - ${64}px)`,
-              },
-            }}>
-            <CustomToolbar />
-            <Container>
-              <PageBreadcrumb pathname={pathname} />
-              <Paper sx={{ my: 1, p: 2 }} elevation={1}>
-                {children}
-              </Paper>
-            </Container>
-          </Box>
+          {children}
         </Box>
       </ThemeProvider>
     </ThemeContext.Provider>

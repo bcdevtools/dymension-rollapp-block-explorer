@@ -6,10 +6,10 @@ import Link from '@mui/material/Link';
 import React from 'react';
 import { getNewPathOnMenuClick } from '@/utils/common';
 import { BreadcrumbName, Path } from '@/consts/path';
+import { usePathname } from 'next/navigation';
 
-export default React.memo(function PageBreadcrumb({
-  pathname,
-}: Readonly<{ pathname: string }>) {
+export default function PageBreadcrumb() {
+  const pathname = usePathname();
   const splittedPath = pathname.split('/').filter(path => path);
 
   return (
@@ -42,4 +42,4 @@ export default React.memo(function PageBreadcrumb({
       })}
     </Breadcrumbs>
   );
-});
+}

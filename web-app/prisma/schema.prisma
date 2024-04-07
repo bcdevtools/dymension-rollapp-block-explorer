@@ -13,6 +13,7 @@ model account {
   continous_insert_ref_cur_tx_counter Int                        @default(0) @db.SmallInt
   balance_on_erc20_contracts          String[]
   balance_on_nft_contracts            String[]
+  chain_info                          chain_info                 @relation(fields: [chain_id], references: [chain_id], onDelete: NoAction, onUpdate: NoAction, map: "account_to_chain_info_fkey")
   ref_account_to_recent_tx            ref_account_to_recent_tx[]
 
   @@id([chain_id, bech32_address])
@@ -20,15 +21,57 @@ model account {
 }
 
 model chain_info {
-  chain_id         String   @id
-  name             String   @unique(map: "chain_info_unique_chain_name")
-  chain_type       String
-  bech32           Json
-  denoms           Json
-  be_json_rpc_urls String[]
+  chain_id             String    @id
+  name                 String    @unique(map: "chain_info_unique_chain_name")
+  chain_type           String
+  bech32               Json
+  denoms               Json
+  be_json_rpc_urls     String[]
+  latest_indexed_block BigInt    @default(0)
+  account              account[]
 }
 
-model recent_accounts_transaction {
+model ref_account_to_recent_tx {
+  chain_id                    String
+  bech32_address              String
+  height                      BigInt
+  hash                        String
+  signer                      Boolean                    @default(false)
+  erc20                       Boolean                    @default(false)
+  nft                         Boolean                    @default(false)
+  account                     account                    @relation(fields: [chain_id, bech32_address], references: [chain_id, bech32_address], onDelete: NoAction, onUpdate: NoAction, map: "ref_recent_acc_tx_to_account_fkey")
+  recent_accounts_transaction recent_account_transaction @relation(fields: [chain_id, height, hash], references: [chain_id, height, hash], onDelete: NoAction, onUpdate: NoAction, map: "ref_recent_acc_tx_to_recent_tx_fkey")
+
+  @@id([chain_id, bech32_address, height, hash])
+  @@index([chain_id, bech32_address], map: "ref_account_to_recent_tx_by_account_index")
+}
+
+model transaction {
+  chain_id      String
+  height        BigInt
+  hash          String
+  partition_id  Int
+  epoch         BigInt
+  message_types String[]
+  tx_type       String
+
+  @@id([chain_id, height, hash, partition_id])
+  @@index([hash], map: "transaction_hash_index")
+}
+
+/// This table is a partition table and requires additional setup for migrations. Visit https://pris.ly/d/partition-tables for more info.
+model failed_block {
+  chain_id         String
+  height           BigInt
+  retry_count      Int      @default(0) @db.SmallInt
+  last_retry_epoch BigInt   @default(0)
+  error_messages   String[] @default([])
+
+  @@id([chain_id, height])
+}
+
+/// This table is a partition table and requires additional setup for migrations. Visit https://pris.ly/d/partition-tables for more info.
+model recent_account_transaction {
   chain_id                 String
   height                   BigInt
   hash                     String
@@ -40,38 +83,10 @@ model recent_accounts_transaction {
   @@id([chain_id, height, hash])
 }
 
-model reduced_ref_count_recent_accounts_transaction {
+model reduced_ref_count_recent_account_transaction {
   chain_id String
   height   BigInt
   hash     String
 
   @@id([chain_id, height, hash])
-}
-
-model ref_account_to_recent_tx {
-  chain_id                    String
-  bech32_address              String
-  height                      BigInt
-  hash                        String
-  signer                      Boolean                     @default(false)
-  erc20                       Boolean                     @default(false)
-  nft                         Boolean                     @default(false)
-  account                     account                     @relation(fields: [chain_id, bech32_address], references: [chain_id, bech32_address], onDelete: NoAction, onUpdate: NoAction, map: "ref_recent_acc_tx_to_account_fkey")
-  recent_accounts_transaction recent_accounts_transaction @relation(fields: [chain_id, height, hash], references: [chain_id, height, hash], onDelete: NoAction, onUpdate: NoAction, map: "ref_recent_acc_tx_to_recent_tx_fkey")
-
-  @@id([chain_id, bech32_address, height, hash])
-  @@index([chain_id, bech32_address], map: "ref_account_to_recent_tx_by_account_index")
-}
-
-model transaction {
-  chain_id      String
-  height        BigInt
-  hash          String
-  partition_id  BigInt
-  epoch         BigInt
-  message_types String[]
-  tx_type       String
-
-  @@id([chain_id, height, hash, partition_id])
-  @@index([hash], map: "transaction_hash_index")
 }

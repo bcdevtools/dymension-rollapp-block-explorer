@@ -6,7 +6,7 @@ type PageTitleProps = Readonly<{
 
 export default function PageTitle({ title }: PageTitleProps) {
   return (
-    <Typography variant="h5" display="inline">
+    <Typography variant="h5">
       <b>{title}</b>
     </Typography>
   );

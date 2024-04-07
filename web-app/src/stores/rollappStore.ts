@@ -1,16 +1,22 @@
 import { RollappActionTypes } from '@/consts/actionTypes';
 import { Store, useStore } from '@/hooks/useStore';
+import { RpcService } from '@/services/rpc.service';
 import { RollappInfo } from '@/utils/rollappInfo';
-import { getSelectedRollappInfoByPathname } from '@/utils/store';
+import {
+  getRpcServiceFromSelectedRollappInfo,
+  getSelectedRollappInfoByPathname,
+} from '@/utils/store';
 
 export type RollappState = {
   rollappInfos: RollappInfo[];
   selectedRollappInfo: RollappInfo | null;
+  rpcService: RpcService | null;
 };
 
 export const defaultRollappState: RollappState = {
   selectedRollappInfo: null,
   rollappInfos: [],
+  rpcService: null,
 };
 
 const actions = {
@@ -22,7 +28,10 @@ const actions = {
       currentState.rollappInfos,
       pathname
     );
-    return { selectedRollappInfo };
+    const rpcService =
+      getRpcServiceFromSelectedRollappInfo(selectedRollappInfo);
+
+    return { selectedRollappInfo, rpcService };
   },
 };
 

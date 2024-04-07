@@ -19,7 +19,6 @@ export function StoreProvider({ children, initialState }: StoreProviderProps) {
     initRollappStore(
       getInitialRollappState(initialState.rollappInfos, pathname)
     );
-    hasInitStore.current = true;
   }
   return children;
 }

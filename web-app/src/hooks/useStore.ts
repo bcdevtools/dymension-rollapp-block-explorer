@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export type StoreActions<S> = {
   [key: string]: (
@@ -26,15 +26,18 @@ export const useStore = <S, A extends StoreActions<S>>(
 ): [S, Dispatch<A>] => {
   const [, setState] = useState(store.state);
 
-  const dispatch: Dispatch<A> = async function (actionIdentifier, payload) {
-    const newState = await store.actions[actionIdentifier](
-      store.state,
-      payload
-    );
-    store.state = { ...store.state, ...newState };
+  const dispatch: Dispatch<A> = useCallback(
+    async function (actionIdentifier, payload) {
+      const newState = await store.actions[actionIdentifier](
+        store.state,
+        payload
+      );
+      store.state = { ...store.state, ...newState };
 
-    store.listeners.forEach(listener => listener(store.state));
-  };
+      store.listeners.forEach(listener => listener(store.state));
+    },
+    [store]
+  );
 
   useEffect(() => {
     if (shouldListen) {

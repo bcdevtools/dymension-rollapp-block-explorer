@@ -1,8 +1,8 @@
 import Grid from '@mui/material/Grid';
-import PageTitle from '@/components/commons/PageTitle';
+import PageTitle from '@/components/server/commons/PageTitle';
 import Typography from '@mui/material/Typography';
-import Label from '@/components/detail/Label';
-import Value from '@/components/detail/Value';
+import Label from '@/components/server/detail/Label';
+import Value from '@/components/server/detail/Value';
 
 type BlockProps = Readonly<{
   params: { blockNo: string };

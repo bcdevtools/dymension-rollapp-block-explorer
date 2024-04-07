@@ -8,7 +8,10 @@ type RollappLayoutProps = Readonly<{
 
 export async function generateMetadata({ params }: RollappLayoutProps) {
   const chainInfos = await getChainInfos();
-  const rollappInfo = getRollappInfoByPath(chainInfos, params.rollappPath);
+  const rollappInfo = getRollappInfoByPath(
+    chainInfos,
+    `/${params.rollappPath}`
+  );
   return {
     title: `${rollappInfo?.name} Block Explorer`,
     description: `${rollappInfo?.name} Block Explorer`,
