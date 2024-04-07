@@ -1,18 +1,16 @@
 import { Block } from '@/consts/rpcResTypes';
 import { useRollappStore } from '@/stores/rollappStore';
+import { Link } from '@mui/material';
 import { GridColDef, DataGrid, GridPaginationModel } from '@mui/x-data-grid';
-import React, { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import React, { useEffect, useMemo, useState } from 'react';
 
 type BlockListProps = Readonly<{
   latestBlockNo: number;
 }>;
 
-const columns: GridColDef<Block>[] = [
-  { field: 'height', headerName: 'Block' },
-  { field: 'timeEpochUTC', headerName: 'Age' },
-];
-
 export default function BlockList({ latestBlockNo }: BlockListProps) {
+  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     pageSize: 25,
@@ -21,6 +19,27 @@ export default function BlockList({ latestBlockNo }: BlockListProps) {
 
   const [{ rpcService }] = useRollappStore();
   const [blocks, setBlocks] = useState<Block[]>([]);
+
+  const columns: GridColDef<Block>[] = useMemo(
+    () => [
+      {
+        field: 'height',
+        headerName: 'Block',
+        renderCell: params => (
+          <Link href={`${pathname}${params.value}`} underline="hover">
+            {params.value}
+          </Link>
+        ),
+      },
+      { field: 'timeEpochUTC', headerName: 'Age' },
+      {
+        field: 'txs',
+        headerName: 'Txs',
+        valueGetter: (value: any[], row) => value.length,
+      },
+    ],
+    [pathname]
+  );
 
   useEffect(() => {
     const ac = new AbortController();
