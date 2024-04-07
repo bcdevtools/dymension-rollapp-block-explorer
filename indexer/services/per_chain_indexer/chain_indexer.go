@@ -302,21 +302,12 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 		if len(transaction.Involvers) > 0 {
 			for _, involvers := range transaction.Involvers {
 				for _, involver := range involvers {
-					var bech32Address string
-					var err error
+					absolutelyInvalidAddress, bech32Address, err := unsafeAnyAddressToBech32Address(involver, bech32Cfg)
+					if err != nil {
+						return errors.Wrapf(err, "failed to convert involver address %s to bech32 address", involver)
+					}
 
-					normalizedAddress := utils.NormalizeAddress(involver)
-					if utils.IsEvmAddress(normalizedAddress) {
-						evmAddr := common.HexToAddress(normalizedAddress)
-						bech32Address, err = sdk.Bech32ifyAddressBytes(bech32Cfg.Bech32PrefixAccAddr, evmAddr.Bytes())
-						if err != nil {
-							return errors.Wrapf(err, "failed to bech32ify address %s", normalizedAddress)
-						}
-						bech32Address = utils.NormalizeAddress(bech32Address)
-					} else if _, possibleBech32Addr := utils.UnsafeExtractBech32Hrp(normalizedAddress); possibleBech32Addr {
-						// ok
-						bech32Address = normalizedAddress
-					} else {
+					if absolutelyInvalidAddress {
 						// ignore invalid records
 						continue
 					}
@@ -434,4 +425,29 @@ func (d *defaultIndexer) isShuttingDownWithRLock() bool {
 	defer d.RUnlock()
 
 	return d.shutdown
+}
+
+// unsafeAnyAddressToBech32Address tries to convert 0x address to bech32 address.
+// If the address is not an EVM address, starts with bech32 prefix, it will return the original address.
+func unsafeAnyAddressToBech32Address(involver string, bech32Cfg dbtypes.Bech32PrefixOfChainInfo) (absolutelyInvalid bool, unsafeBech32Address string, err error) {
+	normalizedAddress := utils.NormalizeAddress(involver)
+	if utils.IsEvmAddress(normalizedAddress) {
+		evmAddr := common.HexToAddress(normalizedAddress)
+		bech32Address, errBech32ify := sdk.Bech32ifyAddressBytes(bech32Cfg.Bech32PrefixAccAddr, evmAddr.Bytes())
+		if errBech32ify != nil {
+			err = errors.Wrapf(err, "failed to bech32ify address %s", normalizedAddress)
+			return
+		}
+		unsafeBech32Address = utils.NormalizeAddress(bech32Address)
+		return
+	}
+
+	if _, possibleBech32Addr := utils.UnsafeExtractBech32Hrp(normalizedAddress); possibleBech32Addr {
+		// ok
+		unsafeBech32Address = normalizedAddress
+		return
+	}
+
+	absolutelyInvalid = true
+	return
 }
