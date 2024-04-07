@@ -144,10 +144,18 @@ func (d *defaultIndexer) Start() {
 		panic(err)
 	}
 
+	var catchUp bool // catch-up mode, lower the interval
+
 	for !d.isShuttingDownWithRLock() {
-		time.Sleep(d.indexingCfg.IndexBlockInterval)
+		if catchUp {
+			time.Sleep(500 * time.Millisecond)
+		} else {
+			time.Sleep(d.indexingCfg.IndexBlockInterval)
+		}
 
 		_ = d.genericLoop(func(beGetChainInfo *querytypes.ResponseBeGetChainInfo) error {
+			catchUp = false
+
 			// perform indexing
 			latestIndexedBlock, err := db.GetLatestIndexedBlock(d.chainConfig.ChainId)
 			upstreamRpcLatestBlock := beGetChainInfo.LatestBlock
@@ -274,6 +282,10 @@ func (d *defaultIndexer) Start() {
 				}
 
 				logger.Debug("indexed block successfully", "chain-id", d.chainConfig.ChainId, "height", blockHeight)
+			}
+
+			if nextBlockToIndexTo < upstreamRpcLatestBlock {
+				catchUp = true
 			}
 
 			return nil
