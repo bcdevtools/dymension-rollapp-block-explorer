@@ -7,49 +7,51 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *dbTxImpl) InsertRecordTransactionsIfNotExists(txs dbtypes.RecordsTransaction) error {
+func (c *dbTxImpl) InsertRecordsRecentAccountTransactionIfNotExists(txs dbtypes.RecordsRecentAccountTransaction) error {
 	if len(txs) == 0 {
 		return nil
 	}
 
 	if err := txs.ValidateBasic(); err != nil {
-		return errors.Wrap(err, "transactions do not pass basic validation")
+		return errors.Wrap(err, "recent account transactions do not pass basic validation")
+	}
+
+	for _, tx := range txs {
+		if tx.RefCount != 0 {
+			return fmt.Errorf("ref count must be 0, got %d in tx %s", tx.RefCount, tx.Hash)
+		}
 	}
 
 	stmt := `
-INSERT INTO transaction (
+INSERT INTO recent_account_transaction (
 	chain_id,
 	height,
 	hash,
-	partition_id,
 	epoch,
-	message_types,
-	tx_type
+	message_types
 ) VALUES `
 
 	var params []interface{}
 
 	for i, account := range txs {
-		pi := i * 7
+		pi := i * 5
 
 		if i > 0 {
 			stmt += ","
 		}
-		stmt += fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d,$%d)", pi+1, pi+2, pi+3, pi+4, pi+5, pi+6, pi+7)
+		stmt += fmt.Sprintf("($%d,$%d,$%d,$%d,$%d)", pi+1, pi+2, pi+3, pi+4, pi+5)
 		params = append(
 			params,
 			account.ChainId,                // 1
 			account.Height,                 // 2
 			account.Hash,                   // 3
-			account.PartitionId,            // 4
-			account.Epoch,                  // 5
-			pq.Array(account.MessageTypes), // 6
-			account.TxType,                 // 7
+			account.Epoch,                  // 4
+			pq.Array(account.MessageTypes), // 5
 		)
 	}
 
 	stmt += `
-ON CONFLICT (chain_id, height, hash, partition_id) DO NOTHING;`
+ON CONFLICT (chain_id, height, hash) DO NOTHING;`
 
 	_, err := c.ExecWithContext(stmt, params...)
 
