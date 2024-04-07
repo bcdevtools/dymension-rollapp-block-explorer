@@ -28,6 +28,8 @@ var startCmd = &cobra.Command{
 	Aliases: []string{"start"},
 	Short:   "Start indexing data from multiple blockchains network",
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := types.NewContext()
+
 		conf, err := loadConfig(homeDir)
 		libutils.ExitIfErr(err, "unable to load configuration")
 
@@ -37,11 +39,10 @@ var startCmd = &cobra.Command{
 		// Perform validation
 		err = conf.Validate()
 		libutils.ExitIfErr(err, "failed to validate configuration")
+		ctx = ctx.WithConfig(*conf)
 
 		err = chainList.Validate()
 		libutils.ExitIfErr(err, "failed to validate chain list")
-
-		ctx := types.NewContext()
 
 		// Initialize logger
 		logger := logging.NewDefaultLogger()

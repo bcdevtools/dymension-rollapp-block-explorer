@@ -13,7 +13,7 @@ func (c *dbTxImpl) InsertRecordTransactionsIfNotExists(txs dbtypes.RecordsTransa
 	}
 
 	if err := txs.ValidateBasic(); err != nil {
-		return errors.Wrap(err, "accounts do not pass basic validation")
+		return errors.Wrap(err, "transactions do not pass basic validation")
 	}
 
 	stmt := `
@@ -53,5 +53,10 @@ ON CONFLICT (chain_id, height, hash, partition_id) DO NOTHING;`
 
 	_, err := c.ExecWithContext(stmt, params...)
 
+	return err
+}
+
+func (c *dbTxImpl) CleanupZeroRefCountRecentAccountTransaction() error {
+	_, err := c.ExecWithContext(`CALL func_cleanup_zero_ref_count_recent_account_transaction();`)
 	return err
 }

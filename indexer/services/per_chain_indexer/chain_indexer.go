@@ -144,10 +144,18 @@ func (d *defaultIndexer) Start() {
 		panic(err)
 	}
 
+	var catchUp bool // catch-up mode, lower the interval
+
 	for !d.isShuttingDownWithRLock() {
-		time.Sleep(d.indexingCfg.IndexBlockInterval)
+		if catchUp {
+			time.Sleep(500 * time.Millisecond)
+		} else {
+			time.Sleep(d.indexingCfg.IndexBlockInterval)
+		}
 
 		_ = d.genericLoop(func(beGetChainInfo *querytypes.ResponseBeGetChainInfo) error {
+			catchUp = false
+
 			// perform indexing
 			latestIndexedBlock, err := db.GetLatestIndexedBlock(d.chainConfig.ChainId)
 			upstreamRpcLatestBlock := beGetChainInfo.LatestBlock
@@ -211,14 +219,18 @@ func (d *defaultIndexer) Start() {
 			}
 
 			for heightStr, block := range beTransactionsInBlockRange.Blocks {
-				if len(block.Transactions) < 1 {
-					// skip empty block
-					continue
-				}
-
 				blockHeight, err := strconv.ParseInt(heightStr, 10, 64)
 				if err != nil {
 					panic(err)
+				}
+
+				if len(block.Transactions) < 1 {
+					// skip empty block
+					err = db.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
+					if err != nil {
+						logger.Error("failed to set latest indexed block", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error(), "tx", false)
+					}
+					continue
 				}
 
 				epochWeek := utils.GetEpochWeek(block.TimeEpochUTC)
@@ -233,7 +245,7 @@ func (d *defaultIndexer) Start() {
 						return errors.Wrap(err, fmt.Sprintf("failed to create partitioned tables for epoch week: %d", epochWeek))
 					}
 
-					logger.Info("successfully prepared partitioned tables for epoch week", "chain-id", d.chainConfig.ChainId, "epoch-week", epochWeek)
+					logger.Info("successfully prepared partitioned tables for epoch week", "epoch-week", epochWeek)
 					d.sharedCache.MarkCreatedPartitionsForEpochWeek(epochWeek)
 				}
 
@@ -248,15 +260,29 @@ func (d *defaultIndexer) Start() {
 					logger.Error("failed to insert block information", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error())
 				}
 
+				if err == nil && len(block.Transactions) > 0 {
+					err = dbTx.CleanupZeroRefCountRecentAccountTransaction()
+					if err != nil {
+						logger.Error("failed to cleanup zero ref count recent account transaction", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error())
+					}
+				}
+
 				if err == nil {
-					err = db.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
+					err = dbTx.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
+					if err != nil {
+						logger.Error("failed to set latest indexed block", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error(), "tx", true)
+					}
 				}
 
 				if err == nil {
 					err = dbTx.RemoveFailedBlockRecord(d.chainConfig.ChainId, blockHeight)
+					if err != nil {
+						logger.Error("failed to remove failed block record", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error())
+					}
 				}
 
 				if err != nil {
+					logger.Error("failed to insert block information, rollback", "error", err.Error(), "chain-id", d.chainConfig.ChainId, "height", blockHeight)
 					_ = dbTx.RollbackTransaction()
 					_ = db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, blockHeight, err)
 					continue
@@ -264,12 +290,16 @@ func (d *defaultIndexer) Start() {
 
 				err = dbTx.CommitTransaction()
 				if err != nil {
-					logger.Error("failed to commit transaction", "error", err.Error())
+					logger.Error("failed to commit block information", "error", err.Error(), "chain-id", d.chainConfig.ChainId, "height", blockHeight)
 					_ = db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, blockHeight, err)
 					continue
 				}
 
 				logger.Debug("indexed block successfully", "chain-id", d.chainConfig.ChainId, "height", blockHeight)
+			}
+
+			if nextBlockToIndexTo < upstreamRpcLatestBlock {
+				catchUp = true
 			}
 
 			return nil
@@ -282,6 +312,8 @@ func (d *defaultIndexer) Start() {
 func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.BlockInResponseBeTransactionsInBlockRange, bech32Cfg dbtypes.Bech32PrefixOfChainInfo, dbTx database.DbTransaction) error {
 	var recordsTxs dbtypes.RecordsTransaction
 	mapInvolvedAccounts := make(map[string]dbtypes.RecordAccount)
+	var recentAccountTxs dbtypes.RecordsRecentAccountTransaction
+	var refAccountToRecentTxs dbtypes.RecordsRefAccountToRecentTx
 
 	for _, transaction := range block.Transactions {
 		// build transaction record
@@ -297,26 +329,26 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 
 		recordsTxs = append(recordsTxs, recordTx)
 
-		// build involved accounts record
+		// build involved accounts record & recent tx for accounts
+
+		var anyInvolvedAccount bool
 
 		if len(transaction.Involvers) > 0 {
-			for _, involvers := range transaction.Involvers {
-				for _, involver := range involvers {
-					var bech32Address string
-					var err error
+			type structInvolvedFlag struct {
+				Signer bool
+				Erc20  bool
+				NFT    bool
+			}
+			mapBech32ToInvolvedFlag := make(map[string]structInvolvedFlag)
 
-					normalizedAddress := utils.NormalizeAddress(involver)
-					if utils.IsEvmAddress(normalizedAddress) {
-						evmAddr := common.HexToAddress(normalizedAddress)
-						bech32Address, err = sdk.Bech32ifyAddressBytes(bech32Cfg.Bech32PrefixAccAddr, evmAddr.Bytes())
-						if err != nil {
-							return errors.Wrapf(err, "failed to bech32ify address %s", normalizedAddress)
-						}
-						bech32Address = utils.NormalizeAddress(bech32Address)
-					} else if _, possibleBech32Addr := utils.UnsafeExtractBech32Hrp(normalizedAddress); possibleBech32Addr {
-						// ok
-						bech32Address = normalizedAddress
-					} else {
+			for involvedType, involvers := range transaction.Involvers {
+				for _, involver := range involvers {
+					absolutelyInvalidAddress, bech32Address, err := unsafeAnyAddressToBech32Address(involver, bech32Cfg)
+					if err != nil {
+						return errors.Wrapf(err, "failed to convert involver address %s to bech32 address", involver)
+					}
+
+					if absolutelyInvalidAddress {
 						// ignore invalid records
 						continue
 					}
@@ -332,8 +364,52 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 					}
 
 					mapInvolvedAccounts[bech32Address] = involvedAccount
+
+					anyInvolvedAccount = true
+
+					sif, existing := mapBech32ToInvolvedFlag[bech32Address]
+					if !existing {
+						sif = structInvolvedFlag{}
+					}
+					switch involvedType {
+					case constants.InvolversTypeSenderOrSigner:
+						sif.Signer = true
+					case constants.InvolversTypeErc20:
+						sif.Erc20 = true
+					case constants.InvolversTypeNft:
+						sif.NFT = true
+					}
+					mapBech32ToInvolvedFlag[bech32Address] = sif
 				}
 			}
+
+			if len(mapBech32ToInvolvedFlag) > 0 {
+				for bech32Address, involvedFlag := range mapBech32ToInvolvedFlag {
+					ref := dbtypes.NewRecordRefAccountToRecentTxForInsert(
+						d.chainConfig.ChainId,
+						bech32Address,
+						height,
+						transaction.TransactionHash,
+					)
+					ref.Signer = involvedFlag.Signer
+					ref.Erc20 = involvedFlag.Erc20
+					ref.NFT = involvedFlag.NFT
+					refAccountToRecentTxs = append(refAccountToRecentTxs, ref)
+				}
+			}
+		}
+
+		if anyInvolvedAccount {
+			recentAccountTxs = append(
+				recentAccountTxs,
+				dbtypes.NewRecordRecentAccountTransactionForInsert(
+					d.chainConfig.ChainId,
+					height,
+					transaction.TransactionHash,
+					block.TimeEpochUTC,
+					transaction.MessagesType,
+				),
+			)
 		}
 	}
 
@@ -350,6 +426,16 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 	err = dbTx.InsertOrUpdateRecordsAccount(involvedAccounts)
 	if err != nil {
 		return errors.Wrap(err, "failed to insert/update involved accounts")
+	}
+
+	err = dbTx.InsertRecordsRecentAccountTransactionIfNotExists(recentAccountTxs)
+	if err != nil {
+		return errors.Wrap(err, "failed to insert recent account transactions")
+	}
+
+	err = dbTx.InsertRecordsRefAccountToRecentTxIfNotExists(refAccountToRecentTxs)
+	if err != nil {
+		return errors.Wrap(err, "failed to insert ref account to recent tx")
 	}
 
 	return nil
@@ -434,4 +520,29 @@ func (d *defaultIndexer) isShuttingDownWithRLock() bool {
 	defer d.RUnlock()
 
 	return d.shutdown
+}
+
+// unsafeAnyAddressToBech32Address tries to convert 0x address to bech32 address.
+// If the address is not an EVM address, starts with bech32 prefix, it will return the original address.
+func unsafeAnyAddressToBech32Address(involver string, bech32Cfg dbtypes.Bech32PrefixOfChainInfo) (absolutelyInvalid bool, unsafeBech32Address string, err error) {
+	normalizedAddress := utils.NormalizeAddress(involver)
+	if utils.IsEvmAddress(normalizedAddress) {
+		evmAddr := common.HexToAddress(normalizedAddress)
+		bech32Address, errBech32ify := sdk.Bech32ifyAddressBytes(bech32Cfg.Bech32PrefixAccAddr, evmAddr.Bytes())
+		if errBech32ify != nil {
+			err = errors.Wrapf(err, "failed to bech32ify address %s", normalizedAddress)
+			return
+		}
+		unsafeBech32Address = utils.NormalizeAddress(bech32Address)
+		return
+	}
+
+	if _, possibleBech32Addr := utils.UnsafeExtractBech32Hrp(normalizedAddress); possibleBech32Addr {
+		// ok
+		unsafeBech32Address = normalizedAddress
+		return
+	}
+
+	absolutelyInvalid = true
+	return
 }

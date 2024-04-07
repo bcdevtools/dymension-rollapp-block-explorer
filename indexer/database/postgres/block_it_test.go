@@ -43,7 +43,7 @@ func (suite *IntegrationTestSuite) TestDatabase_GetSetLatestIndexedBlock_IT() {
 	suite.Equal(int64(9), height, "must be the greater one")
 }
 
-func (suite *IntegrationTestSuite) TestDatabase_InsertOrUpdateFailedBlock_IT() {
+func (suite *IntegrationTestSuite) Test_InsertOrUpdateFailedBlock_IT() {
 	db := suite.Database()
 
 	originalRowsCount := suite.CountRows2("failed_block")
