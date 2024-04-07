@@ -248,6 +248,10 @@ func (d *defaultIndexer) Start() {
 					logger.Error("failed to insert block information", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error())
 				}
 
+				if err == nil && len(block.Transactions) > 0 {
+					err = dbTx.CleanupZeroRefCountRecentAccountTransaction()
+				}
+
 				if err == nil {
 					err = db.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
 				}
