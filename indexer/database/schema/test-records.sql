@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS account_chain_1__1
     PARTITION OF account FOR VALUES IN ('chain_1-1');
-CREATE TABLE IF NOT EXISTS recent_accounts_transaction_chain_1__1
-    PARTITION OF recent_accounts_transaction FOR VALUES IN ('chain_1-1');
+CREATE TABLE IF NOT EXISTS recent_account_transaction_chain_1__1
+    PARTITION OF recent_account_transaction FOR VALUES IN ('chain_1-1');
 CREATE TABLE IF NOT EXISTS ref_account_to_recent_tx_chain_1__1
     PARTITION OF ref_account_to_recent_tx FOR VALUES IN ('chain_1-1');
 
@@ -27,7 +27,7 @@ WHERE chain_id = 'chain_1-1' AND bech32_address = 'addr-1';
 UPDATE account SET balance_on_nft_contracts = balance_on_nft_contracts || '{"nft-2"}'
 WHERE chain_id = 'chain_1-1' AND bech32_address = 'addr-1';
 
-INSERT INTO recent_accounts_transaction (chain_id, height, hash, epoch, message_types) VALUES
+INSERT INTO recent_account_transaction (chain_id, height, hash, epoch, message_types) VALUES
     ('chain_1-1', 1, 'hash-1-1', 1, ARRAY['type-1', 'type-2']),
     ('chain_1-1', 1, 'hash-1-2', 1, ARRAY['type-1', 'type-2', 'type-3']),
     ('chain_1-1', 2, 'hash-2-1', 2, ARRAY['type-1']),
@@ -45,4 +45,4 @@ INSERT INTO ref_account_to_recent_tx (chain_id, bech32_address, height, hash) VA
     ('chain_1-1', 'addr-2', 1, 'hash-1-1'),
     ('chain_1-1', 'addr-2', 2, 'hash-2-1');
 
-CALL func_cleanup_zero_ref_count_recent_accounts_transaction();
+CALL func_cleanup_zero_ref_count_recent_account_transaction();

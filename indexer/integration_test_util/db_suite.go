@@ -246,9 +246,9 @@ func (suite *DatabaseIntegrationTestSuite) Truncate(tableName string) {
 // TruncateAll does remove all existing records of all tables.
 func (suite *DatabaseIntegrationTestSuite) TruncateAll() {
 	suite.Truncate("transaction")
-	suite.Truncate("reduced_ref_count_recent_accounts_transaction")
+	suite.Truncate("reduced_ref_count_recent_account_transaction")
 	suite.Truncate("ref_account_to_recent_tx")
-	suite.Truncate("recent_accounts_transaction")
+	suite.Truncate("recent_account_transaction")
 	suite.Truncate("failed_block")
 	suite.Truncate("account")
 	suite.Truncate("chain_info")
