@@ -286,6 +286,8 @@ func (d *defaultIndexer) Start() {
 func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.BlockInResponseBeTransactionsInBlockRange, bech32Cfg dbtypes.Bech32PrefixOfChainInfo, dbTx database.DbTransaction) error {
 	var recordsTxs dbtypes.RecordsTransaction
 	mapInvolvedAccounts := make(map[string]dbtypes.RecordAccount)
+	var recentAccountTxs dbtypes.RecordsRecentAccountTransaction
+	var refAccountToRecentTxs dbtypes.RecordsRefAccountToRecentTx
 
 	for _, transaction := range block.Transactions {
 		// build transaction record
@@ -301,10 +303,19 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 
 		recordsTxs = append(recordsTxs, recordTx)
 
-		// build involved accounts record
+		// build involved accounts record & recent tx for accounts
+
+		var anyInvolvedAccount bool
 
 		if len(transaction.Involvers) > 0 {
-			for _, involvers := range transaction.Involvers {
+			type structInvolvedFlag struct {
+				Signer bool
+				Erc20  bool
+				NFT    bool
+			}
+			mapBech32ToInvolvedFlag := make(map[string]structInvolvedFlag)
+
+			for involvedType, involvers := range transaction.Involvers {
 				for _, involver := range involvers {
 					absolutelyInvalidAddress, bech32Address, err := unsafeAnyAddressToBech32Address(involver, bech32Cfg)
 					if err != nil {
@@ -327,8 +338,52 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 					}
 
 					mapInvolvedAccounts[bech32Address] = involvedAccount
+
+					anyInvolvedAccount = true
+
+					sif, existing := mapBech32ToInvolvedFlag[bech32Address]
+					if !existing {
+						sif = structInvolvedFlag{}
+					}
+					switch involvedType {
+					case constants.InvolversTypeSenderOrSigner:
+						sif.Signer = true
+					case constants.InvolversTypeErc20:
+						sif.Erc20 = true
+					case constants.InvolversTypeNft:
+						sif.NFT = true
+					}
+					mapBech32ToInvolvedFlag[bech32Address] = sif
 				}
 			}
+
+			if len(mapBech32ToInvolvedFlag) > 0 {
+				for bech32Address, involvedFlag := range mapBech32ToInvolvedFlag {
+					ref := dbtypes.NewRecordRefAccountToRecentTxForInsert(
+						d.chainConfig.ChainId,
+						bech32Address,
+						height,
+						transaction.TransactionHash,
+					)
+					ref.Signer = involvedFlag.Signer
+					ref.Erc20 = involvedFlag.Erc20
+					ref.NFT = involvedFlag.NFT
+					refAccountToRecentTxs = append(refAccountToRecentTxs, ref)
+				}
+			}
+		}
+
+		if anyInvolvedAccount {
+			recentAccountTxs = append(
+				recentAccountTxs,
+				dbtypes.NewRecordRecentAccountTransactionForInsert(
+					d.chainConfig.ChainId,
+					height,
+					transaction.TransactionHash,
+					block.TimeEpochUTC,
+					transaction.MessagesType,
+				),
+			)
 		}
 	}
 
@@ -345,6 +400,16 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 	err = dbTx.InsertOrUpdateRecordsAccount(involvedAccounts)
 	if err != nil {
 		return errors.Wrap(err, "failed to insert/update involved accounts")
+	}
+
+	err = dbTx.InsertRecordsRecentAccountTransactionIfNotExists(recentAccountTxs)
+	if err != nil {
+		return errors.Wrap(err, "failed to insert recent account transactions")
+	}
+
+	err = dbTx.InsertRecordsRefAccountToRecentTxIfNotExists(refAccountToRecentTxs)
+	if err != nil {
+		return errors.Wrap(err, "failed to insert ref account to recent tx")
 	}
 
 	return nil
