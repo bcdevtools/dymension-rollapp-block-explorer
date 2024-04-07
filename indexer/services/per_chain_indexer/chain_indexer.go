@@ -269,6 +269,7 @@ func (d *defaultIndexer) Start() {
 				}
 
 				if err != nil {
+					logger.Error("failed to insert block information, rollback", "error", err.Error(), "chain-id", d.chainConfig.ChainId, "height", blockHeight)
 					_ = dbTx.RollbackTransaction()
 					_ = db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, blockHeight, err)
 					continue
@@ -276,12 +277,12 @@ func (d *defaultIndexer) Start() {
 
 				err = dbTx.CommitTransaction()
 				if err != nil {
-					logger.Error("failed to commit transaction", "error", err.Error())
+					logger.Error("failed to commit block information", "error", err.Error(), "chain-id", d.chainConfig.ChainId, "height", blockHeight)
 					_ = db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, blockHeight, err)
 					continue
 				}
 
-				logger.Debug("indexed block successfully", "chain-id", d.chainConfig.ChainId, "height", blockHeight)
+				logger.Info("indexed block successfully", "chain-id", d.chainConfig.ChainId, "height", blockHeight)
 			}
 
 			if nextBlockToIndexTo < upstreamRpcLatestBlock {
