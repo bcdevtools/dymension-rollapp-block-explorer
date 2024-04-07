@@ -23,30 +23,6 @@ SELECT latest_indexed_block FROM chain_info WHERE chain_id = $1
 	return height, nil
 }
 
-func (db *Database) SetLatestIndexedBlock(chainId string, height int64) error {
-	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
-	sqlRes, err := db.Sql.Exec(`
-UPDATE chain_info SET latest_indexed_block = GREATEST($1, latest_indexed_block) WHERE chain_id = $2
-`,
-		height,  // 1
-		chainId, // 2
-	)
-
-	if err != nil {
-		return errors.Wrapf(err, "failed to update latest indexed block for %s", chainId)
-	}
-
-	effected, err := sqlRes.RowsAffected()
-	if err != nil {
-		return errors.Wrap(err, "failed to get rows effected")
-	}
-	if effected != 1 {
-		return errors.Errorf("expected 1 row effected, got %d", effected)
-	}
-
-	return nil
-}
-
 func (db *Database) InsertOrUpdateFailedBlock(chainId string, height int64, optionalReason error) error {
 	var errs []string
 	if optionalReason == nil {
