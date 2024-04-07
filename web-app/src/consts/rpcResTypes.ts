@@ -1,7 +1,11 @@
 export interface RpcResponse<T> {
   jsonrpc: string;
   id: number;
-  result: T;
+  result?: T;
+  error?: {
+    code: number;
+    message: string;
+  };
 }
 
 export interface Bech32 {

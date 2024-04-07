@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { Skeleton } from '@mui/material';
 import { useLatestBlock } from '@/hooks/useLatestBlock';
-import BlockList from './_BlockList';
+import BlockList from './_BlockListTable';
 
 function BlockSummaryCard({
   label,

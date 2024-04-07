@@ -26,7 +26,7 @@ export class RpcService {
       getChainInfoParam(),
       fetchOptions
     );
-    return response.result;
+    return getResponseResult(response);
   }
 
   getBlockByNumber(

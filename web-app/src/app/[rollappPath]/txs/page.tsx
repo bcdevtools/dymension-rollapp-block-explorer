@@ -4,7 +4,7 @@ import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
-import PageTitle from '@/components/server/commons/PageTitle';
+import PageTitle from '@/components/commons/PageTitle';
 
 function createData(
   name: string,

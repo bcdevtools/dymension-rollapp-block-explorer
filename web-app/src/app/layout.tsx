@@ -10,7 +10,7 @@ import Box from '@mui/material/Box';
 import { CustomToolbar } from '@/components/client/commons/Layout/_Header';
 import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
-import PageBreadcrumb from '@/components/server/commons/PageBreadcrumb';
+import PageBreadcrumb from '@/components/commons/PageBreadcrumb';
 
 export const metadata: Metadata = {
   title: 'Blockchain Explorer',
