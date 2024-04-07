@@ -27,6 +27,15 @@ type DbTransaction interface {
 	// If the transaction is exists, it will do nothing.
 	InsertRecordTransactionsIfNotExists(txs dbtypes.RecordsTransaction) error
 
+	// InsertRecordsRecentAccountTransactionIfNotExists inserts the given recent account transactions into the database.
+	// If the transaction is exists, it will do nothing.
+	InsertRecordsRecentAccountTransactionIfNotExists(txs dbtypes.RecordsRecentAccountTransaction) error
+
+	// InsertRecordsRefAccountToRecentTxIfNotExists inserts the given references of account to recent transaction into the database.
+	// If the reference is exists, it will do nothing.
+	// The record connects the recent account transaction with the account that has the transaction.
+	InsertRecordsRefAccountToRecentTxIfNotExists(refs dbtypes.RecordsRefAccountToRecentTx) error
+
 	// CleanupZeroRefCountRecentAccountTransaction call procedures to clean-up `recent_account_transaction` records
 	// which have zero referent (`ref_account_to_recent_tx`).
 	CleanupZeroRefCountRecentAccountTransaction() error

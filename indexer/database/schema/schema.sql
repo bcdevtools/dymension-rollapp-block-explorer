@@ -99,9 +99,9 @@ CREATE TABLE ref_account_to_recent_tx (
     height          BIGINT  NOT NULL,
     hash            TEXT    NOT NULL,
 
-    signer          BOOLEAN NOT NULL DEFAULT FALSE, -- true if the address is one of the signers of the tx. `false` is not guaranteed to be the signer.
-    erc20           BOOLEAN NOT NULL DEFAULT FALSE, -- true if the tx is erc20/cw20 tx
-    nft             BOOLEAN NOT NULL DEFAULT FALSE, -- true if the tx is nft tx
+    signer          BOOLEAN, -- true if the address is one of the signers of the tx. `false` is not guaranteed to be the signer.
+    erc20           BOOLEAN, -- true if the tx is erc20/cw20 tx
+    nft             BOOLEAN, -- true if the tx is nft tx
 
     CONSTRAINT ref_account_to_recent_tx_pkey PRIMARY KEY (chain_id, bech32_address, height, hash),
     CONSTRAINT ref_recent_acc_tx_to_account_fkey FOREIGN KEY (chain_id, bech32_address)

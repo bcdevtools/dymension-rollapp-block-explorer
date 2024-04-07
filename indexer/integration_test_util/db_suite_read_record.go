@@ -229,6 +229,53 @@ FROM recent_account_transaction WHERE hash = $1 AND height = $2 AND chain_id = $
 	return res
 }
 
+// ReadRefAccountToRecentTxRecord reads a specific ref account to recent tx record from `ref_account_to_recent_tx` table in database.
+//
+//goland:noinspection SqlNoDataSourceInspection,SqlDialectInspection,SpellCheckingInspection
+func (suite *DatabaseIntegrationTestSuite) ReadRefAccountToRecentTxRecord(bech32Address, hash string, height int64, chainId string, optionalTx *sql.Tx) itutildbtypes.RefAccountToRecentTxRecord {
+	statement := `
+SELECT
+    chain_id, -- 1
+	bech32_address, -- 2
+	height, -- 3
+	hash, -- 4
+	signer, -- 5
+	erc20, -- 6
+	nft -- 7
+FROM ref_account_to_recent_tx WHERE bech32_address = $1 AND hash = $2 AND height = $3 AND chain_id = $4
+`
+
+	var rows *sql.Rows
+	var err error
+	if optionalTx == nil {
+		rows, err = suite.Database.Query(statement, bech32Address, hash, height, chainId)
+	} else {
+		rows, err = optionalTx.Query(statement, bech32Address, hash, height, chainId)
+	}
+
+	suite.Require().NoError(err, "failed to query ref account to recent tx")
+	defer func() {
+		_ = rows.Close()
+	}()
+	suite.Require().Truef(rows.Next(), "no record found for ref account to recent tx %s at %d for account %s", hash, height, bech32Address)
+
+	var res itutildbtypes.RefAccountToRecentTxRecord
+
+	err = rows.Scan(
+		&res.ChainId,       // 1
+		&res.Bech32Address, // 2
+		&res.Height,        // 3
+		&res.Hash,          // 4
+		&res.Signer,        // 5
+		&res.Erc20,         // 6
+		&res.NFT,           // 7
+	)
+	suite.Require().NoError(err, "failed to scan ref account to recent tx")
+	suite.Require().Falsef(rows.Next(), "more than one record found for ref account to recent tx %s at %d for account", hash, height, bech32Address)
+
+	return res
+}
+
 // ReadFailedBlockRecord reads a specific failed block record from `failed_block` table in database.
 //
 //goland:noinspection SqlNoDataSourceInspection,SqlDialectInspection,SpellCheckingInspection

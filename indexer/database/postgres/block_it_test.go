@@ -7,7 +7,7 @@ import (
 )
 
 //goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
-func (suite *IntegrationTestSuite) TestDatabase_GetSetLatestIndexedBlock_IT() {
+func (suite *IntegrationTestSuite) Test_GetSetLatestIndexedBlock_IT() {
 	suite.InsertChainInfoRecords()
 
 	db := suite.Database()
@@ -51,7 +51,7 @@ UPDATE chain_info SET latest_indexed_block = $1 WHERE chain_id = $2
 
 }
 
-func (suite *IntegrationTestSuite) TestDatabase_InsertOrUpdateFailedBlock_IT() {
+func (suite *IntegrationTestSuite) Test_InsertOrUpdateFailedBlock_IT() {
 	db := suite.Database()
 
 	originalRowsCount := suite.CountRows2("failed_block")
