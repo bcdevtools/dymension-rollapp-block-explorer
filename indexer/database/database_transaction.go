@@ -18,7 +18,13 @@ type DbTransaction interface {
 
 	// Transaction
 
+	// InsertRecordTransactionsIfNotExists inserts the given transactions into the database.
+	// If the transaction is exists, it will do nothing.
 	InsertRecordTransactionsIfNotExists(txs dbtypes.RecordsTransaction) error
+
+	// CleanupZeroRefCountRecentAccountTransaction call procedures to clean-up `recent_account_transaction` records
+	// which have zero referent (`ref_account_to_recent_tx`).
+	CleanupZeroRefCountRecentAccountTransaction() error
 
 	// Failed blocks
 

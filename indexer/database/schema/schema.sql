@@ -68,6 +68,19 @@ CREATE TABLE recent_account_transaction (
 
     CONSTRAINT recent_account_transaction_pkey PRIMARY KEY (chain_id, height, hash)
 ) PARTITION BY LIST(chain_id);
+-- trigger function for put recent_account_transaction into reduced_ref_count_recent_account_transaction
+-- so if there is no reference to the tx, it will be pruned immediately.
+CREATE OR REPLACE FUNCTION func_trigger_00100_after_insert_recent_account_transaction() RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO reduced_ref_count_recent_account_transaction(chain_id, height, hash)
+    VALUES (NEW.chain_id, NEW.height, NEW.hash)
+    ON CONFLICT DO NOTHING;
+
+    RETURN NULL; -- result is ignored since this is an AFTER trigger
+END;$$ LANGUAGE plpgsql;
+CREATE TRIGGER trigger_00100_after_insert_recent_account_transaction
+    AFTER INSERT ON recent_account_transaction
+    FOR EACH ROW EXECUTE FUNCTION func_trigger_00100_after_insert_recent_account_transaction();
 
 -- table reduced_ref_count_recent_account_transaction
 -- A table with short-live records, used to cache records which reduced ref_count, then to prune corresponding record.

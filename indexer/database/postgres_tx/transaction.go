@@ -55,3 +55,8 @@ ON CONFLICT (chain_id, height, hash, partition_id) DO NOTHING;`
 
 	return err
 }
+
+func (c *dbTxImpl) CleanupZeroRefCountRecentAccountTransaction() error {
+	_, err := c.ExecWithContext(`CALL func_cleanup_zero_ref_count_recent_account_transaction();`)
+	return err
+}

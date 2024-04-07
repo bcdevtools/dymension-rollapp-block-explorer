@@ -190,6 +190,45 @@ FROM recent_account_transaction WHERE hash = $1 AND height = $2 AND chain_id = $
 	return res
 }
 
+// ReadReducedRefCountRecentAccountTransactionRecord reads a specific transaction record from `reduced_ref_count_recent_account_transaction` table in database.
+//
+//goland:noinspection SqlNoDataSourceInspection,SqlDialectInspection,SpellCheckingInspection
+func (suite *DatabaseIntegrationTestSuite) ReadReducedRefCountRecentAccountTransactionRecord(hash string, height int64, chainId string, optionalTx *sql.Tx) itutildbtypes.ReducedRefCountRecentAccountTransactionRecord {
+	statement := `
+SELECT
+    chain_id, -- 1
+	height, -- 2
+	hash, -- 3
+FROM recent_account_transaction WHERE hash = $1 AND height = $2 AND chain_id = $3
+`
+
+	var rows *sql.Rows
+	var err error
+	if optionalTx == nil {
+		rows, err = suite.Database.Query(statement, hash, height, chainId)
+	} else {
+		rows, err = optionalTx.Query(statement, hash, height, chainId)
+	}
+
+	suite.Require().NoError(err, "failed to query recent account transaction")
+	defer func() {
+		_ = rows.Close()
+	}()
+	suite.Require().Truef(rows.Next(), "no record found for recent account transaction %s at %d", hash, height)
+
+	var res itutildbtypes.ReducedRefCountRecentAccountTransactionRecord
+
+	err = rows.Scan(
+		&res.ChainId, // 1
+		&res.Height,  // 2
+		&res.Hash,    // 3
+	)
+	suite.Require().NoError(err, "failed to scan recent account transaction")
+	suite.Require().Falsef(rows.Next(), "more than one record found for recent account transaction %s at %d", hash, height)
+
+	return res
+}
+
 // ReadFailedBlockRecord reads a specific failed block record from `failed_block` table in database.
 //
 //goland:noinspection SqlNoDataSourceInspection,SqlDialectInspection,SpellCheckingInspection
