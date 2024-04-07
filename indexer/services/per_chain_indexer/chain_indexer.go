@@ -241,7 +241,7 @@ func (d *defaultIndexer) Start() {
 						return errors.Wrap(err, fmt.Sprintf("failed to create partitioned tables for epoch week: %d", epochWeek))
 					}
 
-					logger.Info("successfully prepared partitioned tables for epoch week", "chain-id", d.chainConfig.ChainId, "epoch-week", epochWeek)
+					logger.Info("successfully prepared partitioned tables for epoch week", "epoch-week", epochWeek)
 					d.sharedCache.MarkCreatedPartitionsForEpochWeek(epochWeek)
 				}
 
