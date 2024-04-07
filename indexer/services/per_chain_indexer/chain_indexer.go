@@ -219,14 +219,18 @@ func (d *defaultIndexer) Start() {
 			}
 
 			for heightStr, block := range beTransactionsInBlockRange.Blocks {
-				if len(block.Transactions) < 1 {
-					// skip empty block
-					continue
-				}
-
 				blockHeight, err := strconv.ParseInt(heightStr, 10, 64)
 				if err != nil {
 					panic(err)
+				}
+
+				if len(block.Transactions) < 1 {
+					// skip empty block
+					err = db.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
+					if err != nil {
+						logger.Error("failed to set latest indexed block", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error(), "tx", false)
+					}
+					continue
 				}
 
 				epochWeek := utils.GetEpochWeek(block.TimeEpochUTC)
@@ -258,14 +262,23 @@ func (d *defaultIndexer) Start() {
 
 				if err == nil && len(block.Transactions) > 0 {
 					err = dbTx.CleanupZeroRefCountRecentAccountTransaction()
+					if err != nil {
+						logger.Error("failed to cleanup zero ref count recent account transaction", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error())
+					}
 				}
 
 				if err == nil {
 					err = dbTx.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
+					if err != nil {
+						logger.Error("failed to set latest indexed block", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error(), "tx", true)
+					}
 				}
 
 				if err == nil {
 					err = dbTx.RemoveFailedBlockRecord(d.chainConfig.ChainId, blockHeight)
+					if err != nil {
+						logger.Error("failed to remove failed block record", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error())
+					}
 				}
 
 				if err != nil {
@@ -282,7 +295,7 @@ func (d *defaultIndexer) Start() {
 					continue
 				}
 
-				logger.Info("indexed block successfully", "chain-id", d.chainConfig.ChainId, "height", blockHeight)
+				logger.Debug("indexed block successfully", "chain-id", d.chainConfig.ChainId, "height", blockHeight)
 			}
 
 			if nextBlockToIndexTo < upstreamRpcLatestBlock {
