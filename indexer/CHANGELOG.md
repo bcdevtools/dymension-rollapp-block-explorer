@@ -61,3 +61,6 @@ Templates for Unreleased:
 - (indexer,tx) [#8](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/8) Indexing per chain transactions
 - (indexer,tx) [#9](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/9) Indexing transaction involvers as accounts
 - (indexer,tx) [#10](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/10) Indexing recent transactions for involvers
+
+#### Improvements
+- (indexer,block) [#13](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/13) Add column storing epoch UTC last updated
