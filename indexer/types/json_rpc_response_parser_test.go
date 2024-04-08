@@ -61,6 +61,7 @@ func TestParseJsonRpcResponse(t *testing.T) {
 		require.Error(t, err)
 		require.Nil(t, r)
 		require.ErrorContains(t, err, "the method abc does not exist/is not available")
+		require.ErrorContains(t, err, "-32601")
 	})
 
 	type complexResultL4 struct {
