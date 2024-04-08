@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import React from 'react';
-import { getNewPathOnMenuClick } from '@/utils/common';
+import { getNewPathByRollapp } from '@/utils/common';
 import { BreadcrumbName, Path } from '@/consts/path';
 import { usePathname } from 'next/navigation';
 
@@ -17,7 +17,7 @@ export default function PageBreadcrumb() {
       <Link
         underline="hover"
         color="inherit"
-        href={getNewPathOnMenuClick(pathname, Path.OVERVIEW)}>
+        href={getNewPathByRollapp(pathname, Path.OVERVIEW)}>
         Home
       </Link>
       {splittedPath.map((value, idx) => {
@@ -34,7 +34,7 @@ export default function PageBreadcrumb() {
           <Link
             underline="hover"
             color="inherit"
-            href={getNewPathOnMenuClick(pathname, to)}
+            href={getNewPathByRollapp(pathname, to)}
             key={idx}>
             {breadcrumbName}
           </Link>

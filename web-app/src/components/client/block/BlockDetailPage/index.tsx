@@ -5,14 +5,36 @@ import Value from '@/components/detail/Value';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import useBlockDetail from '@/hooks/useBlockDetail';
-import { formatUnixTime } from '@/utils/common';
+import { formatUnixTime, getNewPathByRollapp } from '@/utils/common';
+import Link from '@mui/material/Link';
+import { Block } from '@/consts/rpcResTypes';
+import { usePathname } from 'next/navigation';
+import { Path } from '@/consts/path';
 
 type BlockDetailPageProps = Readonly<{ blockNo: number }>;
+
+function getTxsDisplay(blockDetail: Block, pathname: string) {
+  return blockDetail.txs.length ? (
+    <Link
+      href={`${getNewPathByRollapp(pathname, Path.TRANSACTIONS)}?block=${
+        blockDetail.height
+      }`}
+      underline="hover">
+      {blockDetail.txs.length} transacion{blockDetail.txs.length > 1 && 's'}
+    </Link>
+  ) : (
+    '0 transaction'
+  );
+}
 
 export default function BlockDetailPage({ blockNo }: BlockDetailPageProps) {
   const [blockDetail, loading] = useBlockDetail(blockNo);
   if (loading) return null;
   if (!blockDetail) return null;
+
+  const pathname = usePathname();
+
+  const txsDisplay = getTxsDisplay(blockDetail, pathname);
   return (
     <>
       <Grid container sx={{ mt: 2 }}>
@@ -23,6 +45,10 @@ export default function BlockDetailPage({ blockNo }: BlockDetailPageProps) {
         <Label text="Date Time" />
         <Value>
           <Typography>{formatUnixTime(blockDetail.timeEpochUTC)}</Typography>
+        </Value>
+        <Label text="Transactions" />
+        <Value>
+          <Typography>{txsDisplay} in this block</Typography>
         </Value>
       </Grid>
     </>

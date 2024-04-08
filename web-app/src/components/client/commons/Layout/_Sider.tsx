@@ -18,7 +18,7 @@ import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
 import { useRollappStore } from '@/stores/rollappStore';
-import { getNewPathOnMenuClick } from '@/utils/common';
+import { getNewPathByRollapp } from '@/utils/common';
 
 type SiderProps = Readonly<{
   menuOpen: boolean;
@@ -44,7 +44,7 @@ export default React.memo(function Sider({
   const [{ selectedRollappInfo, rollappInfos }] = useRollappStore(true);
 
   const handleMenuItemClick = (path: string) => {
-    router.push(getNewPathOnMenuClick(pathname, path));
+    router.push(getNewPathByRollapp(pathname, path));
     handleMenuClose();
   };
 

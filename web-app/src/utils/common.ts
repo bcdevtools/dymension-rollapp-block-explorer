@@ -4,9 +4,9 @@ export function getRollappPathFromPathname(pathname: string) {
   return pathname.match(/^\/[^\/]*/)![0];
 }
 
-export function getNewPathOnMenuClick(pathname: string, path: string) {
+export function getNewPathByRollapp(pathname: string, newPath: string) {
   const slittedPath = pathname.split('/');
-  return `${slittedPath[1] ? '/' : ''}${slittedPath[1]}${path}`;
+  return `${slittedPath[1] ? '/' : ''}${slittedPath[1]}${newPath}`;
 }
 
 export function formatUnixTime(unixTime: number) {
