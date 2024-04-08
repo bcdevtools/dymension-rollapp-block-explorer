@@ -17,7 +17,7 @@ export function useLatestBlock(): [number, boolean] {
 
     (async function () {
       try {
-        const chainInfo = await rpcService.getChainInfo({
+        const chainInfo = await rpcService.getLatestBlockNumber({
           signal: ac.signal,
         });
         setLatestBlockNo(chainInfo.latestBlock);

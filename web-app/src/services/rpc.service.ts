@@ -1,9 +1,15 @@
-import { Block, ChainInfo, RpcResponse } from '@/consts/rpcResTypes';
+import {
+  Block,
+  ChainInfo,
+  LatestBlockNumber,
+  RpcResponse,
+} from '@/consts/rpcResTypes';
 import {
   FetchOptions,
   RpcClient,
   getBlockByNumberParam,
   getChainInfoParam,
+  getLatestBlockNumber,
 } from '@/utils/rpc';
 
 function getResponseResult<T>(response: RpcResponse<T>): T;
@@ -26,6 +32,14 @@ export class RpcService {
       getChainInfoParam(),
       fetchOptions
     );
+    return getResponseResult(response);
+  }
+
+  async getLatestBlockNumber(
+    fetchOptions?: FetchOptions
+  ): Promise<LatestBlockNumber> {
+    const response: RpcResponse<LatestBlockNumber> =
+      await this._rpcClient.callRpc(getLatestBlockNumber(), fetchOptions);
     return getResponseResult(response);
   }
 

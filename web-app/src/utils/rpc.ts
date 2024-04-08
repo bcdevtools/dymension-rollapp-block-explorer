@@ -48,6 +48,14 @@ export function getChainInfoParam() {
   };
 }
 
+export function getLatestBlockNumber() {
+  return {
+    method: 'be_getLatestBlockNumber',
+    params: [],
+    jsonrpc: '2.0',
+  };
+}
+
 export function getBlockByNumberParam(blockNo: number): RpcCallParam {
   return {
     method: 'be_getBlockByNumber',

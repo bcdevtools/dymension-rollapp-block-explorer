@@ -38,6 +38,11 @@ export interface ChainInfo {
   latestBlockTimeEpochUTC: number;
 }
 
+export interface LatestBlockNumber {
+  latestBlock: number;
+  latestBlockTimeEpochUTC: number;
+}
+
 export interface Block {
   hash: string;
   height: number;
