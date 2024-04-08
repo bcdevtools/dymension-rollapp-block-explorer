@@ -7,6 +7,7 @@ CREATE TABLE chain_info (
     denoms                  JSONB   NOT NULL,
     be_json_rpc_urls        TEXT[], -- sorted, the best one is the first, might be empty
     latest_indexed_block    BIGINT  NOT NULL DEFAULT 0, -- the latest successfully indexed block height
+    increased_latest_indexed_block_at BIGINT NOT NULL DEFAULT 0, -- the epoch UTC seconds when the latest_indexed_block updated with greater value
 
     CONSTRAINT chain_info_pkey PRIMARY KEY (chain_id),
     CONSTRAINT chain_info_unique_chain_name UNIQUE ("name") -- chain name must be unique
