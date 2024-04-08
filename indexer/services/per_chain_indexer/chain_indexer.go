@@ -16,6 +16,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
+	"slices"
 	"sync"
 	"time"
 )
@@ -215,6 +216,13 @@ func (d *defaultIndexer) Start() {
 					logger.Error("failed to insert/update failed block", "chain-id", d.chainConfig.ChainId, "height", missingBlock, "error", err.Error())
 					return err
 				}
+			}
+
+			if len(beTransactionsInBlockRange.Blocks) > 0 {
+				// sort ascending
+				slices.SortFunc(beTransactionsInBlockRange.Blocks, func(l, r querytypes.BlockInResponseBeTransactionsInBlockRange) int {
+					return int(l.Height - r.Height)
+				})
 			}
 
 			for _, block := range beTransactionsInBlockRange.Blocks {
