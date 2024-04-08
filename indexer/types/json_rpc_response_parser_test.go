@@ -47,6 +47,7 @@ func TestParseJsonRpcResponse(t *testing.T) {
 		require.Error(t, err)
 		require.Nil(t, r)
 		require.ErrorContains(t, err, "missing response")
+		require.False(t, IsErrUpstreamRpcReturnedError(err))
 	})
 
 	t.Run("result with error", func(t *testing.T) {
@@ -62,6 +63,7 @@ func TestParseJsonRpcResponse(t *testing.T) {
 		require.Nil(t, r)
 		require.ErrorContains(t, err, "the method abc does not exist/is not available")
 		require.ErrorContains(t, err, "-32601")
+		require.True(t, IsErrUpstreamRpcReturnedError(err))
 	})
 
 	type complexResultL4 struct {
