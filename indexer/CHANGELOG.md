@@ -57,12 +57,12 @@ Templates for Unreleased:
 ## Unreleased
 
 #### Features
-- (indexer) [#1](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/1) Add indexer
-- (indexer,tx) [#8](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/8) Indexing per chain transactions
-- (indexer,tx) [#9](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/9) Indexing transaction involvers as accounts
-- (indexer,tx) [#10](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/10) Indexing recent transactions for involvers
+- (indexing) [#1](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/1) Add indexer
+- (indexing) [#8](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/8) Indexing per chain transactions
+- (indexing) [#9](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/9) Indexing transaction involvers as accounts
+- (indexing) [#10](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/10) Indexing recent transactions for involvers
 
 #### Improvements
-- (indexer,block) [#13](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/13) Add column storing epoch UTC last updated
-- (indexer,rpc) [#14](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/14) Improve error message and detection when upstream RPC returns error
-- (indexer,block) [#15](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/15) Improve performance and prevent unexpected error when indexing blocks
+- (indexing,sql) [#13](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/13) Add column storing epoch UTC last updated
+- (rpc) [#14](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/14) Improve error message and detection when upstream RPC returns error
+- (indexing) [#15](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/15) Improve performance and prevent unexpected error when indexing blocks
