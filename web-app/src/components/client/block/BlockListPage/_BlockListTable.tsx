@@ -11,7 +11,7 @@ type BlockListProps = Readonly<{
   latestBlockNo: number;
 }>;
 
-export default function BlockList({ latestBlockNo }: BlockListProps) {
+export default function BlockListTable({ latestBlockNo }: BlockListProps) {
   const pathname = usePathname();
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     pageSize: 25,

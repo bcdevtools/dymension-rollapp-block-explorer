@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { Skeleton } from '@mui/material';
 import { useLatestBlock } from '@/hooks/useLatestBlock';
-import BlockList from './_BlockListTable';
+import BlockListTable from './_BlockListTable';
 
 function BlockSummaryCard({
   label,
@@ -28,7 +28,7 @@ function BlockSummaryCard({
   );
 }
 
-export default function BlockContent() {
+export default function BlockListPage() {
   const [latestBlockNo, loading] = useLatestBlock();
 
   return (
@@ -47,7 +47,7 @@ export default function BlockContent() {
           <Typography>test</Typography>
         </BlockSummaryCard>
       </Grid>
-      <BlockList latestBlockNo={latestBlockNo} />
+      <BlockListTable latestBlockNo={latestBlockNo} />
     </>
   );
 }
