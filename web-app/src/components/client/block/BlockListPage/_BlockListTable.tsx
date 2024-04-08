@@ -7,11 +7,11 @@ import { GridColDef, DataGrid, GridPaginationModel } from '@mui/x-data-grid';
 import { usePathname } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
 
-type BlockListProps = Readonly<{
+type BlockListTableProps = Readonly<{
   latestBlockNo: number;
 }>;
 
-export default function BlockListTable({ latestBlockNo }: BlockListProps) {
+export default function BlockListTable({ latestBlockNo }: BlockListTableProps) {
   const pathname = usePathname();
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     pageSize: 25,
