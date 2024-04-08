@@ -22,7 +22,7 @@ type BeJsonRpcQueryService interface {
 	BeGetChainInfo() (res *querytypes.ResponseBeGetChainInfo, duration time.Duration, err error)
 
 	// BeTransactionsInBlockRange is `be_getTransactionsInBlockRange`
-	BeTransactionsInBlockRange(from, to int64) (res *querytypes.ResponseBeTransactionsInBlockRange, duration time.Duration, err error)
+	BeTransactionsInBlockRange(from, to int64) (res *querytypes.TransformedResponseBeTransactionsInBlockRange, duration time.Duration, err error)
 }
 
 var _ BeJsonRpcQueryService = &defaultBeJsonRpcQueryService{}
@@ -89,7 +89,7 @@ func (d *defaultBeJsonRpcQueryService) BeGetChainInfo() (res *querytypes.Respons
 	return
 }
 
-func (d *defaultBeJsonRpcQueryService) BeTransactionsInBlockRange(from, to int64) (res *querytypes.ResponseBeTransactionsInBlockRange, duration time.Duration, err error) {
+func (d *defaultBeJsonRpcQueryService) BeTransactionsInBlockRange(from, to int64) (res *querytypes.TransformedResponseBeTransactionsInBlockRange, duration time.Duration, err error) {
 	startTime := time.Now().UTC()
 
 	var bz []byte
@@ -137,7 +137,17 @@ func (d *defaultBeJsonRpcQueryService) BeTransactionsInBlockRange(from, to int64
 		}
 	}
 
-	for heightStr := range responseBeTransactionsInBlockRange.Blocks {
+	res = &querytypes.TransformedResponseBeTransactionsInBlockRange{
+		MissingBlocks: responseBeTransactionsInBlockRange.MissingBlocks,
+		ErrorBlocks:   responseBeTransactionsInBlockRange.ErrorBlocks,
+	}
+	defer func() {
+		if err != nil {
+			res = nil
+		}
+	}()
+
+	for heightStr, block := range responseBeTransactionsInBlockRange.Blocks {
 		var height int64
 		height, err = strconv.ParseInt(heightStr, 10, 64)
 		if err != nil {
@@ -149,9 +159,11 @@ func (d *defaultBeJsonRpcQueryService) BeTransactionsInBlockRange(from, to int64
 			err = errors.Wrapf(querytypes.ErrBlackList, "block height %d out of range [%d, %d]", height, from, to)
 			return
 		}
+
+		block.Height = height
+		res.Blocks = append(res.Blocks, block)
 	}
 
-	res = responseBeTransactionsInBlockRange
 	return
 }
 

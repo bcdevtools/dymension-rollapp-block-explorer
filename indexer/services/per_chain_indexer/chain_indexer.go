@@ -16,7 +16,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -218,10 +217,11 @@ func (d *defaultIndexer) Start() {
 				}
 			}
 
-			for heightStr, block := range beTransactionsInBlockRange.Blocks {
-				blockHeight, err := strconv.ParseInt(heightStr, 10, 64)
-				if err != nil {
-					panic(err)
+			for _, block := range beTransactionsInBlockRange.Blocks {
+				blockHeight := block.Height
+
+				if blockHeight == 0 { // unexpected un-set value
+					panic(fmt.Sprintf("unexpected block height 0 when indexing %s", d.chainConfig.ChainId))
 				}
 
 				if len(block.Transactions) < 1 {

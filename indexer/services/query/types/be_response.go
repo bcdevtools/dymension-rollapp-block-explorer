@@ -55,7 +55,15 @@ type ResponseBeTransactionsInBlockRange struct {
 	ErrorBlocks   []int64                                              `json:"errorBlocks"`
 }
 
+// TransformedResponseBeTransactionsInBlockRange is ResponseBeTransactionsInBlockRange after transformed
+type TransformedResponseBeTransactionsInBlockRange struct {
+	Blocks        []BlockInResponseBeTransactionsInBlockRange `json:"blocks"`
+	MissingBlocks []int64                                     `json:"missingBlocks"`
+	ErrorBlocks   []int64                                     `json:"errorBlocks"`
+}
+
 type BlockInResponseBeTransactionsInBlockRange struct {
+	Height       int64                                                    `json:"-"` // extracted from key
 	TimeEpochUTC int64                                                    `json:"timeEpochUTC"`
 	Transactions []TransactionInBlockInResponseBeTransactionsInBlockRange `json:"txs"`
 }
