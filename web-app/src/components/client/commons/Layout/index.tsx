@@ -8,12 +8,10 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import themes from '@/utils/themes';
 import ThemeContext from '@/contexts/ThemeContext';
-import { THEME_COOKIE_NAME, ThemeMode } from '@/consts/theme';
+import { SIDER_WIDTH, THEME_COOKIE_NAME, ThemeMode } from '@/consts/theme';
 import { usePathname } from 'next/navigation';
 import { useRollappStore } from '@/stores/rollappStore';
 import { RollappActionTypes } from '@/consts/actionTypes';
-
-const SIDER_WIDTH = 240;
 
 type LayoutProps = Readonly<{
   children: React.ReactNode;

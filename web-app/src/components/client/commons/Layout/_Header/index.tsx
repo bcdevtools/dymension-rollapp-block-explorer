@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import React from 'react';
+import { TOOLBAR_MOBILE_HEIGHT } from '@/consts/theme';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
@@ -20,7 +21,7 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 
 export const CustomToolbar = styled(Toolbar)(({ theme }) => ({
   [theme.breakpoints.down('sm')]: {
-    minHeight: 128,
+    minHeight: TOOLBAR_MOBILE_HEIGHT,
   },
 }));
 

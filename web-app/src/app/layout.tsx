@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import { cookies } from 'next/headers';
 import Layout from '@/components/client/commons/Layout';
-import { ThemeMode } from '@/consts/theme';
+import { SIDER_WIDTH, TOOLBAR_MOBILE_HEIGHT, ThemeMode } from '@/consts/theme';
 import { StoreProvider } from '@/components/client/commons/StoreProvider';
 import { getChainInfos } from '@/services/db/chainInfo';
 import { normalizeRollappsInfo } from '@/utils/rollappInfo';
@@ -46,7 +46,7 @@ export default async function RootLayout({
                   flexGrow: 1,
                   // width: { md: `calc(100vh - ${SIDER_WIDTH}px)` },
                   height: {
-                    xs: `calc(100vh - ${128}px)`,
+                    xs: `calc(100vh - ${TOOLBAR_MOBILE_HEIGHT}px)`,
                     md: `calc(100vh - ${64}px)`,
                   },
                 }}>
