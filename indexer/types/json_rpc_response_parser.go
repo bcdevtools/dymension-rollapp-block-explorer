@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 )
 
 func ParseJsonRpcResponse[T any](bz []byte) (any, error) {
@@ -24,7 +25,7 @@ func ParseJsonRpcResponse[T any](bz []byte) (any, error) {
 	}
 
 	if response.Err.Code != 0 {
-		return nil, fmt.Errorf("error code: %d, message: %s", response.Err.Code, response.Err.Message)
+		return nil, errors.Wrapf(ErrUpstreamRpcReturnedError, "error code: %d, message: %s", response.Err.Code, response.Err.Message)
 	}
 
 	if response.Result == nil {

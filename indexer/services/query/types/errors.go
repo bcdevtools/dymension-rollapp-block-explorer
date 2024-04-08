@@ -1,12 +1,12 @@
 package types
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 	"strings"
 )
 
-var ErrBlackList = fmt.Errorf("black list")
+// ErrBlackList is the error when the response contains critical issue
+var ErrBlackList = errors.New("black list")
 var ErrBlackListDueToMisMatchChainId = errors.Wrap(ErrBlackList, "mis-match chain-id")
 
 // IsErrBlackList returns true if the error indicate the response contains critical issue, the URL should be ignored
