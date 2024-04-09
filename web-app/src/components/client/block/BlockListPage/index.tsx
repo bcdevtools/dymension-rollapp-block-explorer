@@ -3,7 +3,7 @@
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import { Skeleton } from '@mui/material';
+import Skeleton from '@mui/material/Skeleton';
 import { useLatestBlock } from '@/hooks/useLatestBlock';
 import BlockListTable from './_BlockListTable';
 
