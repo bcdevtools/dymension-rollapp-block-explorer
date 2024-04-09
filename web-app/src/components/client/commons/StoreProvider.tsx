@@ -1,6 +1,6 @@
 'use client';
 import { initRollappStore } from '@/stores/rollappStore';
-import { RollappInfo } from '@/utils/rollappInfo';
+import { RollappInfo } from '@/utils/rollapp';
 import { getInitialRollappState } from '@/utils/store';
 import { usePathname } from 'next/navigation';
 import { useRef } from 'react';

@@ -1,6 +1,6 @@
 import { RollappState } from '@/stores/rollappStore';
 import { getRollappPathFromPathname } from './common';
-import { RollappInfo } from './rollappInfo';
+import { RollappInfo } from './rollapp';
 import { RpcService } from '@/services/rpc.service';
 
 export function getSelectedRollappInfoByPathname(

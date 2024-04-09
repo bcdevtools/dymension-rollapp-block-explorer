@@ -5,7 +5,7 @@ import {
 } from '@/consts/setting';
 import dayjs from 'dayjs';
 
-export type SearchParam = string | string[] | undefined;
+export type SearchParam = string | undefined;
 
 export function getRollappPathFromPathname(pathname: string) {
   return pathname.match(/^\/[^\/]*/)![0];
@@ -20,16 +20,8 @@ export function formatUnixTime(unixTime: number) {
   return dayjs.unix(unixTime).format(DEFAULT_DATE_TIME_FORMAT);
 }
 
-export function getStringParamAsArrayNumber(param: SearchParam): number[] {
-  if (!param) return [];
-  const numbers = Array.isArray(param)
-    ? param.map(parseInt)
-    : [parseInt(param)];
-  return numbers.filter(v => !isNaN(v));
-}
-
 export function getStringParamAsNumber(param: SearchParam): number {
-  return param ? parseInt(param.toString()) : NaN;
+  return param ? parseInt(param) : NaN;
 }
 
 export function getValidPageSize(pageSize: number) {

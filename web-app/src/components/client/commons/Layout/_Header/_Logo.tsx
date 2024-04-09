@@ -1,6 +1,5 @@
+import { APP_NAME } from '@/consts/setting';
 import Typography from '@mui/material/Typography';
-
-const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Rollapp Block Explorer';
 
 export default function Logo() {
   return (

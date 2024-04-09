@@ -1,7 +1,7 @@
 import { RollappActionTypes } from '@/consts/actionTypes';
 import { Store, useStore } from '@/hooks/useStore';
 import { RpcService } from '@/services/rpc.service';
-import { RollappInfo } from '@/utils/rollappInfo';
+import { RollappInfo } from '@/utils/rollapp';
 import {
   getRpcServiceFromSelectedRollappInfo,
   getSelectedRollappInfoByPathname,

@@ -1,5 +1,4 @@
-import { getChainInfos } from '@/services/db/chainInfo';
-import { getRollappInfoByPath } from '@/utils/rollappInfo';
+import { getRollAppInfoByRollappPath } from '@/services/chain.service';
 
 type RollappLayoutProps = Readonly<{
   params: { rollappPath: string };
@@ -7,11 +6,8 @@ type RollappLayoutProps = Readonly<{
 }>;
 
 export async function generateMetadata({ params }: RollappLayoutProps) {
-  const chainInfos = await getChainInfos();
-  const rollappInfo = getRollappInfoByPath(
-    chainInfos,
-    `/${params.rollappPath}`
-  );
+  const rollappInfo = await getRollAppInfoByRollappPath(params.rollappPath);
+
   return {
     title: `${rollappInfo?.name} Block Explorer`,
     description: `${rollappInfo?.name} Block Explorer`,
