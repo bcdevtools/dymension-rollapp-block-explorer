@@ -8,7 +8,7 @@ export const getTransactionsByHeight = async function (
 ) {
   const findOption: Prisma.transactionFindManyArgs = {
     where: { chain_id },
-    orderBy: { height: 'desc' },
+    orderBy: [{ epoch: 'desc' }, { height: 'desc' }],
   };
   if (height) {
     findOption.where!.height = height;
