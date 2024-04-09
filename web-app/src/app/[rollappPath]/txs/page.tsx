@@ -1,3 +1,4 @@
+import LinkToBlockNo from '@/components/client/block/LinkToBlockNo';
 import PageTitle from '@/components/commons/PageTitle';
 import TransactionListTable from '@/components/transaction/TransactionListTable';
 import { getRollAppInfoByRollappPath } from '@/services/chain.service';
@@ -43,9 +44,16 @@ export default async function Transactions({
     { limit: pageSize, offset: offset }
   );
 
+  const subtitle = blockNo ? (
+    <>
+      For Block <LinkToBlockNo blockNo={blockNo} />
+    </>
+  ) : null;
+
   return (
     <>
-      <PageTitle title="Transactions" />
+      <PageTitle title="Transactions" subtitle={subtitle} />
+
       <TransactionListTable
         transactions={transactions}
         totalTransactions={total}

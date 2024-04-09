@@ -47,7 +47,7 @@ export default function BlockListPage() {
           <Typography>test</Typography>
         </BlockSummaryCard>
       </Grid>
-      <BlockListTable latestBlockNo={latestBlockNo} />
+      <BlockListTable latestBlockNo={latestBlockNo} loadingBlockNo={loading} />
     </>
   );
 }

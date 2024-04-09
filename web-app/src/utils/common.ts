@@ -31,7 +31,7 @@ export function getValidPageSize(pageSize: number) {
 
 export function getValidPage(page: number, pageSize: number, total: number) {
   if (isNaN(page) || page <= 0) return 0;
-  return Math.min(Math.ceil(total / pageSize) - 1, page);
+  return Math.min(total === 0 ? 0 : Math.ceil(total / pageSize) - 1, page);
 }
 
 export function getOffsetFromPageAndPageSize(page: number, pageSize: number) {

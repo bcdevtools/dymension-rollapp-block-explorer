@@ -7,6 +7,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Path } from '@/consts/path';
 import DataTable from '../commons/DataTable';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
+import { useEffect, useState } from 'react';
+import LinkToBlockNo from '../client/block/LinkToBlockNo';
 
 type TransactionListTableProps = Readonly<{
   transactions: transaction[];
@@ -24,19 +26,24 @@ export default function TransactionListTable({
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(false);
+  }, [transactions]);
 
   const body = transactions.map(transaction => [
-    <Link href={`${pathname}/${transaction.hash}`} underline="hover">
+    <Link
+      key={transaction.hash}
+      href={`${pathname}/${transaction.hash}`}
+      underline="hover">
       {transaction.hash}
     </Link>,
     transaction.tx_type,
-    <Link
-      href={`${getNewPathByRollapp(pathname, Path.BLOCKS)}/${
-        transaction.height
-      }`}
-      underline="hover">
-      {transaction.height.toString()}
-    </Link>,
+    <LinkToBlockNo
+      key={transaction.hash}
+      blockNo={transaction.height.toString()}
+    />,
     formatUnixTime(Number(transaction.epoch)),
   ]);
 
@@ -48,12 +55,17 @@ export default function TransactionListTable({
       total={totalTransactions}
       page={page}
       pageSize={pageSize}
+      loading={loading}
       onPageChange={newPage => {
+        setLoading(true);
         const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.set(PAGE_PARAM_NAME, newPage.toString());
-        router.push(`${pathname}?${newSearchParams.toString()}`);
+        router.push(`${pathname}?${newSearchParams.toString()}`, {
+          scroll: false,
+        });
       }}
       onRowsPerPageChange={newPageSize => {
+        setLoading(true);
         const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.set(PAGE_SIZE_PARAM_NAME, newPageSize);
         router.push(`${pathname}?${newSearchParams.toString()}`);

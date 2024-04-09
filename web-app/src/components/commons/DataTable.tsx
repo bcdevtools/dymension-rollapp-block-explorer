@@ -10,11 +10,11 @@ import TableFooter from '@mui/material/TableFooter';
 import TablePagination from '@mui/material/TablePagination';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
-import { useTheme } from '@mui/material/styles';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
+import Skeleton from '@mui/material/Skeleton';
 
 type DataTableProps = Readonly<{
   headers: React.ReactNode[];
@@ -25,6 +25,7 @@ type DataTableProps = Readonly<{
   pageSize: number;
   onPageChange: (page: number) => void;
   onRowsPerPageChange: (pageSize: string) => void;
+  loading?: boolean;
 }>;
 
 type TablePaginationActionsProps = Readonly<{
@@ -107,10 +108,14 @@ export default function DataTable({
   pageSize,
   onRowsPerPageChange,
   onPageChange,
+  loading,
 }: DataTableProps) {
+  const _body: React.ReactNode[][] = loading
+    ? Array(pageSize).fill(Array(headers.length).fill(<Skeleton />))
+    : body;
   return (
-    <TableContainer>
-      <Table>
+    <TableContainer sx={{ width: '100%' }}>
+      <Table sx={{ overflowY: 'scroll' }}>
         <TableHead>
           <TableRow>
             {headers.map((header, idx) => (
@@ -119,8 +124,8 @@ export default function DataTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {body.map((row, idx) => (
-            <TableRow key={rowKeys[idx]}>
+          {_body.map((row, idx) => (
+            <TableRow key={rowKeys[idx] || idx}>
               {row.map((cell, idx) => (
                 <TableCell key={idx}>{cell}</TableCell>
               ))}

@@ -29,10 +29,10 @@ function getTxsDisplay(blockDetail: Block, pathname: string) {
 
 export default function BlockDetailPage({ blockNo }: BlockDetailPageProps) {
   const [blockDetail, loading] = useBlockDetail(blockNo);
+  const pathname = usePathname();
+
   if (loading) return null;
   if (!blockDetail) return null;
-
-  const pathname = usePathname();
 
   const txsDisplay = getTxsDisplay(blockDetail, pathname);
   return (

@@ -13,9 +13,13 @@ import React from 'react';
 
 type BlockListTableProps = Readonly<{
   latestBlockNo: number;
+  loadingBlockNo: boolean;
 }>;
 
-export default function BlockListTable({ latestBlockNo }: BlockListTableProps) {
+export default function BlockListTable({
+  latestBlockNo,
+  loadingBlockNo,
+}: BlockListTableProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -32,7 +36,7 @@ export default function BlockListTable({ latestBlockNo }: BlockListTableProps) {
   const [blocks, loading] = useBlockList(latestBlockNo, page, pageSize);
 
   const body = blocks.map(b => [
-    <Link href={`${pathname}/${b.height}`} underline="hover">
+    <Link key={b.height} href={`${pathname}/${b.height}`} underline="hover">
       {b.height}
     </Link>,
     formatUnixTime(b.timeEpochUTC),
@@ -46,6 +50,7 @@ export default function BlockListTable({ latestBlockNo }: BlockListTableProps) {
       body={body}
       page={page}
       pageSize={pageSize}
+      loading={loading || loadingBlockNo}
       onPageChange={newPage => {
         const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.set(PAGE_PARAM_NAME, newPage.toString());
