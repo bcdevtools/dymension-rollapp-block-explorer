@@ -1,12 +1,11 @@
-import { QueryList } from '@/consts/dbResTypes';
 import prisma from '../../utils/prisma';
-import { Prisma, transaction } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export const getTransactionsByHeight = async function (
   chain_id: string,
   height: number | null,
   paginationOptions?: { offset?: number; limit?: number }
-): Promise<QueryList<transaction>> {
+) {
   const findOption: Prisma.transactionFindManyArgs = {
     where: { chain_id },
     orderBy: { height: 'desc' },
@@ -24,10 +23,18 @@ export const getTransactionsByHeight = async function (
     }
   }
 
-  const [data, total] = await prisma.$transaction([
-    prisma.transaction.findMany(findOption),
-    prisma.transaction.count({ where: findOption.where }),
-  ]);
+  return prisma.transaction.findMany(findOption);
+};
 
-  return { total, data };
+export const countTransactionsByHeight = async function (
+  chain_id: string,
+  height: number | null
+) {
+  const findOption: Prisma.transactionCountArgs = {
+    where: { chain_id },
+  };
+  if (height) {
+    findOption.where!.height = height;
+  }
+  return prisma.transaction.count(findOption);
 };

@@ -4,6 +4,7 @@ import useBlockList from '@/hooks/useBlockList';
 import {
   formatUnixTime,
   getStringParamAsNumber,
+  getValidPage,
   getValidPageSize,
 } from '@/utils/common';
 import Link from '@mui/material/Link';
@@ -22,7 +23,11 @@ export default function BlockListTable({ latestBlockNo }: BlockListTableProps) {
   const pageSize = getValidPageSize(
     getStringParamAsNumber(searchParams.get(PAGE_SIZE_PARAM_NAME))
   );
-  const page = getStringParamAsNumber(searchParams.get(PAGE_PARAM_NAME)) || 0;
+  const page = getValidPage(
+    getStringParamAsNumber(searchParams.get(PAGE_PARAM_NAME)),
+    pageSize,
+    latestBlockNo
+  );
 
   const [blocks, loading] = useBlockList(latestBlockNo, page, pageSize);
 

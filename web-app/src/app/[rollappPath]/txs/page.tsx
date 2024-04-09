@@ -1,12 +1,16 @@
 import PageTitle from '@/components/commons/PageTitle';
 import TransactionListTable from '@/components/transaction/TransactionListTable';
 import { getRollAppInfoByRollappPath } from '@/services/chain.service';
-import { getTransactionsByHeight } from '@/services/db/transactions';
+import {
+  countTransactionsByHeight,
+  getTransactionsByHeight,
+} from '@/services/db/transactions';
 import {
   SearchParam,
   getValidPageSize,
   getStringParamAsNumber,
   getOffsetFromPageAndPageSize,
+  getValidPage,
 } from '@/utils/common';
 
 type TransactionsProps = Readonly<{
@@ -23,11 +27,17 @@ export default async function Transactions({
   const blockNoParam = getStringParamAsNumber(searchParams.block);
   const blockNo = blockNoParam > 0 ? blockNoParam : null;
 
+  const total = await countTransactionsByHeight(rollappInfo.chainId, blockNo);
+
   const pageSize = getValidPageSize(getStringParamAsNumber(searchParams.ps));
-  const page = getStringParamAsNumber(searchParams.p);
+  const page = getValidPage(
+    getStringParamAsNumber(searchParams.p),
+    pageSize,
+    total
+  );
   const offset = getOffsetFromPageAndPageSize(page, pageSize);
 
-  const transactionsResult = await getTransactionsByHeight(
+  const transactions = await getTransactionsByHeight(
     rollappInfo.chainId,
     blockNo,
     { limit: pageSize, offset: offset }
@@ -37,10 +47,10 @@ export default async function Transactions({
     <>
       <PageTitle title="Transactions" />
       <TransactionListTable
-        transactions={transactionsResult.data}
-        totalTransactions={transactionsResult.total}
+        transactions={transactions}
+        totalTransactions={total}
         pageSize={pageSize}
-        page={isNaN(page) ? 0 : page}
+        page={page}
       />
     </>
   );
