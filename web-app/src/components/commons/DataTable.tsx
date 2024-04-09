@@ -114,47 +114,44 @@ export default function DataTable({
     ? Array(pageSize).fill(Array(headers.length).fill(<Skeleton />))
     : body;
   return (
-    <TableContainer sx={{ width: '100%' }}>
-      <Table sx={{ overflowY: 'scroll' }}>
-        <TableHead>
-          <TableRow>
-            {headers.map((header, idx) => (
-              <TableCell key={idx}>{header}</TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {_body.map((row, idx) => (
-            <TableRow key={rowKeys[idx] || idx}>
-              {row.map((cell, idx) => (
-                <TableCell key={idx}>{cell}</TableCell>
+    <>
+      <TableContainer sx={{ width: '100%' }}>
+        <Table sx={{ overflowX: 'scroll' }}>
+          <TableHead>
+            <TableRow>
+              {headers.map((header, idx) => (
+                <TableCell key={idx}>{header}</TableCell>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[10, 25, 50, 100]}
-              count={total}
-              rowsPerPage={pageSize}
-              page={page}
-              sx={{ border: 0 }}
-              slotProps={{
-                select: {
-                  inputProps: { 'aria-label': 'rows per page' },
-                  native: true,
-                },
-              }}
-              onPageChange={(e, newPage: number) => void onPageChange(newPage)}
-              onRowsPerPageChange={e =>
-                void onRowsPerPageChange(e.target.value)
-              }
-              ActionsComponent={TablePaginationActions}
-            />
-          </TableRow>
-        </TableFooter>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {_body.map((row, idx) => (
+              <TableRow key={rowKeys[idx] || idx}>
+                {row.map((cell, idx) => (
+                  <TableCell key={idx}>{cell}</TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        component="div"
+        rowsPerPageOptions={[10, 25, 50, 100]}
+        count={total}
+        rowsPerPage={pageSize}
+        page={page}
+        sx={{ border: 0 }}
+        slotProps={{
+          select: {
+            inputProps: { 'aria-label': 'rows per page' },
+            native: true,
+          },
+        }}
+        onPageChange={(e, newPage: number) => void onPageChange(newPage)}
+        onRowsPerPageChange={e => void onRowsPerPageChange(e.target.value)}
+        ActionsComponent={TablePaginationActions}
+      />
+    </>
   );
 }
