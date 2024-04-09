@@ -129,8 +129,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# misc
-.DS_Store
-
 # ide
 *.code-workspace
+.idea/
+
+# Mac
+.DS_Store
