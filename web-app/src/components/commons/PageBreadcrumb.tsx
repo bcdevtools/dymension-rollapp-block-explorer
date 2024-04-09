@@ -28,7 +28,7 @@ export default function PageBreadcrumb() {
 
         return isLast ? (
           <Typography color="text.primary" key={idx}>
-            {breadcrumbName || (isNaN(+value) ? value : `#${value}`)}
+            {breadcrumbName || (parseInt(value, 10) ? `#${value}` : value)}
           </Typography>
         ) : (
           <Link

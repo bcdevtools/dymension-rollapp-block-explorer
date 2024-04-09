@@ -9,7 +9,7 @@ export default function Block({ params }: BlockProps) {
   return (
     <>
       <PageTitle title="Block detail" />
-      <BlockDetailPage blockNo={+params.blockNo} />
+      <BlockDetailPage />
     </>
   );
 }

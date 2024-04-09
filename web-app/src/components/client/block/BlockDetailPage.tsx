@@ -8,10 +8,8 @@ import useBlockDetail from '@/hooks/useBlockDetail';
 import { formatUnixTime, getNewPathByRollapp } from '@/utils/common';
 import Link from '@mui/material/Link';
 import { Block } from '@/consts/rpcResTypes';
-import { usePathname } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
-
-type BlockDetailPageProps = Readonly<{ blockNo: number }>;
 
 function getTxsDisplay(blockDetail: Block, pathname: string) {
   return blockDetail.txs.length ? (
@@ -27,7 +25,9 @@ function getTxsDisplay(blockDetail: Block, pathname: string) {
   );
 }
 
-export default function BlockDetailPage({ blockNo }: BlockDetailPageProps) {
+export default function BlockDetailPage() {
+  const params = useParams<{ blockNo: string }>();
+  const blockNo = parseInt(params.blockNo);
   const [blockDetail, loading] = useBlockDetail(blockNo);
   const pathname = usePathname();
 

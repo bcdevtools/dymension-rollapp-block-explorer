@@ -16,7 +16,9 @@ export default function useBlockDetail(
       (async function () {
         try {
           setLoading(true);
-          const _block = await rpcService.getBlockByNumber(blockNo);
+          const _block = await rpcService.getBlockByNumber(blockNo, {
+            signal: ac.signal,
+          });
           setBlock(_block);
         } catch (e) {
           console.log(e);
