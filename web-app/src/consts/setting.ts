@@ -15,3 +15,6 @@ const maxPaginationSize = Number(process.env.NEXT_PUBLIC_MAX_PAGINATION_SIZE);
 export const MAX_PAGINATION_SIZE: number = !isNaN(maxPaginationSize)
   ? maxPaginationSize
   : 100;
+
+export const PAGE_SIZE_PARAM_NAME = 'ps';
+export const PAGE_PARAM_NAME = 'p';

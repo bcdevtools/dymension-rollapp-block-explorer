@@ -5,7 +5,7 @@ import {
 } from '@/consts/setting';
 import dayjs from 'dayjs';
 
-export type SearchParam = string | undefined;
+export type SearchParam = string | undefined | null;
 
 export function getRollappPathFromPathname(pathname: string) {
   return pathname.match(/^\/[^\/]*/)![0];

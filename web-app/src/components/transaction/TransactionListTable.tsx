@@ -6,6 +6,7 @@ import Link from '@mui/material/Link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Path } from '@/consts/path';
 import DataTable from '../commons/DataTable';
+import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 
 type TransactionListTableProps = Readonly<{
   transactions: transaction[];
@@ -49,12 +50,12 @@ export default function TransactionListTable({
       pageSize={pageSize}
       onPageChange={newPage => {
         const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set('p', newPage.toString());
+        newSearchParams.set(PAGE_PARAM_NAME, newPage.toString());
         router.push(`${pathname}?${newSearchParams.toString()}`);
       }}
       onRowsPerPageChange={newPageSize => {
         const newSearchParams = new URLSearchParams(searchParams);
-        newSearchParams.set('ps', newPageSize);
+        newSearchParams.set(PAGE_SIZE_PARAM_NAME, newPageSize);
         router.push(`${pathname}?${newSearchParams.toString()}`);
       }}
     />
