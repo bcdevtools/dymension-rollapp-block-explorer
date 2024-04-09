@@ -37,7 +37,7 @@ export default function TransactionListTable({
       key={transaction.hash}
       href={`${pathname}/${transaction.hash}`}
       underline="hover">
-      {transaction.hash}
+      0x{transaction.hash.toLowerCase()}
     </Link>,
     <Chip
       key={transaction.hash}
