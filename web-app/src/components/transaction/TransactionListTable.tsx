@@ -1,14 +1,14 @@
 'use client';
 
 import { transaction } from '@prisma/client';
-import { formatUnixTime, getNewPathByRollapp } from '@/utils/common';
+import { formatUnixTime } from '@/utils/common';
 import Link from '@mui/material/Link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Path } from '@/consts/path';
 import DataTable from '../commons/DataTable';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 import { useEffect, useState } from 'react';
 import LinkToBlockNo from '../client/block/LinkToBlockNo';
+import Chip from '@mui/material/Chip';
 
 type TransactionListTableProps = Readonly<{
   transactions: transaction[];
@@ -39,7 +39,11 @@ export default function TransactionListTable({
       underline="hover">
       {transaction.hash}
     </Link>,
-    transaction.tx_type,
+    <Chip
+      key={transaction.hash}
+      label={transaction.tx_type}
+      variant="outlined"
+    />,
     <LinkToBlockNo
       key={transaction.hash}
       blockNo={transaction.height.toString()}
