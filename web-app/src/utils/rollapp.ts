@@ -5,6 +5,7 @@ export type RollappInfo = {
   name: string;
   path: string;
   rpcUrls: string[];
+  chainType: string;
 };
 
 export function normalizeRollappsInfo(chainInfos: chain_info[]): RollappInfo[] {
@@ -17,6 +18,7 @@ export function normalizeRollappsInfo(chainInfos: chain_info[]): RollappInfo[] {
       .trim()
       .replace(/\s/g, '-')}`,
     rpcUrls: chainInfo.be_json_rpc_urls,
+    chainType: chainInfo.chain_type,
   }));
 }
 
