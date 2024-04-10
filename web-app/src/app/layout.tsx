@@ -9,7 +9,8 @@ import { normalizeRollappsInfo } from '@/utils/rollapp';
 import Box from '@mui/material/Box';
 import { CustomToolbar } from '@/components/client/commons/Layout/_Header';
 import Container from '@mui/material/Container';
-import Paper from '@mui/material/Paper';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 import PageBreadcrumb from '@/components/commons/PageBreadcrumb';
 
 export const metadata: Metadata = {
@@ -54,11 +55,11 @@ export default async function RootLayout({
                   },
                 }}>
                 <CustomToolbar />
-                <Container>
+                <Container sx={{ py: 1 }}>
                   <PageBreadcrumb />
-                  <Paper sx={{ my: 1, p: 2 }} elevation={1}>
-                    {children}
-                  </Paper>
+                  <Card>
+                    <CardContent>{children}</CardContent>
+                  </Card>
                 </Container>
               </Box>
             </Layout>
