@@ -183,7 +183,7 @@ func (d *defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, opt
 	}
 
 	httpClient := http.Client{
-		Timeout: timeout * time.Millisecond,
+		Timeout: timeout,
 	}
 
 	resp, err := httpClient.Post(d.getQueryEndpointWithRLock(), "application/json", bytes.NewBuffer([]byte(qb.String())))
