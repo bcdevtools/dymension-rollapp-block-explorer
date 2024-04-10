@@ -37,7 +37,7 @@ export default function BlockDetailPage() {
   const txsDisplay = getTxsDisplay(blockDetail, pathname);
   return (
     <>
-      <Grid container sx={{ mt: 2 }}>
+      <Grid container spacing={1}>
         <Label text="Block height" />
         <Value>
           <Typography>{blockNo}</Typography>
