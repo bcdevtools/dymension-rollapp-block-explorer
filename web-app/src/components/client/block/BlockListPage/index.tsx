@@ -13,11 +13,13 @@ function BlockSummaryCard({
   children,
 }: Readonly<{ label: string; loading?: boolean; children: React.ReactNode }>) {
   return (
-    <Grid item xs={6} md={3}>
-      <Paper sx={{ p: 1 }} elevation={3}>
+    <Grid item xs={6} lg={3}>
+      <Paper sx={{ p: 1, height: 80 }} square>
         <Grid container>
           <Grid item xs={12}>
-            <Typography color="gray">{label}</Typography>
+            <Typography variant="subtitle2" gutterBottom>
+              {label}
+            </Typography>
           </Grid>
           <Grid item xs={12}>
             {loading ? <Skeleton /> : children}
@@ -33,18 +35,18 @@ export default function BlockListPage() {
 
   return (
     <>
-      <Grid container spacing={2} sx={{ my: 2 }}>
+      <Grid container spacing={2} sx={{ mb: 3, mt: 1 }}>
         <BlockSummaryCard label="Block Height" loading={loading}>
-          <Typography>{latestBlockNo}</Typography>
+          <Typography variant="h5">{latestBlockNo}</Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Block Count (Last 24H)" loading={loading}>
-          <Typography>test</Typography>
+          <Typography variant="h5">test</Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Tx Count (Last 24H)" loading={loading}>
-          <Typography>test</Typography>
+          <Typography variant="h5">test</Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Block Time" loading={loading}>
-          <Typography>test</Typography>
+          <Typography variant="h5">test</Typography>
         </BlockSummaryCard>
       </Grid>
       <BlockListTable latestBlockNo={latestBlockNo} loadingBlockNo={loading} />

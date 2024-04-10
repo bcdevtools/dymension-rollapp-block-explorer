@@ -27,11 +27,16 @@ const baseThemeOptions: ThemeOptions = {
 const themes = {
   [ThemeMode.LIGHT]: createTheme({
     ...baseThemeOptions,
-    palette: { mode: ThemeMode.LIGHT },
+    palette: { mode: ThemeMode.LIGHT, background: { default: '#f8fafb' } },
   }),
   [ThemeMode.DARK]: createTheme({
     ...baseThemeOptions,
-    palette: { mode: ThemeMode.DARK },
+    palette: {
+      mode: ThemeMode.DARK,
+      background: {
+        default: '#13171b',
+      },
+    },
   }),
 };
 

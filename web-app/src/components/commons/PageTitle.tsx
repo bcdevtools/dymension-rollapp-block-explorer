@@ -9,8 +9,8 @@ type PageTitleProps = Readonly<{
 
 export default function PageTitle({ title, subtitle }: PageTitleProps) {
   return (
-    <Box sx={{ mb: 4 }}>
-      <Typography variant="h5">
+    <Box sx={{ mb: 3 }}>
+      <Typography variant="h4">
         <b>{title}</b>
       </Typography>
       {subtitle && <Typography variant="subtitle1">{subtitle}</Typography>}

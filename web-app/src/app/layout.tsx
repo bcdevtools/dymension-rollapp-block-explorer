@@ -57,7 +57,7 @@ export default async function RootLayout({
                 <CustomToolbar />
                 <Container sx={{ py: 1 }}>
                   <PageBreadcrumb />
-                  <Card>
+                  <Card variant="outlined">
                     <CardContent>{children}</CardContent>
                   </Card>
                 </Container>
