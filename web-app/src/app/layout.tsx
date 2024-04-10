@@ -49,18 +49,8 @@ export default async function RootLayout({
               <Box
                 width={{ xs: '100vw', md: `calc(100vw - ${SIDER_WIDTH}px)` }}
                 component="main"
-                flexGrow={1}
-                height={{
-                  xs: `calc(100vh - ${TOOLBAR_MOBILE_HEIGHT}px)`,
-                  md: `calc(100vh - ${TOOLBAR_HEIGHT}px)`,
-                }}>
-                <CustomToolbar />
-                <Container sx={{ py: 1 }}>
-                  <PageBreadcrumb />
-                  <Card variant="outlined">
-                    <CardContent>{children}</CardContent>
-                  </Card>
-                </Container>
+                flexGrow={1}>
+                {children}
               </Box>
             </Layout>
           </StoreProvider>

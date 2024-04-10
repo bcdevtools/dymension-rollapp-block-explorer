@@ -52,7 +52,7 @@ export default function Layout({ children, initialThemeMode }: LayoutProps) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, handleThemeToggle }}>
+    <ThemeContext.Provider value={{ handleThemeToggle }}>
       <ThemeProvider theme={themes[theme]}>
         <CssBaseline />
         <Box display="flex">
