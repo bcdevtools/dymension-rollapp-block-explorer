@@ -2,7 +2,12 @@ import type { Metadata } from 'next';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v14-appRouter';
 import { cookies } from 'next/headers';
 import Layout from '@/components/client/commons/Layout';
-import { SIDER_WIDTH, TOOLBAR_MOBILE_HEIGHT, ThemeMode } from '@/consts/theme';
+import {
+  SIDER_WIDTH,
+  TOOLBAR_HEIGHT,
+  TOOLBAR_MOBILE_HEIGHT,
+  ThemeMode,
+} from '@/consts/theme';
 import { StoreProvider } from '@/components/client/commons/StoreProvider';
 import { getChainInfos } from '@/services/db/chainInfo';
 import { normalizeRollappsInfo } from '@/utils/rollapp';
@@ -42,17 +47,12 @@ export default async function RootLayout({
           <StoreProvider initialState={initialState}>
             <Layout initialThemeMode={themeMode}>
               <Box
+                width={{ xs: '100vw', md: `calc(100vw - ${SIDER_WIDTH}px)` }}
                 component="main"
-                sx={{
-                  flexGrow: 1,
-                  width: {
-                    xs: '100vw',
-                    md: `calc(100vw - ${SIDER_WIDTH}px)`,
-                  },
-                  height: {
-                    xs: `calc(100vh - ${TOOLBAR_MOBILE_HEIGHT}px)`,
-                    md: `calc(100vh - ${64}px)`,
-                  },
+                flexGrow={1}
+                height={{
+                  xs: `calc(100vh - ${TOOLBAR_MOBILE_HEIGHT}px)`,
+                  md: `calc(100vh - ${TOOLBAR_HEIGHT}px)`,
                 }}>
                 <CustomToolbar />
                 <Container sx={{ py: 1 }}>

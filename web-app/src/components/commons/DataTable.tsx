@@ -70,7 +70,7 @@ function TablePaginationActions({
   };
 
   return (
-    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+    <Box flexShrink={0} marginLeft={2.5}>
       <IconButton
         onClick={handleFirstPageButtonClick}
         disabled={page === 0}

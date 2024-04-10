@@ -14,6 +14,6 @@ export async function generateMetadata({ params }: RollappLayoutProps) {
   };
 }
 
-export default async function RootLayout({ children }: RollappLayoutProps) {
+export default async function Layout({ children }: RollappLayoutProps) {
   return children;
 }

@@ -21,7 +21,7 @@ type LayoutProps = Readonly<{
 export default function Layout({ children, initialThemeMode }: LayoutProps) {
   const [theme, setTheme] = useState(initialThemeMode);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isClosing, setClosing] = useState(false);
+  const isClosing = useRef(false);
   const pathname = usePathname();
   const [, dispatch] = useRollappStore(false);
 
@@ -37,18 +37,18 @@ export default function Layout({ children, initialThemeMode }: LayoutProps) {
   };
 
   const handleMenuToggle = () => {
-    if (!isClosing) {
+    if (!isClosing.current) {
       setMenuOpen(!menuOpen);
     }
   };
 
   const handleMenuClose = () => {
-    setClosing(true);
+    isClosing.current = true;
     setMenuOpen(false);
   };
 
   const handleDrawerTransitionEnd = () => {
-    setClosing(false);
+    isClosing.current = false;
   };
 
   return (
