@@ -21,14 +21,15 @@ model account {
 }
 
 model chain_info {
-  chain_id             String    @id
-  name                 String    @unique(map: "chain_info_unique_chain_name")
-  chain_type           String
-  bech32               Json
-  denoms               Json
-  be_json_rpc_urls     String[]
-  latest_indexed_block BigInt    @default(0)
-  account              account[]
+  chain_id                          String    @id
+  name                              String    @unique(map: "chain_info_unique_chain_name")
+  chain_type                        String
+  bech32                            Json
+  denoms                            Json
+  be_json_rpc_urls                  String[]
+  latest_indexed_block              BigInt    @default(0)
+  increased_latest_indexed_block_at BigInt    @default(0)
+  account                           account[]
 }
 
 model ref_account_to_recent_tx {
@@ -36,9 +37,9 @@ model ref_account_to_recent_tx {
   bech32_address              String
   height                      BigInt
   hash                        String
-  signer                      Boolean                    @default(false)
-  erc20                       Boolean                    @default(false)
-  nft                         Boolean                    @default(false)
+  signer                      Boolean?
+  erc20                       Boolean?
+  nft                         Boolean?
   account                     account                    @relation(fields: [chain_id, bech32_address], references: [chain_id, bech32_address], onDelete: NoAction, onUpdate: NoAction, map: "ref_recent_acc_tx_to_account_fkey")
   recent_accounts_transaction recent_account_transaction @relation(fields: [chain_id, height, hash], references: [chain_id, height, hash], onDelete: NoAction, onUpdate: NoAction, map: "ref_recent_acc_tx_to_recent_tx_fkey")
 
