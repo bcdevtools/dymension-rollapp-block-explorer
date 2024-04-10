@@ -72,7 +72,9 @@ export default function TransactionListTable({
         setLoading(true);
         const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.set(PAGE_SIZE_PARAM_NAME, newPageSize);
-        router.push(`${pathname}?${newSearchParams.toString()}`);
+        router.push(`${pathname}?${newSearchParams.toString()}`, {
+          scroll: false,
+        });
       }}
     />
   );
