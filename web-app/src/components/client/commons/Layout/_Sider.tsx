@@ -93,11 +93,7 @@ export default React.memo(function Sider({
     typeof window !== 'undefined' ? () => window.document.body : undefined;
 
   return (
-    <Box
-      component="nav"
-      sx={{ width: { md: width }, flexShrink: { md: 0 } }}
-      // aria-label="mailbox folders"
-    >
+    <Box component="nav" sx={{ width: { md: width }, flexShrink: { md: 0 } }}>
       {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
       <Drawer
         container={container}
