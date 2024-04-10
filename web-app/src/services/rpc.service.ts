@@ -3,6 +3,7 @@ import {
   ChainInfo,
   LatestBlockNumber,
   RpcResponse,
+  Transaction,
 } from '@/consts/rpcResTypes';
 import {
   FetchOptions,
@@ -10,6 +11,7 @@ import {
   getBlockByNumberParam,
   getChainInfoParam,
   getLatestBlockNumber,
+  getTransactionByHashParam,
 } from '@/utils/rpc';
 
 function getResponseResult<T>(response: RpcResponse<T>): T;
@@ -68,5 +70,13 @@ export class RpcService {
       );
       return getResponseResult(response);
     }
+  }
+
+  async getTransactionByHash(txHash: string, fetchOptions?: FetchOptions) {
+    const response: RpcResponse<Transaction> = await this._rpcClient.callRpc(
+      getTransactionByHashParam(txHash),
+      fetchOptions
+    );
+    return getResponseResult(response);
   }
 }

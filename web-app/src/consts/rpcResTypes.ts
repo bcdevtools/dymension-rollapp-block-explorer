@@ -49,3 +49,25 @@ export interface Block {
   timeEpochUTC: number;
   txs: Transaction[];
 }
+
+export interface TransactionGas {
+  limit: number;
+  used: number;
+}
+export interface Event {
+  type: string;
+  attributes: { key: string; value: string }[];
+}
+
+export interface Transaction {
+  hash: string;
+  height: number;
+  msgs: any[];
+
+  result: {
+    code: number;
+    events: Event[];
+    gas: TransactionGas;
+    success: boolean;
+  };
+}

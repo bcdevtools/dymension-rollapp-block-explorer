@@ -63,3 +63,11 @@ export function getBlockByNumberParam(blockNo: number): RpcCallParam {
     jsonrpc: '2.0',
   };
 }
+
+export function getTransactionByHashParam(txHash: string): RpcCallParam {
+  return {
+    method: 'be_getTransactionByHash',
+    params: [txHash],
+    jsonrpc: '2.0',
+  };
+}

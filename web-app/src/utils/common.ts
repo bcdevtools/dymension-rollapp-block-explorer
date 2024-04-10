@@ -38,3 +38,7 @@ export function getOffsetFromPageAndPageSize(page: number, pageSize: number) {
   if (isNaN(page) || page < 0) return 0;
   return page * pageSize;
 }
+
+export function formatNumberString(value: number) {
+  return value.toLocaleString();
+}

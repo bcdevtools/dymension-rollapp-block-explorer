@@ -13,7 +13,11 @@ export default function PageTitle({ title, subtitle }: PageTitleProps) {
       <Typography variant="h4">
         <b>{title}</b>
       </Typography>
-      {subtitle && <Typography variant="subtitle1">{subtitle}</Typography>}
+      {subtitle && (
+        <Typography variant="subtitle1" color="text.secondary">
+          {subtitle}
+        </Typography>
+      )}
     </Box>
   );
 }

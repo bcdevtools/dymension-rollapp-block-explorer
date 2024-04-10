@@ -1,8 +1,11 @@
 import DataTable from '@/components/commons/DataTable';
+import { Path } from '@/consts/path';
+import { Block } from '@/consts/rpcResTypes';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 import useBlockList from '@/hooks/useBlockList';
 import {
   formatUnixTime,
+  getNewPathByRollapp,
   getStringParamAsNumber,
   getValidPage,
   getValidPageSize,
@@ -15,6 +18,21 @@ type BlockListTableProps = Readonly<{
   latestBlockNo: number;
   loadingBlockNo: boolean;
 }>;
+
+function getTxsDisplay(blockDetail: Block, pathname: string) {
+  const txCount = blockDetail.txs.length;
+  return !txCount ? (
+    0
+  ) : (
+    <Link
+      href={`${getNewPathByRollapp(pathname, Path.TRANSACTIONS)}?block=${
+        blockDetail.height
+      }`}
+      underline="hover">
+      {txCount}
+    </Link>
+  );
+}
 
 export default function BlockListTable({
   latestBlockNo,
@@ -40,7 +58,7 @@ export default function BlockListTable({
       {b.height}
     </Link>,
     formatUnixTime(b.timeEpochUTC),
-    b.txs.length,
+    getTxsDisplay(b, pathname),
   ]);
 
   return (

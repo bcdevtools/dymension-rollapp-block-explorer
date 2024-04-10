@@ -17,7 +17,7 @@ function BlockSummaryCard({
       <Paper sx={{ p: 1, height: 80 }} square>
         <Grid container>
           <Grid item xs={12}>
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="subtitle2" color="grey" gutterBottom>
               {label}
             </Typography>
           </Grid>
