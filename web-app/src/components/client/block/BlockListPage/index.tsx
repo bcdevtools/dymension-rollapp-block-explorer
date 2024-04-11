@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import Skeleton from '@mui/material/Skeleton';
 import { useLatestBlock } from '@/hooks/useLatestBlock';
 import BlockListTable from './_BlockListTable';
+import Box from '@mui/material/Box';
 
 function BlockSummaryCard({
   label,
@@ -15,16 +16,17 @@ function BlockSummaryCard({
   return (
     <Grid item xs={6} lg={3}>
       <Paper sx={{ p: 1, height: 80 }} square>
-        <Grid container>
-          <Grid item xs={12}>
-            <Typography variant="subtitle2" color="grey" gutterBottom>
-              {label}
-            </Typography>
-          </Grid>
-          <Grid item xs={12}>
-            {loading ? <Skeleton /> : children}
-          </Grid>
-        </Grid>
+        <Box
+          display="flex"
+          flexDirection="column"
+          height="100%"
+          width="100%"
+          justifyContent="space-between">
+          <Typography variant="subtitle2" color="grey" gutterBottom>
+            {label}
+          </Typography>
+          {loading ? <Skeleton /> : children}
+        </Box>
       </Paper>
     </Grid>
   );
@@ -37,16 +39,16 @@ export default function BlockListPage() {
     <>
       <Grid container spacing={2} sx={{ mb: 3, mt: 1 }}>
         <BlockSummaryCard label="Block Height" loading={loading}>
-          <Typography variant="h5">{latestBlockNo}</Typography>
+          <Typography variant="h6">{latestBlockNo}</Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Block Count (Last 24H)" loading={loading}>
-          <Typography variant="h5">test</Typography>
+          <Typography variant="h6">test</Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Tx Count (Last 24H)" loading={loading}>
-          <Typography variant="h5">test</Typography>
+          <Typography variant="h6">test</Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Block Time" loading={loading}>
-          <Typography variant="h5">test</Typography>
+          <Typography variant="h6">test</Typography>
         </BlockSummaryCard>
       </Grid>
       <BlockListTable latestBlockNo={latestBlockNo} loadingBlockNo={loading} />

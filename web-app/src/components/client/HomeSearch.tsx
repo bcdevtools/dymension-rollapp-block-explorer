@@ -10,6 +10,7 @@ import IconButton from '@mui/material/IconButton';
 import InputBase from '@mui/material/InputBase';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
+import { SEARCH_PLACEHOLDER } from '@/consts/setting';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   p: '2px 4px',
@@ -29,8 +30,6 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-const placeholder = 'Address, Block, Transaction hash, etc.';
-
 export default function HomeSearch() {
   const [rollappPath, setRollappPath] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
@@ -46,9 +45,13 @@ export default function HomeSearch() {
         />
       </Grid>
       <Grid item xs={12} md={9}>
-        <StyledTextField placeholder={placeholder} fullWidth size="small" />
+        <StyledTextField
+          placeholder={SEARCH_PLACEHOLDER}
+          fullWidth
+          size="small"
+        />
         <StyledPaper sx={{ width: '100%' }}>
-          <InputBase sx={{ ml: 1, flex: 1 }} placeholder={placeholder} />
+          <InputBase sx={{ ml: 1, flex: 1 }} placeholder={SEARCH_PLACEHOLDER} />
           <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
             <SearchIcon />
           </IconButton>

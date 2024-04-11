@@ -12,6 +12,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
 import React from 'react';
 import { TOOLBAR_MOBILE_HEIGHT } from '@/consts/theme';
+import { SEARCH_PLACEHOLDER } from '@/consts/setting';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
@@ -71,9 +72,11 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create('width'),
     [theme.breakpoints.up('sm')]: {
-      width: '42ch',
+      width: '32ch',
+    },
+    [theme.breakpoints.up('md')]: {
       '&:focus': {
-        width: '66ch',
+        width: '53ch',
       },
     },
   },
@@ -102,7 +105,7 @@ export default React.memo(function Header({ handleMenuToggle }: HeaderProps) {
             <SearchIcon />
           </SearchIconWrapper>
           <StyledInputBase
-            placeholder="Search…"
+            placeholder={SEARCH_PLACEHOLDER}
             inputProps={{ 'aria-label': 'search' }}
           />
         </Search>
