@@ -11,14 +11,13 @@ import Widgets from '@mui/icons-material/Widgets';
 import Receipt from '@mui/icons-material/Receipt';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
-import FormControl from '@mui/material/FormControl';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
+import { SelectChangeEvent } from '@mui/material/Select';
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
 import { useRollappStore } from '@/stores/rollappStore';
 import { getNewPathByRollapp } from '@/utils/common';
+import RollappSelect from '../RollappSelect';
 
 type SiderProps = Readonly<{
   menuOpen: boolean;
@@ -41,7 +40,7 @@ export default React.memo(function Sider({
 }: SiderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [{ selectedRollappInfo, rollappInfos }] = useRollappStore(true);
+  const [{ selectedRollappInfo }] = useRollappStore(true);
 
   const handleMenuItemClick = (path: string) => {
     router.push(getNewPathByRollapp(pathname, path));
@@ -61,19 +60,13 @@ export default React.memo(function Sider({
       <Toolbar sx={{ display: { xs: 'none', md: 'flex' } }} />
       <List>
         <ListItem>
-          <FormControl fullWidth>
-            <Select
-              value={selectedRollappInfo?.path}
-              onChange={e =>
-                void router.push(pathname.replace(/^\/[^\/]*/, e.target.value))
-              }>
-              {rollappInfos.map(rollapp => (
-                <MenuItem key={rollapp.chainId} value={rollapp.path}>
-                  {rollapp.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <RollappSelect
+            fullWidth
+            value={selectedRollappInfo!.path}
+            onChange={(e: SelectChangeEvent) =>
+              void router.push(pathname.replace(/^\/[^\/]*/, e.target.value!))
+            }
+          />
         </ListItem>
         {MENU_ITEMS.map((menuItem, index) => (
           <ListItem key={index} disablePadding>

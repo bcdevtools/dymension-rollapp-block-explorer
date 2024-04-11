@@ -24,21 +24,19 @@ export async function generateMetadata({ params }: RollappLayoutProps) {
 
 export default async function RollappLayout({ children }: RollappLayoutProps) {
   return (
-    <>
-      <Layout>
-        <Box
-          width={{ xs: '100vw', md: `calc(100vw - ${SIDER_WIDTH}px)` }}
-          component="main"
-          flexGrow={1}>
-          <CustomToolbar />
-          <Container sx={{ py: 1 }}>
-            <PageBreadcrumb />
-            <Card variant="outlined">
-              <CardContent>{children}</CardContent>
-            </Card>
-          </Container>
-        </Box>
-      </Layout>
-    </>
+    <Layout>
+      <Box
+        width={{ xs: '100vw', md: `calc(100vw - ${SIDER_WIDTH}px)` }}
+        component="main"
+        flexGrow={1}>
+        <CustomToolbar />
+        <Container sx={{ py: 1 }}>
+          <PageBreadcrumb />
+          <Card variant="outlined">
+            <CardContent>{children}</CardContent>
+          </Card>
+        </Container>
+      </Box>
+    </Layout>
   );
 }
