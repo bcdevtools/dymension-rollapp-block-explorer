@@ -158,6 +158,11 @@ func (d *defaultIndexer) Start() {
 
 			// perform indexing
 			latestIndexedBlock, err := db.GetLatestIndexedBlock(d.chainConfig.ChainId)
+			if err != nil {
+				logger.Error("failed to get latest indexed block from database", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+				return err
+			}
+
 			upstreamRpcLatestBlock := beGetChainInfo.LatestBlock
 
 			// Sometime, the upstream RPC is restored with snapshot, thus causing the latest block to be behind.
