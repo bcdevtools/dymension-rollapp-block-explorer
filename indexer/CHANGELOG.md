@@ -56,13 +56,16 @@ Templates for Unreleased:
 
 ## Unreleased
 
-#### Features
+### Features
+
 - (indexing) [#1](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/1) Add indexer
 - (indexing) [#8](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/8) Indexing per chain transactions
 - (indexing) [#9](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/9) Indexing transaction involvers as accounts
 - (indexing) [#10](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/10) Indexing recent transactions for involvers
+- (indexing) [#16](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/16) Add ability to enable and disable indexing a chain for hot reload
 
-#### Improvements
+### Improvements
+
 - (indexing,sql) [#13](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/13) Add column storing epoch UTC last updated
 - (rpc) [#14](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/14) Improve error message and detection when upstream RPC returns error
 - (indexing) [#15](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/15) Improve performance and prevent unexpected error when indexing blocks

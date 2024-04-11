@@ -100,8 +100,7 @@ func NewDatabaseIntegrationTestSuite(
 	err = rows.Scan(&count)
 	require.NoError(t, err)
 
-	var remakeDb bool
-	remakeDb = count != 1
+	remakeDb := count != 1
 
 	if remakeDb {
 		require.NoError(
@@ -361,7 +360,6 @@ func isPgClosed() (closed bool, err error) {
 		errMsg := err.Error()
 		dialingError := strings.Contains(errMsg, "error while dialing") || strings.Contains(errMsg, "connection refused")
 		if dialingError {
-			closed = true
 			err = nil
 		} else {
 			fmt.Println(err)
