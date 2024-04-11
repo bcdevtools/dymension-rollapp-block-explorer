@@ -88,9 +88,14 @@ func initChainListFile() {
 		_, err = file.WriteString(
 			// trailing style: 2 spaces
 			fmt.Sprint(`
-chain_1_name:
-  chain_id: abc-1
+evil:
+  chain_id: evil_8363-1
   be_json_rpc_urls: [ "http://localhost:11100" ]
+  # disable: true
+worm:
+  chain_id: worm_8383-1
+  be_json_rpc_urls: [ "http://localhost:11102" ]
+  # disable: true
 `))
 		libutils.ExitIfErr(err, fmt.Sprintf("Unable to write content for new Chain list file %s", chainsFile))
 	} else if err != nil {
