@@ -1,6 +1,6 @@
 import LinkToBlockNo from '@/components/client/block/LinkToBlockNo';
 import PageTitle from '@/components/commons/PageTitle';
-import TransactionListTable from '@/components/transaction/TransactionListTable';
+import TransactionListTable from '@/components/client/transaction/TransactionListTable';
 import { getRollAppInfoByRollappPath } from '@/services/chain.service';
 import {
   countTransactionsByHeight,

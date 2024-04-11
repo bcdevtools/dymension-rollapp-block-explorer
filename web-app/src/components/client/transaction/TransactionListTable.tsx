@@ -4,10 +4,10 @@ import { transaction } from '@prisma/client';
 import { formatUnixTime } from '@/utils/common';
 import Link from '@mui/material/Link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import DataTable from '../commons/DataTable';
+import DataTable from '../../commons/DataTable';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 import { useEffect, useState } from 'react';
-import LinkToBlockNo from '../client/block/LinkToBlockNo';
+import LinkToBlockNo from '../block/LinkToBlockNo';
 import Chip from '@mui/material/Chip';
 
 type TransactionListTableProps = Readonly<{
