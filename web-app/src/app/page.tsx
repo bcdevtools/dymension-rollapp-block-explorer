@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box';
-import HomeSearch from '@/components/client/HomeSearch';
+import _Home from '@/components/client/Home';
 import Image from 'next/image';
 import Typography from '@mui/material/Typography';
 import { APP_NAME } from '@/consts/setting';
@@ -21,7 +21,7 @@ export default async function Home() {
         </Box>
         {APP_NAME}
       </Typography>
-      <HomeSearch />
+      <_Home />
     </Box>
   );
 }
