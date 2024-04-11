@@ -1,9 +1,11 @@
+import { Path } from '@/consts/path';
 import {
   DEFAULT_DATE_TIME_FORMAT,
   DEFAULT_PAGINATION_SIZE,
   MAX_PAGINATION_SIZE,
 } from '@/consts/setting';
 import dayjs from 'dayjs';
+import { isAddress } from './address';
 
 export type SearchParam = string | undefined | null;
 
@@ -41,4 +43,24 @@ export function getOffsetFromPageAndPageSize(page: number, pageSize: number) {
 
 export function formatNumberString(value: number) {
   return value.toLocaleString();
+}
+
+export function getNewPathOnSearch(rollappPath: string, searchText: string) {
+  searchText = searchText.trim();
+
+  const searchTextAsDec = parseInt(searchText, 10);
+
+  if (!isNaN(searchTextAsDec) && searchTextAsDec > 0)
+    return `${rollappPath}/${Path.BLOCKS}/${searchTextAsDec}`;
+
+  let searchTextAsHex = parseInt(searchText, 16);
+  if (!isNaN(searchTextAsHex) && searchTextAsHex >= 0) {
+    searchText = searchText.toLowerCase();
+    if (!searchText.startsWith('0x')) searchText = `0x${searchText}`;
+
+    return `${rollappPath}/${
+      isAddress(searchText) ? Path.ADDRESS : Path.TRANSACTIONS
+    }/${searchText}`;
+  }
+  throw new Error('Invalid search');
 }

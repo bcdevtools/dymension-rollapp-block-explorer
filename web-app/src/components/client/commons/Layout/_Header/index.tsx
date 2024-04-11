@@ -10,9 +10,12 @@ import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
-import React from 'react';
+import React, { FormEventHandler, useState } from 'react';
 import { TOOLBAR_MOBILE_HEIGHT } from '@/consts/theme';
 import { SEARCH_PLACEHOLDER } from '@/consts/setting';
+import { useRouter } from 'next/navigation';
+import { useRollappStore } from '@/stores/rollappStore';
+import { getNewPathOnSearch } from '@/utils/common';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
@@ -87,6 +90,20 @@ type HeaderProps = Readonly<{
 }>;
 
 export default React.memo(function Header({ handleMenuToggle }: HeaderProps) {
+  const [{ selectedRollappInfo }] = useRollappStore(true);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const router = useRouter();
+
+  const handleSubmit: FormEventHandler = e => {
+    e.preventDefault();
+
+    if (!searchValue) {
+      return;
+    }
+
+    router.push(getNewPathOnSearch(selectedRollappInfo!.path, searchValue));
+  };
+
   return (
     <StyledAppBar>
       <StyledToolbar>
@@ -100,13 +117,14 @@ export default React.memo(function Header({ handleMenuToggle }: HeaderProps) {
           <MenuIcon />
         </IconButton>
         <Logo />
-        <Search component="div">
+        <Search component="form" onSubmit={handleSubmit}>
           <SearchIconWrapper>
             <SearchIcon />
           </SearchIconWrapper>
           <StyledInputBase
             placeholder={SEARCH_PLACEHOLDER}
             inputProps={{ 'aria-label': 'search' }}
+            onChange={e => void setSearchValue(e.target.value)}
           />
         </Search>
         <ThemeToggleButton />

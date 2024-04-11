@@ -63,7 +63,7 @@ export default React.memo(function Sider({
           <RollappSelect
             fullWidth
             value={selectedRollappInfo!.path}
-            onChange={(e: SelectChangeEvent) =>
+            onValueChange={e =>
               void router.push(pathname.replace(/^\/[^\/]*/, e.target.value!))
             }
           />
