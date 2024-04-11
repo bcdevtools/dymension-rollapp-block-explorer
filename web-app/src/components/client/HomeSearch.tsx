@@ -19,9 +19,6 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   height: 40,
   width: '100%',
   backgroundColor: theme.palette.background.default,
-  [theme.breakpoints.down('md')]: {
-    display: 'none',
-  },
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
@@ -45,26 +42,12 @@ export default function HomeSearch() {
         />
       </Grid>
       <Grid item xs={12} md={9}>
-        <StyledTextField
-          placeholder={SEARCH_PLACEHOLDER}
-          fullWidth
-          size="small"
-        />
         <StyledPaper sx={{ width: '100%' }}>
           <InputBase sx={{ ml: 1, flex: 1 }} placeholder={SEARCH_PLACEHOLDER} />
           <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
             <SearchIcon />
           </IconButton>
         </StyledPaper>
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        justifyContent="center"
-        sx={{ display: { xs: 'flex', md: 'none' } }}>
-        <Button variant="contained" startIcon={<SearchIcon />}>
-          Search
-        </Button>
       </Grid>
     </Grid>
   );
