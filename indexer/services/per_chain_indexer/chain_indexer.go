@@ -232,7 +232,7 @@ func (d *defaultIndexer) Start() {
 						"error", err.Error(),
 					)
 					// no further action, just wait for next round
-				} else {
+				} else if height > 0 {
 					perBlockErr := d.fetchAndIndexingBlockRange(height, height, bech32Cfg)
 					if perBlockErr != nil {
 						logger.Error(
@@ -243,6 +243,8 @@ func (d *defaultIndexer) Start() {
 						)
 						return perBlockErr
 					}
+				} else {
+					logger.Debug("no failed block to retry", "chain-id", d.chainId)
 				}
 			}
 
