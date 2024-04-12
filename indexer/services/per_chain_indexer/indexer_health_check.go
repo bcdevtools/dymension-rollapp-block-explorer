@@ -25,11 +25,11 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 	// fetch from provided URLs
 
 	var responsesByJsonRpcUrl responseByJsonRpcUrlSlice
-	for _, url := range d.chainConfig.BeJsonRpcUrls {
+	for _, url := range d.getBeRpcUrlsWithRLock() {
 		d.querySvc.SetQueryEndpoint(url)
 		resBeGetChainInfo, duration, err := d.querySvc.BeGetChainInfo()
 		if err != nil {
-			logger.Error("failed to get chain info", "url", url, "chain-id", d.chainConfig.ChainId, "error", err.Error())
+			logger.Error("failed to get chain info", "url", url, "chain-id", d.chainId, "error", err.Error())
 			continue
 		}
 		responsesByJsonRpcUrl = append(responsesByJsonRpcUrl, responseByJsonRpcUrl{
@@ -41,12 +41,12 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 
 	theBestResponse, found := responsesByJsonRpcUrl.GetTop()
 	if !found {
-		logger.Error("failed to get chain info from all json-rpc urls", "chain-id", d.chainConfig.ChainId)
+		logger.Error("failed to get chain info from all json-rpc urls", "chain-id", d.chainId)
 		d.forceResetActiveJsonRpcUrl(true)
 
-		_, err := db.UpdateBeJsonRpcUrlsIfExists(d.chainConfig.ChainId, []string{})
+		_, err := db.UpdateBeJsonRpcUrlsIfExists(d.chainId, []string{})
 		if err != nil {
-			logger.Error("failed to clear be_json_rpc_urls from chain_info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+			logger.Error("failed to clear be_json_rpc_urls from chain_info record", "chain-id", d.chainId, "error", err.Error())
 		}
 	} else {
 		d.updateActiveJsonRpcUrlAndLastCheckWithLock(theBestResponse.url, time.Now())
@@ -57,9 +57,9 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 			urls = append(urls, res.url)
 		}
 
-		_, err := db.UpdateBeJsonRpcUrlsIfExists(d.chainConfig.ChainId, urls)
+		_, err := db.UpdateBeJsonRpcUrlsIfExists(d.chainId, urls)
 		if err != nil {
-			logger.Error("failed to update be_json_rpc_urls into chain_info record", "chain-id", d.chainConfig.ChainId, "error", err.Error())
+			logger.Error("failed to update be_json_rpc_urls into chain_info record", "chain-id", d.chainId, "error", err.Error())
 		} else {
 			updated = true
 			beGetChainInfoWhenUpdated = theBestResponse.res
