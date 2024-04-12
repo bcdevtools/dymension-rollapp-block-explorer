@@ -96,6 +96,7 @@ func (suite *IntegrationTestSuite) Test_UpdateBeJsonRpcUrlsIfExists_IT() {
 	})
 }
 
+//goland:noinspection SpellCheckingInspection
 func (suite *IntegrationTestSuite) Test_GetBech32Config_IT() {
 	db := suite.Database()
 

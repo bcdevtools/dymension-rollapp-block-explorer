@@ -1,5 +1,6 @@
 package per_chain_indexer
 
+//goland:noinspection SpellCheckingInspection
 import (
 	querytypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/types"

@@ -1,5 +1,6 @@
 package per_chain_indexer
 
+//goland:noinspection SpellCheckingInspection
 import (
 	"context"
 	pcitypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/per_chain_indexer/types"

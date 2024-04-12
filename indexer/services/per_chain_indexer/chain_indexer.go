@@ -1,5 +1,6 @@
 package per_chain_indexer
 
+//goland:noinspection SpellCheckingInspection
 import (
 	"context"
 	"fmt"

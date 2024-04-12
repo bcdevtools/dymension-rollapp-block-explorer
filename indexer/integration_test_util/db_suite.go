@@ -151,6 +151,7 @@ func NewDatabaseIntegrationTestSuite(
 	// Initialize connection
 	pgDbByOwner := openDbConnection(t, databaseName, databaseOwner)
 
+	//goland:noinspection SpellCheckingInspection
 	result := &DatabaseIntegrationTestSuite{
 		t:       t,
 		require: r,

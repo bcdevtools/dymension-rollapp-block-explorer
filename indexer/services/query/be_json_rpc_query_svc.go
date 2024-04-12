@@ -1,5 +1,6 @@
 package query
 
+//goland:noinspection SpellCheckingInspection
 import (
 	"bytes"
 	"fmt"

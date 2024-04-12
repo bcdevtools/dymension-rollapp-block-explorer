@@ -1,5 +1,6 @@
 package postgres
 
+//goland:noinspection SpellCheckingInspection
 import (
 	"context"
 	"database/sql"

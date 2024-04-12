@@ -1,8 +1,6 @@
 package utils
 
 import (
-	cryptorand "crypto/rand"
-	"github.com/pkg/errors"
 	"math/rand"
 )
 
@@ -13,16 +11,4 @@ func RandomPositiveInt64() int64 {
 		val = -val
 	}
 	return val
-}
-
-// GenRandomBytes returns generated random bytes array, with specified length.
-func GenRandomBytes(size int) []byte {
-	bz := make([]byte, size)
-	if size > 0 {
-		_, err := cryptorand.Read(bz)
-		if err != nil {
-			panic(errors.Wrap(err, "failed to generate random bytes"))
-		}
-	}
-	return bz
 }

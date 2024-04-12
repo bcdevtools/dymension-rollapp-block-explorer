@@ -84,10 +84,6 @@ type ContextKey string
 // AppContextKey is the key in the context.Context which holds the application context.
 const AppContextKey = "be-indexer-context"
 
-func WrapIndexerContext(ctx Context) context.Context {
-	return ctx
-}
-
 func UnwrapIndexerContext(ctx context.Context) Context {
 	if indexerCtx, ok := ctx.(Context); ok {
 		return indexerCtx

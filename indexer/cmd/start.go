@@ -1,5 +1,6 @@
 package cmd
 
+//goland:noinspection SpellCheckingInspection
 import (
 	"fmt"
 	libapp "github.com/EscanBE/go-lib/app"
