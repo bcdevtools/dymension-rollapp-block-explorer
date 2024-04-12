@@ -186,134 +186,30 @@ func (d *defaultIndexer) Start() {
 				return nil
 			}
 
+			var nextBlockToIndexFrom, nextBlockToIndexTo int64
+
 			if upstreamRpcLatestBlock <= latestIndexedBlock {
 				// no new block to index
+
+				// TODO instead of sleeping, do resync failed blocks
 				return nil
 			}
 
-			nextBlockToIndexFrom := latestIndexedBlock + 1
-			nextBlockToIndexTo := libutils.MinInt64(
+			nextBlockToIndexFrom = latestIndexedBlock + 1
+			nextBlockToIndexTo = libutils.MinInt64(
 				upstreamRpcLatestBlock,
 				nextBlockToIndexFrom+constants.MaximumNumberOfBlocksToIndexPerBatch-1,
 			)
 
-			beTransactionsInBlockRange, _, err := d.querySvc.BeTransactionsInBlockRange(nextBlockToIndexFrom, nextBlockToIndexTo)
-			if err != nil {
-				if querytypes.IsErrBlackList(err) {
-					d.forceResetActiveJsonRpcUrl(true)
-					logger.Error("malformed response", "chain-id", d.chainConfig.ChainId, "endpoint", "be_getTransactionsInBlockRange", "error", err.Error())
-				} else {
-					logger.Error("failed to get transactions in block range, waiting for next round", "chain-id", d.chainConfig.ChainId, "error", err.Error())
-				}
-				return err
-			}
-
-			for _, errorBlock := range beTransactionsInBlockRange.ErrorBlocks {
-				err = db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, errorBlock, fmt.Errorf("rpc marks error"))
-				if err != nil {
-					logger.Error("failed to insert/update failed block", "chain-id", d.chainConfig.ChainId, "height", errorBlock, "error", err.Error())
-					return err
-				}
-			}
-
-			for _, missingBlock := range beTransactionsInBlockRange.MissingBlocks {
-				err = db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, missingBlock, fmt.Errorf("rpc marks missing"))
-				if err != nil {
-					logger.Error("failed to insert/update failed block", "chain-id", d.chainConfig.ChainId, "height", missingBlock, "error", err.Error())
-					return err
-				}
-			}
-
-			if len(beTransactionsInBlockRange.Blocks) > 0 {
-				// sort ascending
-				slices.SortFunc(beTransactionsInBlockRange.Blocks, func(l, r querytypes.BlockInResponseBeTransactionsInBlockRange) int {
-					return int(l.Height - r.Height)
-				})
-			}
-
-			for _, block := range beTransactionsInBlockRange.Blocks {
-				blockHeight := block.Height
-
-				if blockHeight == 0 { // unexpected un-set value
-					panic(fmt.Sprintf("unexpected block height 0 when indexing %s", d.chainConfig.ChainId))
-				}
-
-				if len(block.Transactions) < 1 {
-					// skip empty block
-					err = db.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
-					if err != nil {
-						logger.Error("failed to set latest indexed block", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error(), "tx", false)
-					}
-					continue
-				}
-
-				epochWeek := utils.GetEpochWeek(block.TimeEpochUTC)
-				if !d.sharedCache.IsCreatedPartitionsForEpochWeek(epochWeek) {
-					// prepare partitioned tables for this epoch week
-					err := utils.ObserveLongOperation("create partitioned tables for epoch week", func() error {
-						return db.PreparePartitionedTablesForEpoch(block.TimeEpochUTC)
-					}, 15*time.Second, logger)
-					if err != nil {
-						logger.Error("failed to create partitioned tables for epoch, retrying...", "chain-id", d.chainConfig.ChainId, "error", err.Error())
-						time.Sleep(15 * time.Second)
-						return errors.Wrap(err, fmt.Sprintf("failed to create partitioned tables for epoch week: %d", epochWeek))
-					}
-
-					logger.Info("successfully prepared partitioned tables for epoch week", "epoch-week", epochWeek)
-					d.sharedCache.MarkCreatedPartitionsForEpochWeek(epochWeek)
-				}
-
-				dbTx, err := db.BeginDatabaseTransaction(context.Background())
-				if err != nil {
-					logger.Error("failed to begin transaction", "error", err.Error())
-					return err
-				}
-
-				err = d.insertBlockInformation(blockHeight, block, bech32Cfg, dbTx)
-				if err != nil {
-					logger.Error("failed to insert block information", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error())
-				}
-
-				if err == nil && len(block.Transactions) > 0 {
-					err = dbTx.CleanupZeroRefCountRecentAccountTransaction()
-					if err != nil {
-						logger.Error("failed to cleanup zero ref count recent account transaction", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error())
-					}
-				}
-
-				if err == nil {
-					err = dbTx.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
-					if err != nil {
-						logger.Error("failed to set latest indexed block", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error(), "tx", true)
-					}
-				}
-
-				if err == nil {
-					err = dbTx.RemoveFailedBlockRecord(d.chainConfig.ChainId, blockHeight)
-					if err != nil {
-						logger.Error("failed to remove failed block record", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", err.Error())
-					}
-				}
-
-				if err != nil {
-					logger.Error("failed to insert block information, rollback", "error", err.Error(), "chain-id", d.chainConfig.ChainId, "height", blockHeight)
-					_ = dbTx.RollbackTransaction()
-					_ = db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, blockHeight, err)
-					continue
-				}
-
-				err = dbTx.CommitTransaction()
-				if err != nil {
-					logger.Error("failed to commit block information", "error", err.Error(), "chain-id", d.chainConfig.ChainId, "height", blockHeight)
-					_ = db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, blockHeight, err)
-					continue
-				}
-
-				logger.Debug("indexed block successfully", "chain-id", d.chainConfig.ChainId, "height", blockHeight)
+			fatalErr := d.fetchAndIndexingBlockRange(nextBlockToIndexFrom, nextBlockToIndexTo, bech32Cfg)
+			if fatalErr != nil {
+				return fatalErr
 			}
 
 			if nextBlockToIndexTo < upstreamRpcLatestBlock {
 				catchUp = true
+			} else {
+				// TODO instead of sleeping, do resync failed blocks
 			}
 
 			return nil
@@ -321,6 +217,181 @@ func (d *defaultIndexer) Start() {
 	}
 
 	logger.Info("shutting down indexer", "name", d.chainName)
+}
+
+func (d *defaultIndexer) fetchAndIndexingBlockRange(
+	nextBlockToIndexFrom, nextBlockToIndexTo int64,
+	bech32Cfg dbtypes.Bech32PrefixOfChainInfo,
+) (
+	// fatal error are errors which affects the whole indexing process,
+	// they are not per-block-level error since the failed-to-index block will be put into the `failed_block` table.
+	fatalError error,
+) {
+	indexerCtx := types.UnwrapIndexerContext(d.ctx)
+	db := indexerCtx.GetDatabase()
+	logger := indexerCtx.GetLogger()
+
+	beTransactionsInBlockRange, _, fatalError := d.querySvc.BeTransactionsInBlockRange(nextBlockToIndexFrom, nextBlockToIndexTo)
+	if fatalError != nil {
+		if querytypes.IsErrBlackList(fatalError) {
+			d.forceResetActiveJsonRpcUrl(true)
+			logger.Error("malformed response", "chain-id", d.chainConfig.ChainId, "endpoint", "be_getTransactionsInBlockRange", "error", fatalError.Error())
+		} else {
+			logger.Error("failed to get transactions in block range, waiting for next round", "chain-id", d.chainConfig.ChainId, "error", fatalError.Error())
+		}
+		return fatalError // failed to query got no data, then it is a fatal error
+	}
+
+	for _, errorBlock := range beTransactionsInBlockRange.ErrorBlocks {
+		fatalError = db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, errorBlock, fmt.Errorf("rpc marks error"))
+		if fatalError != nil {
+			logger.Error("failed to insert/update failed block", "chain-id", d.chainConfig.ChainId, "height", errorBlock, "error", fatalError.Error())
+			return fatalError // insert into the table is mandatory, then it is a fatal error
+		}
+	}
+
+	for _, missingBlock := range beTransactionsInBlockRange.MissingBlocks {
+		fatalError = db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, missingBlock, fmt.Errorf("rpc marks missing"))
+		if fatalError != nil {
+			logger.Error("failed to insert/update failed block", "chain-id", d.chainConfig.ChainId, "height", missingBlock, "error", fatalError.Error())
+			return fatalError // insert into the table is mandatory, then it is a fatal error
+		}
+	}
+
+	if len(beTransactionsInBlockRange.Blocks) > 0 {
+		// sort ascending
+		slices.SortFunc(beTransactionsInBlockRange.Blocks, func(l, r querytypes.BlockInResponseBeTransactionsInBlockRange) int {
+			return int(l.Height - r.Height)
+		})
+	}
+
+	for _, block := range beTransactionsInBlockRange.Blocks {
+		blockHeight := block.Height
+
+		if blockHeight == 0 { // unexpected un-set value
+			panic(fmt.Sprintf("unexpected block height 0 when indexing %s", d.chainConfig.ChainId))
+		}
+
+		if len(block.Transactions) < 1 {
+			// skip empty block
+			fatalError := db.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
+			if fatalError != nil {
+				logger.Error(
+					"failed to set latest indexed block",
+					"chain-id", d.chainConfig.ChainId,
+					"height", blockHeight,
+					"error", fatalError.Error(),
+					"tx", false,
+				)
+			}
+
+			// error when updating the table, look like there is a db connection issue, then it is a fatal error
+			return fatalError
+		}
+
+		epochWeek := utils.GetEpochWeek(block.TimeEpochUTC)
+		if !d.sharedCache.IsCreatedPartitionsForEpochWeek(epochWeek) {
+			// prepare partitioned tables for this epoch week
+			fatalError := utils.ObserveLongOperation("create partitioned tables for epoch week", func() error {
+				return db.PreparePartitionedTablesForEpoch(block.TimeEpochUTC)
+			}, 15*time.Second, logger)
+			if fatalError != nil {
+				logger.Error("failed to create partitioned tables for epoch, retrying...", "chain-id", d.chainConfig.ChainId, "error", fatalError.Error())
+				time.Sleep(15 * time.Second)
+
+				fatalError = errors.Wrap(fatalError, fmt.Sprintf("failed to create partitioned tables for epoch week: %d", epochWeek))
+
+				// error when preparing the partitioned tables, then it is a fatal error
+				return fatalError
+			}
+
+			logger.Info("successfully prepared partitioned tables for epoch week", "epoch-week", epochWeek)
+			d.sharedCache.MarkCreatedPartitionsForEpochWeek(epochWeek)
+		}
+
+		dbTx, fatalError := db.BeginDatabaseTransaction(context.Background())
+		if fatalError != nil {
+			logger.Error("failed to begin transaction", "error", fatalError.Error())
+
+			// error when initializing a tx, look like there is a db connection issue, then it is a fatal error
+			return fatalError
+		}
+
+		perBlockErr := d.insertBlockInformation(blockHeight, block, bech32Cfg, dbTx)
+		if perBlockErr != nil {
+			logger.Error("failed to insert block information", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", perBlockErr.Error())
+			// to be handled with rollback operation
+		}
+
+		if perBlockErr == nil && len(block.Transactions) > 0 {
+			perBlockErr = dbTx.CleanupZeroRefCountRecentAccountTransaction()
+			if perBlockErr != nil {
+				logger.Error("failed to cleanup zero ref count recent account transaction", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", perBlockErr.Error())
+				// to be handled with rollback operation
+			}
+		}
+
+		if perBlockErr == nil {
+			perBlockErr = dbTx.SetLatestIndexedBlock(d.chainConfig.ChainId, blockHeight)
+			if perBlockErr != nil {
+				logger.Error("failed to set latest indexed block", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", perBlockErr.Error(), "tx", true)
+				// to be handled with rollback operation
+			}
+		}
+
+		if perBlockErr == nil {
+			perBlockErr = dbTx.RemoveFailedBlockRecord(d.chainConfig.ChainId, blockHeight)
+			if perBlockErr != nil {
+				logger.Error("failed to remove failed block record", "chain-id", d.chainConfig.ChainId, "height", blockHeight, "error", perBlockErr.Error())
+				// to be handled with rollback operation
+			}
+		}
+
+		if perBlockErr != nil {
+			logger.Error(
+				"failed to insert block information, rollback",
+				"chain-id", d.chainConfig.ChainId,
+				"height", blockHeight,
+				"error", perBlockErr.Error(),
+			)
+			_ = dbTx.RollbackTransaction()
+			fatalError := db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, blockHeight, perBlockErr)
+			if fatalError != nil {
+				logger.Error(
+					"failed to insert/update failed block after rollback",
+					"chain-id", d.chainConfig.ChainId,
+					"height", blockHeight,
+					"error", fatalError.Error(),
+				)
+
+				// there is no longer something that can mark the block as failed, then it is a fatal error
+				return fatalError
+			}
+			continue
+		}
+
+		perBlockErr = dbTx.CommitTransaction()
+		if perBlockErr != nil {
+			logger.Error("failed to commit block information", "error", perBlockErr.Error(), "chain-id", d.chainConfig.ChainId, "height", blockHeight)
+			fatalError := db.InsertOrUpdateFailedBlock(d.chainConfig.ChainId, blockHeight, perBlockErr)
+			if fatalError != nil {
+				logger.Error(
+					"failed to insert/update failed block after failed to commit",
+					"chain-id", d.chainConfig.ChainId,
+					"height", blockHeight,
+					"error", fatalError.Error(),
+				)
+
+				// there is no longer something that can mark the block as failed, then it is a fatal error
+				return fatalError
+			}
+			continue
+		}
+
+		logger.Debug("indexed block successfully", "chain-id", d.chainConfig.ChainId, "height", blockHeight)
+	}
+
+	return nil
 }
 
 func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.BlockInResponseBeTransactionsInBlockRange, bech32Cfg dbtypes.Bech32PrefixOfChainInfo, dbTx database.DbTransaction) error {
