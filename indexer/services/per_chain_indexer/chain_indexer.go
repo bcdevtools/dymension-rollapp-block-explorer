@@ -217,6 +217,7 @@ func (d *defaultIndexer) Start() {
 
 				if nextBlockToIndexTo < upstreamRpcLatestBlock {
 					catchUp = true
+					logger.Debug("catching up", "chain-id", d.chainId, "from", nextBlockToIndexTo+1, "to", upstreamRpcLatestBlock)
 				} else {
 					checkRetryIndexFailedBlock = true
 				}
@@ -233,15 +234,44 @@ func (d *defaultIndexer) Start() {
 					)
 					// no further action, just wait for next round
 				} else if height > 0 {
+					logger.Debug("retrying failed block", "chain-id", d.chainId, "height", height)
 					perBlockErr := d.fetchAndIndexingBlockRange(height, height, bech32Cfg)
-					if perBlockErr != nil {
+					if perBlockErr == nil {
+						dbTx, err := db.BeginDatabaseTransaction(context.Background())
+						if err == nil {
+							err = dbTx.RemoveFailedBlockRecord(d.chainId, height)
+							if err == nil {
+								err = dbTx.CommitTransaction()
+								if err != nil {
+									logger.Error(
+										"failed to commit transaction that remove the failed block",
+										"error", err.Error(),
+									)
+									// it is not important to be failed
+									_ = dbTx.RollbackTransaction()
+								}
+							} else {
+								logger.Error(
+									"failed to remove failed block record",
+									"chain-id", d.chainId,
+									"height", height,
+									"error", err.Error(),
+								)
+								// it is not important to be failed
+								_ = dbTx.RollbackTransaction()
+							}
+						} else {
+							logger.Error("failed to begin transaction", "error", err.Error())
+							// it is not important to be failed
+						}
+					} else {
 						logger.Error(
 							"fatal error while fetching and indexing the failed block",
 							"height", height,
 							"chain-id", d.chainId,
 							"error", perBlockErr.Error(),
 						)
-						return perBlockErr
+						// it is not important to be failed
 					}
 				} else {
 					logger.Debug("no failed block to retry", "chain-id", d.chainId)
@@ -259,8 +289,8 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 	nextBlockToIndexFrom, nextBlockToIndexTo int64,
 	bech32Cfg dbtypes.Bech32PrefixOfChainInfo,
 ) (
-	// fatal error are errors which affects the whole indexing process,
-	// they are not per-block-level error since the failed-to-index block will be put into the `failed_block` table.
+// fatal error are errors which affects the whole indexing process,
+// they are not per-block-level error since the failed-to-index block will be put into the `failed_block` table.
 	fatalError error,
 ) {
 	indexerCtx := types.UnwrapIndexerContext(d.ctx)
