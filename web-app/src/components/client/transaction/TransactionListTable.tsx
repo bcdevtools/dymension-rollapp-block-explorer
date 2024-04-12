@@ -35,9 +35,9 @@ export default function TransactionListTable({
   const body = transactions.map(transaction => [
     <Link
       key={transaction.hash}
-      href={`${pathname}/0x${transaction.hash.toLowerCase()}`}
+      href={`${pathname}/${transaction.hash}`}
       underline="hover">
-      0x{transaction.hash.toLowerCase()}
+      {transaction.hash}
     </Link>,
     <Chip
       key={transaction.hash}
