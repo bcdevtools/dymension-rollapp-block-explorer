@@ -24,9 +24,10 @@ type Config struct {
 // Indexing is the structure representation of configuration from `config.yaml` file, at `indexing` section.
 // Configuration for indexing on-chain data can be putted here
 type Indexing struct {
-	HotReloadInterval  time.Duration `mapstructure:"hot-reload"`
-	UrlCheckInterval   time.Duration `mapstructure:"url-check"`
-	IndexBlockInterval time.Duration `mapstructure:"index-block"`
+	HotReloadInterval             time.Duration `mapstructure:"hot-reload"`
+	UrlCheckInterval              time.Duration `mapstructure:"url-check"`
+	IndexBlockInterval            time.Duration `mapstructure:"index-block"`
+	DisableRetryIndexFailedBlocks bool          `mapstructure:"disable-retry-failed-blocks"`
 }
 
 // Secret is the structure representation of configuration from `config.yaml` file, at `secret` section.
@@ -87,6 +88,7 @@ func (c Config) PrintOptions() {
 	headerPrintf("  + Hot-reload chain-list every: %s\n", c.IndexingConfig.HotReloadInterval)
 	headerPrintf("  + Json-RPC URL health-check every: %s\n", c.IndexingConfig.UrlCheckInterval)
 	headerPrintf("  + Index new block every: %s\n", c.IndexingConfig.IndexBlockInterval)
+	headerPrintf("  + Disable retry failed blocks: %t\n", c.IndexingConfig.DisableRetryIndexFailedBlocks)
 	headerPrintln("- Tokens configuration:")
 	if len(c.SecretConfig.TelegramToken) > 0 {
 		headerPrintln("  + Telegram bot token has set")

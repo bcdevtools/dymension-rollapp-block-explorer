@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/constants"
 	"math"
 	"time"
 )
@@ -93,4 +94,55 @@ func (suite *IntegrationTestSuite) Test_InsertOrUpdateFailedBlock_IT() {
 			suite.Equal(originalRowsCount+1, suite.CountRows2("failed_block"))
 		})
 	}
+}
+
+//goland:noinspection SqlNoDataSourceInspection, SqlDialectInspection
+func (suite *IntegrationTestSuite) Test_GetOneFailedBlock_IT() {
+	db := suite.Database()
+
+	originalRowsCount := suite.CountRows2("failed_block")
+	suite.Require().Zero(originalRowsCount)
+
+	firstChain := suite.DBITS.Chains.Number(1)
+
+	height, err := db.GetOneFailedBlock(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Zero(height, "must be zero when no failed block")
+
+	err = db.InsertOrUpdateFailedBlock(firstChain.ChainId, 2, nil)
+	suite.Require().NoError(err)
+
+	err = db.InsertOrUpdateFailedBlock(firstChain.ChainId, 3, nil)
+	suite.Require().NoError(err)
+
+	err = db.InsertOrUpdateFailedBlock(firstChain.ChainId, 5, nil)
+	suite.Require().NoError(err)
+
+	_, err = db.Sql.Exec("UPDATE failed_block SET last_retry_epoch = 1")
+	suite.Require().NoError(err)
+
+	height, err = db.GetOneFailedBlock(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Equal(int64(5), height, "must be the latest one")
+
+	_, err = db.Sql.Exec("UPDATE failed_block SET retry_count = $1 WHERE height = 5", constants.RetryIndexingFailedBlockMaxRetries)
+	suite.Require().NoError(err)
+
+	height, err = db.GetOneFailedBlock(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Equal(int64(3), height, "must be the latest one which not reached max retry count")
+
+	_, err = db.Sql.Exec("UPDATE failed_block SET last_retry_epoch = $1 WHERE height = 3", time.Now().UTC().Unix()-constants.RetryIndexingFailedBlockGapSeconds+2)
+	suite.Require().NoError(err)
+
+	height, err = db.GetOneFailedBlock(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Equal(int64(2), height, "must be the latest one which not reached max retry count and not retried recently")
+
+	_, err = db.Sql.Exec("UPDATE failed_block SET retry_count = $1", constants.RetryIndexingFailedBlockMaxRetries)
+	suite.Require().NoError(err)
+
+	height, err = db.GetOneFailedBlock(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Zero(height, "must be zero when no failed block satisfy conditions")
 }
