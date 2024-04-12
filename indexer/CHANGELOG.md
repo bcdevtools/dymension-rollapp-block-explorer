@@ -41,15 +41,15 @@ Templates for Unreleased:
 
 ## Unreleased
 
-#### Features
+### Features
 
-#### Improvements
+### Improvements
 
-#### Bug Fixes
+### Bug Fixes
 
-#### Schema Breaking
+### Schema Breaking
 
-#### API Breaking
+### API Breaking
 -->
 
 # Changelog
@@ -70,3 +70,7 @@ Templates for Unreleased:
 - (rpc) [#14](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/14) Improve error message and detection when upstream RPC returns error
 - (indexing) [#15](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/15) Improve performance and prevent unexpected error when indexing blocks
 - (indexing) [#18](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/18) Retry indexing failed block
+
+### Bug Fixes
+
+- (indexing) [#19](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/19) Skip retry indexing failed block with `height = 0`
