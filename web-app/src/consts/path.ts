@@ -3,6 +3,7 @@ export const enum Path {
   BLOCKS = '/blocks',
   TRANSACTIONS = '/txs',
   ADDRESS = '/address',
+  NOT_FOUND = '/not-found',
 }
 
 export const BreadcrumbName = {
@@ -10,4 +11,5 @@ export const BreadcrumbName = {
   [Path.BLOCKS]: 'Blocks',
   [Path.TRANSACTIONS]: 'Transactions',
   [Path.ADDRESS]: 'Address',
+  [Path.NOT_FOUND]: 'Not found',
 };

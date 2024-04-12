@@ -7,7 +7,7 @@ import { FormEventHandler, useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import { SEARCH_PLACEHOLDER } from '@/consts/setting';
 import { useRouter } from 'next/navigation';
-import { getNewPathOnSearch } from '@/utils/common';
+import { handleSearch } from '@/utils/common';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Fade from '@mui/material/Fade';
@@ -44,7 +44,7 @@ export default function Home() {
       setHasTriedSubmit(true);
       return;
     }
-    router.push(getNewPathOnSearch(rollappPath, searchValue));
+    handleSearch(rollappPath, searchValue, newPath => router.push(newPath));
   };
 
   return (

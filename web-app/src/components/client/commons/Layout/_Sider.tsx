@@ -16,7 +16,7 @@ import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
 import { useRollappStore } from '@/stores/rollappStore';
-import { getNewPathByRollapp } from '@/utils/common';
+import { getNewPathByRollapp, isNotFoundPath } from '@/utils/common';
 import RollappSelect from '../RollappSelect';
 
 type SiderProps = Readonly<{
@@ -63,9 +63,13 @@ export default React.memo(function Sider({
           <RollappSelect
             fullWidth
             value={selectedRollappInfo!.path}
-            onValueChange={e =>
-              void router.push(pathname.replace(/^\/[^\/]*/, e.target.value!))
-            }
+            onValueChange={e => {
+              void router.push(
+                isNotFoundPath(pathname)
+                  ? e.target.value
+                  : pathname.replace(/^\/[^\/]*/, e.target.value!)
+              );
+            }}
           />
         </ListItem>
         {MENU_ITEMS.map((menuItem, index) => (

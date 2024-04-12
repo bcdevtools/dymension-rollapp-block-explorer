@@ -5,12 +5,15 @@ import {
   MAX_PAGINATION_SIZE,
 } from '@/consts/setting';
 import dayjs from 'dayjs';
-import { isAddress } from './address';
 
 export type SearchParam = string | undefined | null;
 
 export function getRollappPathFromPathname(pathname: string) {
   return pathname.match(/^\/[^\/]*/)![0];
+}
+
+export function isNotFoundPath(pathname: string) {
+  return /(?<=^\/[^\/]*\/)not-found$/.test(pathname);
 }
 
 export function getNewPathByRollapp(pathname: string, newPath: string) {
@@ -45,22 +48,26 @@ export function formatNumberString(value: number) {
   return value.toLocaleString();
 }
 
-export function getNewPathOnSearch(rollappPath: string, searchText: string) {
+export function handleSearch(
+  rollappPath: string,
+  searchText: string,
+  cb: (newPath: string) => void
+) {
   searchText = searchText.trim();
 
-  const searchTextAsDec = parseInt(searchText, 10);
+  if (!searchText) return;
 
-  if (!isNaN(searchTextAsDec) && searchTextAsDec > 0)
-    return `${rollappPath}/${Path.BLOCKS}/${searchTextAsDec}`;
+  if (/^\d+$/.test(searchText))
+    return cb(`${rollappPath}/${Path.BLOCKS}/${searchText}`);
 
-  let searchTextAsHex = parseInt(searchText, 16);
-  if (!isNaN(searchTextAsHex) && searchTextAsHex >= 0) {
-    searchText = searchText.toLowerCase();
-    if (!searchText.startsWith('0x')) searchText = `0x${searchText}`;
+  if (
+    /^(0x)?[\da-fA-F]{40}$/.test(searchText) ||
+    /^[a-z]+1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{38,}$/.test(searchText)
+  )
+    return cb(`${rollappPath}/${Path.ADDRESS}/${searchText}`);
 
-    return `${rollappPath}/${
-      isAddress(searchText) ? Path.ADDRESS : Path.TRANSACTIONS
-    }/${searchText}`;
-  }
-  throw new Error('Invalid search');
+  if (/^(0x)?[\da-fA-F]{64}$/.test(searchText))
+    return cb(`${rollappPath}/${Path.TRANSACTIONS}/${searchText}`);
+
+  return cb(`${rollappPath}/${Path.NOT_FOUND}`);
 }

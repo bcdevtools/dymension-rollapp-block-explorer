@@ -13,9 +13,9 @@ import Toolbar from '@mui/material/Toolbar';
 import React, { FormEventHandler, useState } from 'react';
 import { TOOLBAR_MOBILE_HEIGHT } from '@/consts/theme';
 import { SEARCH_PLACEHOLDER } from '@/consts/setting';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useRollappStore } from '@/stores/rollappStore';
-import { getNewPathOnSearch } from '@/utils/common';
+import { handleSearch } from '@/utils/common';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
@@ -91,8 +91,9 @@ type HeaderProps = Readonly<{
 
 export default React.memo(function Header({ handleMenuToggle }: HeaderProps) {
   const [{ selectedRollappInfo }] = useRollappStore(true);
-  const [searchValue, setSearchValue] = useState<string>('');
+  const [searchValue, setSearchValue] = useState('');
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSubmit: FormEventHandler = e => {
     e.preventDefault();
@@ -101,7 +102,10 @@ export default React.memo(function Header({ handleMenuToggle }: HeaderProps) {
       return;
     }
 
-    router.push(getNewPathOnSearch(selectedRollappInfo!.path, searchValue));
+    handleSearch(selectedRollappInfo!.path, searchValue, newPath => {
+      if (pathname !== newPath) router.push(newPath);
+      setSearchValue('');
+    });
   };
 
   return (
@@ -124,6 +128,7 @@ export default React.memo(function Header({ handleMenuToggle }: HeaderProps) {
           <StyledInputBase
             placeholder={SEARCH_PLACEHOLDER}
             inputProps={{ 'aria-label': 'search' }}
+            value={searchValue}
             onChange={e => void setSearchValue(e.target.value)}
           />
         </Search>
