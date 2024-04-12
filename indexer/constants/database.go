@@ -1,5 +1,10 @@
 package constants
 
+const (
+	RetryIndexingFailedBlockGapSeconds = 60
+	RetryIndexingFailedBlockMaxRetries = 100
+)
+
 func GetTablesPartitionedByEpochWeek() []string {
 	return []string{
 		"transaction",

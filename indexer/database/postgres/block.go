@@ -1,6 +1,9 @@
 package postgres
 
 import (
+	"database/sql"
+	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/constants"
+	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/utils"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 	"time"
@@ -69,4 +72,39 @@ SET retry_count = failed_block.retry_count + 1,
 	}
 
 	return nil
+}
+
+func (db *Database) GetOneFailedBlock(chainId string) (height int64, err error) {
+	tableName := utils.GetPartitionedTableNameByChainId("failed_block", chainId)
+
+	var rows *sql.Rows
+
+	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
+	rows, err = db.Sql.Query(`
+SELECT COALESCE(height, 0) FROM `+tableName+`
+WHERE chain_id = $1 AND retry_count < $2 AND last_retry_epoch < $3
+ORDER BY height DESC
+LIMIT 1
+`,
+		chainId, // 1
+		constants.RetryIndexingFailedBlockMaxRetries,                         // 2
+		time.Now().UTC().Unix()-constants.RetryIndexingFailedBlockGapSeconds, // 3
+	)
+
+	if err != nil {
+		err = errors.Wrap(err, "failed to get failed block")
+		return
+	}
+
+	if !rows.Next() {
+		return
+	}
+
+	err = rows.Scan(&height)
+	if err != nil {
+		err = errors.Wrap(err, "failed to scan result of failed block")
+		return
+	}
+
+	return
 }
