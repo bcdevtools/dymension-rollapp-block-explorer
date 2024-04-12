@@ -7,6 +7,7 @@ import Skeleton from '@mui/material/Skeleton';
 import { useLatestBlock } from '@/hooks/useLatestBlock';
 import BlockListTable from './_BlockListTable';
 import Box from '@mui/material/Box';
+import Card from '@/components/commons/Card';
 
 function BlockSummaryCard({
   label,
@@ -51,7 +52,12 @@ export default function BlockListPage() {
           <Typography variant="h6">test</Typography>
         </BlockSummaryCard>
       </Grid>
-      <BlockListTable latestBlockNo={latestBlockNo} loadingBlockNo={loading} />
+      <Card>
+        <BlockListTable
+          latestBlockNo={latestBlockNo}
+          loadingBlockNo={loading}
+        />
+      </Card>
     </>
   );
 }

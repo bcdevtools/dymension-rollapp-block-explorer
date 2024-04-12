@@ -12,7 +12,7 @@ import { formatNumberString } from '@/utils/common';
 
 function getStatusDisplay(success: boolean) {
   return success ? (
-    <Chip label="primary" color="success" size="small" icon={<DoneIcon />} />
+    <Chip label="Success" color="success" size="small" icon={<DoneIcon />} />
   ) : (
     <Chip label="Fail" color="error" size="small" icon={<ClearIcon />} />
   );

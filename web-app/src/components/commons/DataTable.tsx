@@ -6,7 +6,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
-import TableFooter from '@mui/material/TableFooter';
 import TablePagination from '@mui/material/TablePagination';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -113,6 +112,7 @@ export default function DataTable({
   const _body: React.ReactNode[][] = loading
     ? Array(pageSize).fill(Array(headers.length).fill(<Skeleton />))
     : body;
+
   return (
     <>
       <TableContainer sx={{ width: '100%' }}>
@@ -141,7 +141,6 @@ export default function DataTable({
         count={total}
         rowsPerPage={pageSize}
         page={page}
-        sx={{ border: 0 }}
         slotProps={{
           select: {
             inputProps: { 'aria-label': 'rows per page' },
