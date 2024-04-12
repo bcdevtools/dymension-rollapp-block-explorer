@@ -15,7 +15,7 @@ function BlockSummaryCard({
 }: Readonly<{ label: string; loading?: boolean; children: React.ReactNode }>) {
   return (
     <Grid item xs={6} lg={3}>
-      <Paper sx={{ p: 1, height: 80 }} square>
+      <Paper sx={{ p: 1, height: 80 }} variant="outlined">
         <Box
           display="flex"
           flexDirection="column"

@@ -9,7 +9,7 @@ type PageTitleProps = Readonly<{
 
 export default function PageTitle({ title, subtitle }: PageTitleProps) {
   return (
-    <Box marginBottom={3}>
+    <Box marginBottom={3} marginTop={2}>
       <Typography variant="h4">
         <b>{title}</b>
       </Typography>

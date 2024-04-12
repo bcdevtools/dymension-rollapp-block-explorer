@@ -38,9 +38,7 @@ export default async function RollappLayout({
         <CustomToolbar />
         <Container sx={{ py: 1 }}>
           <PageBreadcrumb />
-          <Card variant="outlined">
-            <CardContent>{children}</CardContent>
-          </Card>
+          {children}
         </Container>
       </Box>
     </Layout>

@@ -13,6 +13,7 @@ import {
   getOffsetFromPageAndPageSize,
   getValidPage,
 } from '@/utils/common';
+import Card from '@/components/commons/Card';
 
 type TransactionsProps = Readonly<{
   params: { rollappPath: string };
@@ -54,12 +55,14 @@ export default async function Transactions({
     <>
       <PageTitle title="Transactions" subtitle={subtitle} />
 
-      <TransactionListTable
-        transactions={transactions}
-        totalTransactions={total}
-        pageSize={pageSize}
-        page={page}
-      />
+      <Card>
+        <TransactionListTable
+          transactions={transactions}
+          totalTransactions={total}
+          pageSize={pageSize}
+          page={page}
+        />
+      </Card>
     </>
   );
 }
