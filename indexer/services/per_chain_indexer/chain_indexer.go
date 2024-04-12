@@ -186,7 +186,6 @@ func (d *defaultIndexer) Start() {
 				return nil
 			}
 
-			var nextBlockToIndexFrom, nextBlockToIndexTo int64
 			var checkRetryIndexFailedBlock bool
 
 			if upstreamRpcLatestBlock <= latestIndexedBlock {
@@ -196,8 +195,8 @@ func (d *defaultIndexer) Start() {
 			} else {
 				checkRetryIndexFailedBlock = false
 
-				nextBlockToIndexFrom = latestIndexedBlock + 1
-				nextBlockToIndexTo = libutils.MinInt64(
+				nextBlockToIndexFrom := latestIndexedBlock + 1
+				nextBlockToIndexTo := libutils.MinInt64(
 					upstreamRpcLatestBlock,
 					nextBlockToIndexFrom+constants.MaximumNumberOfBlocksToIndexPerBatch-1,
 				)
@@ -223,6 +222,26 @@ func (d *defaultIndexer) Start() {
 
 			if checkRetryIndexFailedBlock && !d.indexingCfg.DisableRetryIndexFailedBlocks {
 				// TODO instead of sleeping, do resync failed blocks
+				height, err := db.GetOneFailedBlock(d.chainConfig.ChainId)
+				if err != nil {
+					logger.Error(
+						"failed to get one failed block for retry indexing",
+						"chain-id", d.chainConfig.ChainId,
+						"error", err.Error(),
+					)
+					// no further action, just wait for next round
+				} else {
+					perBlockErr := d.fetchAndIndexingBlockRange(height, height, bech32Cfg)
+					if perBlockErr != nil {
+						logger.Error(
+							"fatal error while fetching and indexing the failed block",
+							"height", height,
+							"chain-id", d.chainConfig.ChainId,
+							"error", perBlockErr.Error(),
+						)
+						return perBlockErr
+					}
+				}
 			}
 
 			return nil
