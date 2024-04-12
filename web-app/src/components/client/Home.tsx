@@ -64,6 +64,7 @@ export default function Home() {
             onValueChange={e => setRollappPath(e.target.value)}
             fullWidth
             error={error}
+            size="small"
           />
         </Grid>
       </Fade>

@@ -20,14 +20,17 @@ export default React.memo(function RollappSelect({
   value,
   label,
   onValueChange,
+  size = 'medium',
   ...props
 }: RollappSelectProps) {
   const [{ rollappInfos }] = useRollappStore(true);
 
   return (
-    <FormControl {...props}>
+    <FormControl {...props} size={size}>
       {label && (
-        <InputLabel id="select-rollapp-label" size="small">
+        <InputLabel
+          id="select-rollapp-label"
+          size={size === 'medium' ? 'normal' : 'small'}>
           Rollapp
         </InputLabel>
       )}
@@ -36,7 +39,7 @@ export default React.memo(function RollappSelect({
         onChange={onValueChange}
         labelId="select-rollapp-label"
         label={label && 'Rollapp'}
-        size="small">
+        size={size}>
         {rollappInfos.map(rollapp => (
           <MenuItem key={rollapp.chainId} value={rollapp.path}>
             {rollapp.name}
