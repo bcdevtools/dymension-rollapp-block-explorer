@@ -217,6 +217,7 @@ func (d *defaultIndexer) Start() {
 
 				if nextBlockToIndexTo < upstreamRpcLatestBlock {
 					catchUp = true
+					logger.Debug("catching up", "chain-id", d.chainId, "from", nextBlockToIndexTo+1, "to", upstreamRpcLatestBlock)
 				} else {
 					checkRetryIndexFailedBlock = true
 				}
@@ -233,6 +234,7 @@ func (d *defaultIndexer) Start() {
 					)
 					// no further action, just wait for next round
 				} else if height > 0 {
+					logger.Debug("retrying failed block", "chain-id", d.chainId, "height", height)
 					perBlockErr := d.fetchAndIndexingBlockRange(height, height, bech32Cfg)
 					if perBlockErr != nil {
 						logger.Error(
@@ -241,7 +243,7 @@ func (d *defaultIndexer) Start() {
 							"chain-id", d.chainId,
 							"error", perBlockErr.Error(),
 						)
-						return perBlockErr
+						// it is not important to be failed
 					}
 				} else {
 					logger.Debug("no failed block to retry", "chain-id", d.chainId)
