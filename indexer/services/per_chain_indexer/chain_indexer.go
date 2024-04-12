@@ -187,28 +187,41 @@ func (d *defaultIndexer) Start() {
 			}
 
 			var nextBlockToIndexFrom, nextBlockToIndexTo int64
+			var checkRetryIndexFailedBlock bool
 
 			if upstreamRpcLatestBlock <= latestIndexedBlock {
 				// no new block to index
 
-				// TODO instead of sleeping, do resync failed blocks
-				return nil
-			}
-
-			nextBlockToIndexFrom = latestIndexedBlock + 1
-			nextBlockToIndexTo = libutils.MinInt64(
-				upstreamRpcLatestBlock,
-				nextBlockToIndexFrom+constants.MaximumNumberOfBlocksToIndexPerBatch-1,
-			)
-
-			fatalErr := d.fetchAndIndexingBlockRange(nextBlockToIndexFrom, nextBlockToIndexTo, bech32Cfg)
-			if fatalErr != nil {
-				return fatalErr
-			}
-
-			if nextBlockToIndexTo < upstreamRpcLatestBlock {
-				catchUp = true
+				checkRetryIndexFailedBlock = true
 			} else {
+				checkRetryIndexFailedBlock = false
+
+				nextBlockToIndexFrom = latestIndexedBlock + 1
+				nextBlockToIndexTo = libutils.MinInt64(
+					upstreamRpcLatestBlock,
+					nextBlockToIndexFrom+constants.MaximumNumberOfBlocksToIndexPerBatch-1,
+				)
+
+				fatalErr := d.fetchAndIndexingBlockRange(nextBlockToIndexFrom, nextBlockToIndexTo, bech32Cfg)
+				if fatalErr != nil {
+					logger.Error(
+						"fatal error while fetching and indexing block range",
+						"from", nextBlockToIndexFrom,
+						"to", nextBlockToIndexTo,
+						"chain-id", d.chainConfig.ChainId,
+						"error", fatalErr.Error(),
+					)
+					return fatalErr
+				}
+
+				if nextBlockToIndexTo < upstreamRpcLatestBlock {
+					catchUp = true
+				} else {
+					checkRetryIndexFailedBlock = true
+				}
+			}
+
+			if checkRetryIndexFailedBlock && !d.indexingCfg.DisableRetryIndexFailedBlocks {
 				// TODO instead of sleeping, do resync failed blocks
 			}
 
