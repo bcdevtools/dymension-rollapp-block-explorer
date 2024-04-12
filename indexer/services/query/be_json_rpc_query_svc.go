@@ -29,7 +29,7 @@ type BeJsonRpcQueryService interface {
 var _ BeJsonRpcQueryService = &defaultBeJsonRpcQueryService{}
 
 type defaultBeJsonRpcQueryService struct {
-	mutex sync.RWMutex
+	sync.RWMutex
 
 	chainId string
 
@@ -40,15 +40,15 @@ type defaultBeJsonRpcQueryService struct {
 // NewBeJsonRpcQueryService initialize and returns a BeJsonRpcQueryService instance
 func NewBeJsonRpcQueryService(chainId string) BeJsonRpcQueryService {
 	return &defaultBeJsonRpcQueryService{
-		mutex:         sync.RWMutex{},
+		RWMutex:       sync.RWMutex{},
 		chainId:       chainId,
 		queryEndpoint: "",
 	}
 }
 
 func (d *defaultBeJsonRpcQueryService) SetQueryEndpoint(url string) {
-	d.mutex.Lock()
-	defer d.mutex.Unlock()
+	d.Lock()
+	defer d.Unlock()
 	d.queryEndpoint = url
 }
 
@@ -169,8 +169,8 @@ func (d *defaultBeJsonRpcQueryService) BeTransactionsInBlockRange(from, to int64
 }
 
 func (d *defaultBeJsonRpcQueryService) getQueryEndpointWithRLock() string {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
+	d.RLock()
+	defer d.RUnlock()
 	return d.queryEndpoint
 }
 
