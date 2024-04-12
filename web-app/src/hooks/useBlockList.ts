@@ -18,10 +18,10 @@ export default function useBlockList(
       (async function () {
         try {
           setLoading(true);
-          const topPageBlockNo = latestBlockNo - page * pageSize;
+          const topBlockNoInPage = latestBlockNo - page * pageSize;
           const _blocks = await rpcService.getBlockByNumber(
-            Array.from(Array(Math.min(topPageBlockNo, pageSize))).map(
-              (i, idx) => topPageBlockNo - idx
+            Array.from(Array(Math.min(topBlockNoInPage, pageSize))).map(
+              (i, idx) => topBlockNoInPage - idx
             ),
             { signal: ac.signal }
           );
