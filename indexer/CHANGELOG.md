@@ -73,6 +73,7 @@ Templates for Unreleased:
 - (indexing) [#15](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/15) Improve performance and prevent unexpected error when indexing blocks
 - (indexing) [#18](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/18) Retry indexing failed block
 - (refactor) [#25](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/25) Refactor indexer
+- (refactor) [#26](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/26) Refactor naming for methods of RWMutex structs
 
 ### Bug Fixes
 
