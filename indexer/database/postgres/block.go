@@ -9,21 +9,21 @@ import (
 	"time"
 )
 
-func (db *Database) GetLatestIndexedBlock(chainId string) (int64, error) {
+func (db *Database) GetLatestIndexedBlock(chainId string) (height int64, postponed bool, err error) {
 	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
 	row := db.Sql.QueryRow(`
-SELECT latest_indexed_block FROM chain_info WHERE chain_id = $1
+SELECT latest_indexed_block, COALESCE(postponed, FALSE) FROM chain_info WHERE chain_id = $1
 `,
 		chainId, // 1
 	)
 
-	var height int64
-	err := row.Scan(&height)
+	err = row.Scan(&height, &postponed)
 	if err != nil {
-		return 0, errors.Wrapf(err, "failed to get latest indexed block for %s", chainId)
+		err = errors.Wrapf(err, "failed to get latest indexed block for %s", chainId)
+		return
 	}
 
-	return height, nil
+	return
 }
 
 func (db *Database) SetLatestIndexedBlock(chainId string, height int64) error {

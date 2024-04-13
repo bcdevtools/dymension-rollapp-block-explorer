@@ -41,8 +41,11 @@ type Database interface {
 	// GetBech32Config returns the bech32 config of the chain info record with the given chain ID.
 	GetBech32Config(chainId string) (bech32Cfg dbtypes.Bech32PrefixOfChainInfo, err error)
 
+	// IsChainPostponed returns true if the chain is postponed. If the chain is not exists, it returns false.
+	IsChainPostponed(chainId string) (postponed bool, err error)
+
 	// GetLatestIndexedBlock returns the latest indexed block height of the chain info record with the given chain ID.
-	GetLatestIndexedBlock(chainId string) (int64, error)
+	GetLatestIndexedBlock(chainId string) (height int64, postponed bool, err error)
 
 	// SetLatestIndexedBlock updates the latest indexed block height of the chain info record with the given chain ID.
 	SetLatestIndexedBlock(chainId string, height int64) error

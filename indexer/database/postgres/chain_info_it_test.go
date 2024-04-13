@@ -121,3 +121,38 @@ func (suite *IntegrationTestSuite) Test_GetBech32Config_IT() {
 	suite.Equal("cosmosvalcons", cfg.Bech32PrefixCons)
 	suite.Equal("cosmosvaloper", cfg.Bech32PrefixOperator)
 }
+
+//goland:noinspection SqlNoDataSourceInspection,SqlDialectInspection
+func (suite *IntegrationTestSuite) Test_IsChainPostponed_IT() {
+	db := suite.Database()
+
+	postponed, err := db.IsChainPostponed("non-existing-chain")
+	suite.Require().NoError(err)
+	suite.Require().False(postponed)
+
+	firstChain := suite.DBITS.Chains.Number(1)
+
+	originalRecord := dbtypes.RecordChainInfo{
+		ChainId:       firstChain.ChainId,
+		Name:          firstChain.ChainId,
+		ChainType:     "cosmos",
+		Bech32:        `{"a": "b"}`,
+		Denoms:        `{"1": "2"}`,
+		BeJsonRpcUrls: []string{},
+	}
+
+	insertedOrUpdated, err := db.InsertOrUpdateRecordChainInfo(originalRecord)
+	suite.Require().NoError(err)
+	suite.Require().True(insertedOrUpdated)
+
+	postponed, err = db.IsChainPostponed(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Require().False(postponed)
+
+	_, err = db.Sql.Exec(`UPDATE chain_info SET postponed = true WHERE chain_id = $1`, firstChain.ChainId)
+	suite.Require().NoError(err)
+
+	postponed, err = db.IsChainPostponed(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Require().True(postponed)
+}
