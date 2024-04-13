@@ -72,6 +72,7 @@ Templates for Unreleased:
 - (rpc) [#14](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/14) Improve error message and detection when upstream RPC returns error
 - (indexing) [#15](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/15) Improve performance and prevent unexpected error when indexing blocks
 - (indexing) [#18](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/18) Retry indexing failed block
+- (refactor) [#25](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/25) Refactor indexer
 
 ### Bug Fixes
 

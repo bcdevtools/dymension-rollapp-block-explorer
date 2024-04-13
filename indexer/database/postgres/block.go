@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/constants"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/utils"
 	"github.com/lib/pq"
@@ -45,30 +46,48 @@ WHERE chain_id = $3 AND latest_indexed_block < $1
 	return nil
 }
 
-func (db *Database) InsertOrUpdateFailedBlock(chainId string, height int64, optionalReason error) error {
+//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
+func (db *Database) InsertOrUpdateFailedBlocks(chainId string, blocksHeight []int64, optionalReason error) error {
 	var errs []string
 	if optionalReason == nil {
 		errs = []string{}
 	} else {
 		errs = []string{optionalReason.Error()}
 	}
-	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
-	_, err := db.Sql.Exec(`
-INSERT INTO failed_block(chain_id, height, last_retry_epoch, error_messages)
-VALUES ($1, $2, $3, $4)
-ON CONFLICT(chain_id, height) DO UPDATE
+
+	stmt := `
+INSERT INTO failed_block(chain_id, last_retry_epoch, error_messages, height)
+VALUES `
+
+	params := []any{
+		chainId,                 // 1
+		time.Now().UTC().Unix(), // 2
+		pq.Array(errs),          // 3
+	}
+
+	for i, height := range blocksHeight {
+		pi := i + 4
+
+		if i > 0 {
+			stmt += ","
+		}
+		stmt += fmt.Sprintf("($1,$2,$3,$%d)", pi)
+		params = append(
+			params,
+			height,
+		)
+	}
+
+	stmt += `ON CONFLICT(chain_id, height) DO UPDATE
 SET retry_count = failed_block.retry_count + 1,
     last_retry_epoch = GREATEST(excluded.last_retry_epoch, failed_block.last_retry_epoch),
     error_messages = excluded.error_messages || failed_block.error_messages
-`,
-		chainId,                 // 1
-		height,                  // 2
-		time.Now().UTC().Unix(), // 3
-		pq.Array(errs),          // 4
-	)
+`
+
+	_, err := db.Sql.Exec(stmt, params...)
 
 	if err != nil {
-		return errors.Wrap(err, "failed to insert or update failed block")
+		return errors.Wrap(err, "failed to insert or update failed blocks")
 	}
 
 	return nil
