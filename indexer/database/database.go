@@ -52,9 +52,9 @@ type Database interface {
 
 	// Failed blocks
 
-	// InsertOrUpdateFailedBlock inserts a new failed block record into the database.
+	// InsertOrUpdateFailedBlocks inserts a batch of failed block records into the database.
 	// If the record is already present, the logic fields will be updated.
-	InsertOrUpdateFailedBlock(chainId string, height int64, optionalReason error) error
+	InsertOrUpdateFailedBlocks(chainId string, blocksHeight []int64, optionalReason error) error
 
 	// GetOneFailedBlock returns the height of a failed block record of the chain with the given chain ID.
 	GetOneFailedBlock(chainId string) (height int64, err error)

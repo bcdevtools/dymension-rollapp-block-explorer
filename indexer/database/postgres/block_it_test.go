@@ -52,12 +52,14 @@ func (suite *IntegrationTestSuite) TestDatabase_GetSetLatestIndexedBlock_IT() {
 	suite.False(postponed)
 }
 
-func (suite *IntegrationTestSuite) Test_InsertOrUpdateFailedBlock_IT() {
+func (suite *IntegrationTestSuite) Test_InsertOrUpdateFailedBlocks_IT() {
 	db := suite.Database()
 
 	originalRowsCount := suite.CountRows2("failed_block")
 
 	firstChain := suite.DBITS.Chains.Number(1)
+
+	const height = 2
 
 	tests := []struct {
 		err               error
@@ -89,12 +91,12 @@ func (suite *IntegrationTestSuite) Test_InsertOrUpdateFailedBlock_IT() {
 		suite.Run(fmt.Sprintf("round %d", i+1), func() {
 			time.Sleep(1500 * time.Millisecond)
 
-			err := db.InsertOrUpdateFailedBlock(firstChain.ChainId, 2, test.err)
+			err := db.InsertOrUpdateFailedBlocks(firstChain.ChainId, []int64{height}, test.err)
 			suite.Require().NoError(err)
 
-			record := suite.DBITS.ReadFailedBlockRecord(firstChain.ChainId, 2, nil)
+			record := suite.DBITS.ReadFailedBlockRecord(firstChain.ChainId, height, nil)
 			suite.Equal(firstChain.ChainId, record.ChainId)
-			suite.Equal(int64(2), record.Height)
+			suite.Equal(int64(height), record.Height)
 			suite.Equal(int16(test.wantRetryCount), record.RetryCount)
 			suite.Equal(test.wantErrorMessages, record.ErrorMessages)
 			suite.GreaterOrEqual(float64(1), math.Abs(float64(time.Now().UTC().Unix()-record.LastRetryEpoch)))
@@ -102,6 +104,39 @@ func (suite *IntegrationTestSuite) Test_InsertOrUpdateFailedBlock_IT() {
 			suite.Equal(originalRowsCount+1, suite.CountRows2("failed_block"))
 		})
 	}
+
+	suite.Run("multi", func() {
+		time.Sleep(1500 * time.Millisecond)
+
+		var height2 int64 = height * 200
+		var height3 int64 = height * 300
+
+		err := db.InsertOrUpdateFailedBlocks(firstChain.ChainId, []int64{height, height2, height3}, fmt.Errorf("multi test"))
+		suite.Require().NoError(err)
+
+		record1 := suite.DBITS.ReadFailedBlockRecord(firstChain.ChainId, height, nil)
+		suite.Equal(firstChain.ChainId, record1.ChainId)
+		suite.Equal(int64(height), record1.Height)
+		suite.Equal(int16(4), record1.RetryCount)
+		suite.Equal([]string{"multi test", "another error", "some error"}, record1.ErrorMessages)
+		suite.GreaterOrEqual(float64(1), math.Abs(float64(time.Now().UTC().Unix()-record1.LastRetryEpoch)))
+
+		suite.Equal(originalRowsCount+3, suite.CountRows2("failed_block"))
+
+		record2 := suite.DBITS.ReadFailedBlockRecord(firstChain.ChainId, height2, nil)
+		suite.Equal(firstChain.ChainId, record2.ChainId)
+		suite.Equal(height2, record2.Height)
+		suite.Equal(int16(0), record2.RetryCount)
+		suite.Equal([]string{"multi test"}, record2.ErrorMessages)
+		suite.GreaterOrEqual(float64(1), math.Abs(float64(time.Now().UTC().Unix()-record2.LastRetryEpoch)))
+
+		record3 := suite.DBITS.ReadFailedBlockRecord(firstChain.ChainId, height3, nil)
+		suite.Equal(firstChain.ChainId, record3.ChainId)
+		suite.Equal(height3, record3.Height)
+		suite.Equal(int16(0), record3.RetryCount)
+		suite.Equal([]string{"multi test"}, record3.ErrorMessages)
+		suite.GreaterOrEqual(float64(1), math.Abs(float64(time.Now().UTC().Unix()-record3.LastRetryEpoch)))
+	})
 }
 
 //goland:noinspection SqlNoDataSourceInspection, SqlDialectInspection
@@ -117,13 +152,7 @@ func (suite *IntegrationTestSuite) Test_GetOneFailedBlock_IT() {
 	suite.Require().NoError(err)
 	suite.Zero(height, "must be zero when no failed block")
 
-	err = db.InsertOrUpdateFailedBlock(firstChain.ChainId, 2, nil)
-	suite.Require().NoError(err)
-
-	err = db.InsertOrUpdateFailedBlock(firstChain.ChainId, 3, nil)
-	suite.Require().NoError(err)
-
-	err = db.InsertOrUpdateFailedBlock(firstChain.ChainId, 5, nil)
+	err = db.InsertOrUpdateFailedBlocks(firstChain.ChainId, []int64{2, 3, 5}, nil)
 	suite.Require().NoError(err)
 
 	_, err = db.Sql.Exec("UPDATE failed_block SET last_retry_epoch = 1")
