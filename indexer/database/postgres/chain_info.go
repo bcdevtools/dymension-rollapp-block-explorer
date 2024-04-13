@@ -108,3 +108,30 @@ SELECT bech32 FROM chain_info WHERE chain_id = $1
 
 	return
 }
+
+func (db *Database) IsChainPostponed(chainId string) (postponed bool, err error) {
+	var rows *sql.Rows
+
+	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
+	rows, err = db.Sql.Query(`
+SELECT COALESCE(postponed, FALSE) FROM chain_info WHERE chain_id = $1
+`, chainId)
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		_ = rows.Close()
+	}()
+
+	if !rows.Next() {
+		return
+	}
+
+	err = rows.Scan(&postponed)
+	if err != nil {
+		return
+	}
+
+	return
+}
