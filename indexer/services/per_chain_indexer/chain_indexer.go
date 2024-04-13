@@ -91,7 +91,7 @@ func (d *defaultIndexer) Start() {
 
 		if isPostponedChain {
 			logger.Info("chain is postponed, skip indexing", "chain-id", d.chainId)
-			time.Sleep(5 * time.Minute)
+			time.Sleep(constants.RecheckPostponedChainInterval)
 			// sleep for few minutes before checking again
 			continue
 		}
@@ -179,10 +179,16 @@ func (d *defaultIndexer) Start() {
 			catchUp = false
 
 			// perform indexing
-			latestIndexedBlock, err := db.GetLatestIndexedBlock(d.chainId)
+			latestIndexedBlock, isPostponedChain, err := db.GetLatestIndexedBlock(d.chainId)
 			if err != nil {
 				logger.Error("failed to get latest indexed block from database", "chain-id", d.chainId, "error", err.Error())
 				return err
+			}
+			if isPostponedChain {
+				logger.Info("chain is postponed, skip indexing", "chain-id", d.chainId)
+				time.Sleep(constants.RecheckPostponedChainInterval)
+				// sleep for few minutes before checking again
+				return nil
 			}
 
 			upstreamRpcLatestBlock := beGetChainInfo.LatestBlock
