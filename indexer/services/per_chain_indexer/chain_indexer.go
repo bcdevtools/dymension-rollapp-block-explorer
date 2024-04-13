@@ -80,6 +80,25 @@ func (d *defaultIndexer) Start() {
 
 	defer libapp.TryRecoverAndExecuteExitFunctionIfRecovered(logger)
 
+	// check if chain is postponed then stop indexing
+	for {
+		isPostponedChain, err := db.IsChainPostponed(d.chainId)
+		if err != nil {
+			logger.Error("failed to check if chain is postponed", "chain-id", d.chainId, "error", err.Error())
+			time.Sleep(15 * time.Second)
+			continue
+		}
+
+		if isPostponedChain {
+			logger.Info("chain is postponed, skip indexing", "chain-id", d.chainId)
+			time.Sleep(5 * time.Minute)
+			// sleep for few minutes before checking again
+			continue
+		}
+
+		break
+	}
+
 	logger.Debug("Starting indexer", "chain", d.chainName)
 
 	d.ensureNotStartedWithRLock()
@@ -289,8 +308,8 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 	nextBlockToIndexFrom, nextBlockToIndexTo int64,
 	bech32Cfg dbtypes.Bech32PrefixOfChainInfo,
 ) (
-// fatal error are errors which affects the whole indexing process,
-// they are not per-block-level error since the failed-to-index block will be put into the `failed_block` table.
+	// fatal error are errors which affects the whole indexing process,
+	// they are not per-block-level error since the failed-to-index block will be put into the `failed_block` table.
 	fatalError error,
 ) {
 	indexerCtx := types.UnwrapIndexerContext(d.ctx)
