@@ -122,7 +122,7 @@ func (d *defaultIndexer) Start() {
 	for !d.isShuttingDownWithRLock() {
 		time.Sleep(5 * time.Second)
 
-		err := d.genericLoop(func(beGetChainInfo *querytypes.ResponseBeGetChainInfo) error {
+		err := d.genericLoop(func(beGetChainInfo querytypes.ResponseBeGetChainInfo) error {
 			activeJsonRpcUrl, _ := d.getActiveJsonRpcUrlAndLastCheck()
 
 			record, err := dbtypes.NewRecordChainInfoForInsert(
@@ -175,7 +175,7 @@ func (d *defaultIndexer) Start() {
 			time.Sleep(d.indexingCfg.IndexBlockInterval)
 		}
 
-		_ = d.genericLoop(func(beGetChainInfo *querytypes.ResponseBeGetChainInfo) error {
+		_ = d.genericLoop(func(beGetChainInfo querytypes.ResponseBeGetChainInfo) error {
 			catchUp = false
 
 			// perform indexing
@@ -320,6 +320,7 @@ func (d *defaultIndexer) Start() {
 	logger.Info("shutting down indexer", "name", d.chainName)
 }
 
+// fetchAndIndexingBlockRange will fetch the block range from RPC and index it.
 func (d *defaultIndexer) fetchAndIndexingBlockRange(
 	nextBlockToIndexFrom, nextBlockToIndexTo int64,
 	bech32Cfg dbtypes.Bech32PrefixOfChainInfo,
@@ -366,15 +367,14 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 		return
 	}
 
-	for _, errorBlock := range beTransactionsInBlockRange.ErrorBlocks {
-		sqlErr := db.InsertOrUpdateFailedBlock(d.chainId, errorBlock, fmt.Errorf("rpc marks error"))
+	if len(beTransactionsInBlockRange.ErrorBlocks) > 0 {
+		sqlErr := db.InsertOrUpdateFailedBlocks(d.chainId, beTransactionsInBlockRange.ErrorBlocks, fmt.Errorf("rpc marks error"))
 		if sqlErr != nil {
 			// insert into the table is mandatory, then it is a fatal error
 
 			logger.Error(
 				"failed to insert/update failed block",
 				"chain-id", d.chainId,
-				"height", errorBlock,
 				"error", sqlErr.Error(),
 				"idx-mode", indexingMode.String(),
 			)
@@ -384,15 +384,14 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 		}
 	}
 
-	for _, missingBlock := range beTransactionsInBlockRange.MissingBlocks {
-		sqlErr := db.InsertOrUpdateFailedBlock(d.chainId, missingBlock, fmt.Errorf("rpc marks missing"))
+	if len(beTransactionsInBlockRange.MissingBlocks) > 0 {
+		sqlErr := db.InsertOrUpdateFailedBlocks(d.chainId, beTransactionsInBlockRange.MissingBlocks, fmt.Errorf("rpc marks missing"))
 		if sqlErr != nil {
 			// insert into the table is mandatory, then it is a fatal error
 
 			logger.Error(
 				"failed to insert/update failed block",
 				"chain-id", d.chainId,
-				"height", missingBlock,
 				"error", sqlErr.Error(),
 				"idx-mode", indexingMode.String(),
 			)
@@ -549,7 +548,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 			)
 			_ = dbTx.RollbackTransaction()
 
-			sqlErr := db.InsertOrUpdateFailedBlock(d.chainId, blockHeight, perBlockErr)
+			sqlErr := db.InsertOrUpdateFailedBlocks(d.chainId, []int64{blockHeight}, perBlockErr)
 			if sqlErr != nil {
 				// there is no longer something that can mark the block as failed, then it is a fatal error
 
@@ -578,7 +577,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				"idx-mode", indexingMode.String(),
 			)
 
-			sqlErr := db.InsertOrUpdateFailedBlock(d.chainId, blockHeight, perBlockErr)
+			sqlErr := db.InsertOrUpdateFailedBlocks(d.chainId, []int64{blockHeight}, perBlockErr)
 			if sqlErr != nil {
 				// there is no longer something that can mark the block as failed, then it is a fatal error
 
@@ -741,7 +740,7 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 }
 
 // genericLoop will handle refresh active json rpc url, and perform the provided function.
-func (d *defaultIndexer) genericLoop(f func(*querytypes.ResponseBeGetChainInfo) error) (err error) {
+func (d *defaultIndexer) genericLoop(f func(querytypes.ResponseBeGetChainInfo) error) (err error) {
 	indexerCtx := types.UnwrapIndexerContext(d.ctx)
 	logger := indexerCtx.GetLogger()
 
@@ -776,7 +775,7 @@ func (d *defaultIndexer) genericLoop(f func(*querytypes.ResponseBeGetChainInfo) 
 		return fmt.Errorf("chain-id mismatch")
 	}
 
-	return f(beGetChainInfo)
+	return f(*beGetChainInfo)
 }
 
 func (d *defaultIndexer) Reload(chainConfig types.ChainConfig) error {
