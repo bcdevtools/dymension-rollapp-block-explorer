@@ -101,7 +101,7 @@ func (d *defaultIndexer) Start() {
 
 	logger.Debug("Starting indexer", "chain", d.chainName)
 
-	d.ensureNotStartedWithRLock()
+	d.ensureNotStartedRL()
 
 	// prepare partitioned tables
 	for {
@@ -119,11 +119,11 @@ func (d *defaultIndexer) Start() {
 	}
 
 	// prepare chain info record
-	for !d.isShuttingDownWithRLock() {
+	for !d.isShuttingDownRL() {
 		time.Sleep(5 * time.Second)
 
 		err := d.genericLoop(func(beGetChainInfo querytypes.ResponseBeGetChainInfo) error {
-			activeJsonRpcUrl, _ := d.getActiveJsonRpcUrlAndLastCheck()
+			activeJsonRpcUrl, _ := d.getActiveJsonRpcUrlAndLastCheckRL()
 
 			record, err := dbtypes.NewRecordChainInfoForInsert(
 				beGetChainInfo.ChainId,
@@ -149,7 +149,7 @@ func (d *defaultIndexer) Start() {
 	}
 
 	var bech32Cfg dbtypes.Bech32PrefixOfChainInfo
-	for !d.isShuttingDownWithRLock() {
+	for !d.isShuttingDownRL() {
 		time.Sleep(10 * time.Second)
 
 		var err error
@@ -168,7 +168,7 @@ func (d *defaultIndexer) Start() {
 
 	var catchUp bool // catch-up mode, lower the interval
 
-	for !d.isShuttingDownWithRLock() {
+	for !d.isShuttingDownRL() {
 		if catchUp {
 			time.Sleep(100 * time.Millisecond)
 		} else {
@@ -209,7 +209,7 @@ func (d *defaultIndexer) Start() {
 					"indexed-latest-block", latestIndexedBlock,
 					"out-dated URL", d.querySvc.GetQueryEndpoint(),
 				)
-				d.forceResetActiveJsonRpcUrl(true)
+				d.forceResetActiveJsonRpcUrlDL(true)
 				return nil
 			}
 
@@ -266,45 +266,30 @@ func (d *defaultIndexer) Start() {
 
 					time.Sleep(50 * time.Millisecond) // sleep for a while before retrying the failed block
 
-					perBlockErr, _ := d.fetchAndIndexingBlockRange(
+					retryIndexErr, _ := d.fetchAndIndexingBlockRange(
 						height, height,
 						bech32Cfg,
 						pcitypes.IndexingModeRetryFailedBlocks,
 					)
-					if perBlockErr == nil {
-						dbTx, err := db.BeginDatabaseTransaction(context.Background())
-						if err == nil {
-							err = dbTx.RemoveFailedBlockRecord(d.chainId, height)
-							if err == nil {
-								err = dbTx.CommitTransaction()
-								if err != nil {
-									logger.Error(
-										"failed to commit transaction that remove the failed block",
-										"error", err.Error(),
-									)
-									// it is not important to be failed
-									_ = dbTx.RollbackTransaction()
-								}
-							} else {
-								logger.Error(
-									"failed to remove failed block record",
-									"chain-id", d.chainId,
-									"height", height,
-									"error", err.Error(),
-								)
-								// it is not important to be failed
-								_ = dbTx.RollbackTransaction()
-							}
+					if retryIndexErr == nil {
+						sqlErr := db.RemoveFailedBlockRecord(d.chainId, height)
+						if sqlErr != nil {
+							logger.Error(
+								"failed to remove failed block record after retry indexing failed block",
+								"chain-id", d.chainId,
+								"height", height,
+								"error", sqlErr.Error(),
+							)
+							// it is not important to be failed, in this case, the failed block will be retried again in the next round
 						} else {
-							logger.Error("failed to begin transaction", "error", err.Error())
-							// it is not important to be failed
+							logger.Debug("successfully re-index the failed block", "chain-id", d.chainId, "height", height)
 						}
 					} else {
 						logger.Error(
-							"fatal error while fetching and indexing the failed block",
+							"error while retry indexing the failed block",
 							"height", height,
 							"chain-id", d.chainId,
-							"error", perBlockErr.Error(),
+							"error", retryIndexErr.Error(),
 						)
 						// it is not important to be failed
 					}
@@ -339,7 +324,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 		// it's a malformed response, then it is a fatal error
 		blackListErr := fetchErr
 
-		d.forceResetActiveJsonRpcUrl(true)
+		d.forceResetActiveJsonRpcUrlDL(true)
 		logger.Error(
 			"malformed response",
 			"chain-id", d.chainId,
@@ -439,7 +424,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 		}
 
 		epochWeek := utils.GetEpochWeek(block.TimeEpochUTC)
-		if !d.sharedCache.IsCreatedPartitionsForEpochWeek(epochWeek) {
+		if !d.sharedCache.IsCreatedPartitionsForEpochWeekRL(epochWeek) {
 			// prepare partitioned tables for this epoch week
 			sqlErr := utils.ObserveLongOperation("create partitioned tables for epoch week", func() error {
 				return db.PreparePartitionedTablesForEpoch(block.TimeEpochUTC)
@@ -465,7 +450,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				"successfully prepared partitioned tables for epoch week",
 				"epoch-week", epochWeek,
 			)
-			d.sharedCache.MarkCreatedPartitionsForEpochWeek(epochWeek)
+			d.sharedCache.MarkCreatedPartitionsForEpochWeekWL(epochWeek)
 		}
 
 		dbTx, sqlErr := db.BeginDatabaseTransaction(context.Background())
@@ -747,11 +732,11 @@ func (d *defaultIndexer) genericLoop(f func(querytypes.ResponseBeGetChainInfo) e
 	// check if active json rpc url is still valid, and use the most up-to-date, the fastest one
 	_, beGetChainInfo := d.refreshActiveJsonRpcUrl()
 
-	activeJsonRpcUrl, _ := d.getActiveJsonRpcUrlAndLastCheck()
+	activeJsonRpcUrl, _ := d.getActiveJsonRpcUrlAndLastCheckRL()
 	// if no active json rpc url at this point, skip indexing
 	if len(activeJsonRpcUrl) == 0 {
 		logger.Error("no active json-rpc url, skip this round", "chain-id", d.chainId)
-		d.forceResetActiveJsonRpcUrl(true)
+		d.forceResetActiveJsonRpcUrlDL(true)
 		time.Sleep(15 * time.Second)
 		return fmt.Errorf("no active json-rpc url")
 	}
@@ -771,56 +756,22 @@ func (d *defaultIndexer) genericLoop(f func(querytypes.ResponseBeGetChainInfo) e
 	// Even tho the validation was performed earlier, it's better to double-check and provide more context
 	if beGetChainInfo.ChainId != d.chainId {
 		logger.Error("chain-id mismatch", "expected", d.chainId, "got", beGetChainInfo.ChainId)
-		d.forceResetActiveJsonRpcUrl(true)
+		d.forceResetActiveJsonRpcUrlDL(true)
 		return fmt.Errorf("chain-id mismatch")
 	}
 
 	return f(*beGetChainInfo)
 }
 
-func (d *defaultIndexer) Reload(chainConfig types.ChainConfig) error {
-	d.Lock()
-	defer d.Unlock()
-
-	if chainConfig.ChainId != d.chainId {
-		return fmt.Errorf("mis-match chain-id, expected %s, got new %s", d.chainId, chainConfig.ChainId)
-	}
-
-	if !utils.AreSortedStringArraysEquals(d.chainConfig.BeJsonRpcUrls, chainConfig.BeJsonRpcUrls) {
-		// urls changed, force health-check URLs
-		d.forceResetActiveJsonRpcUrl(false)
-	}
-
-	d.chainConfig = chainConfig
-	return nil
-}
-
-func (d *defaultIndexer) Shutdown() {
-	d.Lock()
-	defer d.Unlock()
-
-	d.shutdown = true
-}
-
-// ensureNotStartedWithRLock panics if the indexer has already started.
-func (d *defaultIndexer) ensureNotStartedWithRLock() {
-	d.RLock()
-	defer d.RUnlock()
-
-	if d.started {
-		panic(fmt.Sprintf("indexer for %s has already started", d.chainName))
-	}
-}
-
-// isShuttingDownWithRLock returns true of the indexer is flagged as in shutting down state.
-func (d *defaultIndexer) isShuttingDownWithRLock() bool {
+// isShuttingDownRL returns true of the indexer is flagged as in shutting down state.
+func (d *defaultIndexer) isShuttingDownRL() bool {
 	d.RLock()
 	defer d.RUnlock()
 
 	return d.shutdown
 }
 
-func (d *defaultIndexer) getBeRpcUrlsWithRLock() []string {
+func (d *defaultIndexer) getBeRpcUrlsRL() []string {
 	d.RLock()
 	defer d.RUnlock()
 

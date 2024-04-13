@@ -58,4 +58,8 @@ type Database interface {
 
 	// GetOneFailedBlock returns the height of a failed block record of the chain with the given chain ID.
 	GetOneFailedBlock(chainId string) (height int64, err error)
+
+	// RemoveFailedBlockRecord removes a failed block record from the database.
+	// Typically, this is used when the failed block is successfully processed.
+	RemoveFailedBlockRecord(chainId string, height int64) error
 }

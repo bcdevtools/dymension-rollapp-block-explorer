@@ -10,7 +10,7 @@ import (
 
 // refreshActiveJsonRpcUrl: check if active json rpc url is still valid, and use the most up-to-date, the fastest one
 func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfoWhenUpdated *querytypes.ResponseBeGetChainInfo) {
-	activeJsonRpcUrl, lastUrlCheck := d.getActiveJsonRpcUrlAndLastCheck()
+	activeJsonRpcUrl, lastUrlCheck := d.getActiveJsonRpcUrlAndLastCheckRL()
 	if len(activeJsonRpcUrl) != 0 && time.Since(lastUrlCheck) <= d.indexingCfg.UrlCheckInterval {
 		// no need to update
 		return
@@ -25,7 +25,7 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 	// fetch from provided URLs
 
 	var responsesByJsonRpcUrl responseByJsonRpcUrlSlice
-	for _, url := range d.getBeRpcUrlsWithRLock() {
+	for _, url := range d.getBeRpcUrlsRL() {
 		d.querySvc.SetQueryEndpoint(url)
 		resBeGetChainInfo, duration, err := d.querySvc.BeGetChainInfo()
 		if err != nil {
@@ -42,14 +42,14 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 	theBestResponse, found := responsesByJsonRpcUrl.GetTop()
 	if !found {
 		logger.Error("failed to get chain info from all json-rpc urls", "chain-id", d.chainId)
-		d.forceResetActiveJsonRpcUrl(true)
+		d.forceResetActiveJsonRpcUrlDL(true)
 
 		_, err := db.UpdateBeJsonRpcUrlsIfExists(d.chainId, []string{})
 		if err != nil {
 			logger.Error("failed to clear be_json_rpc_urls from chain_info record", "chain-id", d.chainId, "error", err.Error())
 		}
 	} else {
-		d.updateActiveJsonRpcUrlAndLastCheckWithLock(theBestResponse.url, time.Now())
+		d.updateActiveJsonRpcUrlAndLastCheckWL(theBestResponse.url, time.Now())
 
 		// update URLs into the database
 		var urls []string
@@ -69,8 +69,8 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 	return
 }
 
-// forceResetActiveJsonRpcUrl force requires to find active Json-RPC URL
-func (d *defaultIndexer) forceResetActiveJsonRpcUrl(acquireLock bool) {
+// forceResetActiveJsonRpcUrlDL force requires to find active Json-RPC URL
+func (d *defaultIndexer) forceResetActiveJsonRpcUrlDL(acquireLock bool) {
 	if acquireLock {
 		d.Lock()
 		defer d.Unlock()
@@ -80,14 +80,14 @@ func (d *defaultIndexer) forceResetActiveJsonRpcUrl(acquireLock bool) {
 	d.lastUrlCheck = time.Time{}
 }
 
-func (d *defaultIndexer) getActiveJsonRpcUrlAndLastCheck() (activeJsonRpcUrl string, lastUrlCheck time.Time) {
+func (d *defaultIndexer) getActiveJsonRpcUrlAndLastCheckRL() (activeJsonRpcUrl string, lastUrlCheck time.Time) {
 	d.RLock()
 	defer d.RUnlock()
 
 	return d.activeJsonRpcUrl, d.lastUrlCheck
 }
 
-func (d *defaultIndexer) updateActiveJsonRpcUrlAndLastCheckWithLock(activeJsonRpcUrl string, lastUrlCheck time.Time) {
+func (d *defaultIndexer) updateActiveJsonRpcUrlAndLastCheckWL(activeJsonRpcUrl string, lastUrlCheck time.Time) {
 	d.Lock()
 	defer d.Unlock()
 

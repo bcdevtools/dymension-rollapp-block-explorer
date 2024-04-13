@@ -36,6 +36,10 @@ func NewIndexerManager(ctx context.Context) IndexerManager {
 }
 
 func (d *defaultIndexerManager) Reload(cl types.ChainList) {
+	d.reloadWL(cl)
+}
+
+func (d *defaultIndexerManager) reloadWL(cl types.ChainList) {
 	d.Lock()
 	defer d.Unlock()
 
