@@ -228,7 +228,11 @@ func (d *defaultIndexer) Start() {
 					nextBlockToIndexFrom+constants.MaximumNumberOfBlocksToIndexPerBatch-1,
 				)
 
-				fatalErr := d.fetchAndIndexingBlockRange(nextBlockToIndexFrom, nextBlockToIndexTo, bech32Cfg)
+				fatalErr := d.fetchAndIndexingBlockRange(
+					nextBlockToIndexFrom, nextBlockToIndexTo,
+					bech32Cfg,
+					pcitypes.IndexingModeNewBlocks,
+				)
 				if fatalErr != nil {
 					logger.Error(
 						"fatal error while fetching and indexing block range",
@@ -260,7 +264,14 @@ func (d *defaultIndexer) Start() {
 					// no further action, just wait for next round
 				} else if height > 0 {
 					logger.Debug("retrying failed block", "chain-id", d.chainId, "height", height)
-					perBlockErr := d.fetchAndIndexingBlockRange(height, height, bech32Cfg)
+
+					time.Sleep(50 * time.Millisecond) // sleep for a while before retrying the failed block
+
+					perBlockErr := d.fetchAndIndexingBlockRange(
+						height, height,
+						bech32Cfg,
+						pcitypes.IndexingModeRetryFailedBlocks,
+					)
 					if perBlockErr == nil {
 						dbTx, err := db.BeginDatabaseTransaction(context.Background())
 						if err == nil {
@@ -299,7 +310,7 @@ func (d *defaultIndexer) Start() {
 						// it is not important to be failed
 					}
 				} else {
-					logger.Debug("no failed block to retry", "chain-id", d.chainId)
+					logger.Debug("no candidate failed block to retry", "chain-id", d.chainId)
 				}
 			}
 
@@ -313,6 +324,7 @@ func (d *defaultIndexer) Start() {
 func (d *defaultIndexer) fetchAndIndexingBlockRange(
 	nextBlockToIndexFrom, nextBlockToIndexTo int64,
 	bech32Cfg dbtypes.Bech32PrefixOfChainInfo,
+	indexingMode pcitypes.IndexingMode,
 ) (
 	// fatal error are errors which affects the whole indexing process,
 	// they are not per-block-level error since the failed-to-index block will be put into the `failed_block` table.
@@ -326,9 +338,20 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 	if fatalError != nil {
 		if querytypes.IsErrBlackList(fatalError) {
 			d.forceResetActiveJsonRpcUrl(true)
-			logger.Error("malformed response", "chain-id", d.chainId, "endpoint", "be_getTransactionsInBlockRange", "error", fatalError.Error())
+			logger.Error(
+				"malformed response",
+				"chain-id", d.chainId,
+				"endpoint", "be_getTransactionsInBlockRange",
+				"error", fatalError.Error(),
+				"idx-mode", indexingMode.String(),
+			)
 		} else {
-			logger.Error("failed to get transactions in block range, waiting for next round", "chain-id", d.chainId, "error", fatalError.Error())
+			logger.Error(
+				"failed to get transactions in block range, waiting for next round",
+				"chain-id", d.chainId,
+				"error", fatalError.Error(),
+				"idx-mode", indexingMode.String(),
+			)
 		}
 		return fatalError // failed to query got no data, then it is a fatal error
 	}
@@ -336,7 +359,13 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 	for _, errorBlock := range beTransactionsInBlockRange.ErrorBlocks {
 		fatalError = db.InsertOrUpdateFailedBlock(d.chainId, errorBlock, fmt.Errorf("rpc marks error"))
 		if fatalError != nil {
-			logger.Error("failed to insert/update failed block", "chain-id", d.chainId, "height", errorBlock, "error", fatalError.Error())
+			logger.Error(
+				"failed to insert/update failed block",
+				"chain-id", d.chainId,
+				"height", errorBlock,
+				"error", fatalError.Error(),
+				"idx-mode", indexingMode.String(),
+			)
 			return fatalError // insert into the table is mandatory, then it is a fatal error
 		}
 	}
@@ -344,7 +373,13 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 	for _, missingBlock := range beTransactionsInBlockRange.MissingBlocks {
 		fatalError = db.InsertOrUpdateFailedBlock(d.chainId, missingBlock, fmt.Errorf("rpc marks missing"))
 		if fatalError != nil {
-			logger.Error("failed to insert/update failed block", "chain-id", d.chainId, "height", missingBlock, "error", fatalError.Error())
+			logger.Error(
+				"failed to insert/update failed block",
+				"chain-id", d.chainId,
+				"height", missingBlock,
+				"error", fatalError.Error(),
+				"idx-mode", indexingMode.String(),
+			)
 			return fatalError // insert into the table is mandatory, then it is a fatal error
 		}
 	}
@@ -372,7 +407,8 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 					"chain-id", d.chainId,
 					"height", blockHeight,
 					"error", fatalError.Error(),
-					"tx", false,
+					"txs", 0,
+					"idx-mode", indexingMode.String(),
 				)
 			}
 
@@ -387,7 +423,11 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				return db.PreparePartitionedTablesForEpoch(block.TimeEpochUTC)
 			}, 15*time.Second, logger)
 			if fatalError != nil {
-				logger.Error("failed to create partitioned tables for epoch, retrying...", "chain-id", d.chainId, "error", fatalError.Error())
+				logger.Error(
+					"failed to create partitioned tables for epoch, retrying...",
+					"epoch-week", epochWeek,
+					"error", fatalError.Error(),
+				)
 				time.Sleep(15 * time.Second)
 
 				fatalError = errors.Wrap(fatalError, fmt.Sprintf("failed to create partitioned tables for epoch week: %d", epochWeek))
@@ -396,13 +436,20 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				return fatalError
 			}
 
-			logger.Info("successfully prepared partitioned tables for epoch week", "epoch-week", epochWeek)
+			logger.Info(
+				"successfully prepared partitioned tables for epoch week",
+				"epoch-week", epochWeek,
+			)
 			d.sharedCache.MarkCreatedPartitionsForEpochWeek(epochWeek)
 		}
 
 		dbTx, fatalError := db.BeginDatabaseTransaction(context.Background())
 		if fatalError != nil {
-			logger.Error("failed to begin transaction", "error", fatalError.Error())
+			logger.Error(
+				"failed to begin transaction",
+				"error", fatalError.Error(),
+				"idx-mode", indexingMode.String(),
+			)
 
 			// error when initializing a tx, look like there is a db connection issue, then it is a fatal error
 			return fatalError
@@ -410,14 +457,27 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 
 		perBlockErr := d.insertBlockInformation(blockHeight, block, bech32Cfg, dbTx)
 		if perBlockErr != nil {
-			logger.Error("failed to insert block information", "chain-id", d.chainId, "height", blockHeight, "error", perBlockErr.Error())
+			logger.Error(
+				"failed to insert block information",
+				"chain-id", d.chainId,
+				"height", blockHeight,
+				"txs", len(block.Transactions),
+				"error", perBlockErr.Error(),
+				"idx-mode", indexingMode.String(),
+			)
 			// to be handled with rollback operation
 		}
 
 		if perBlockErr == nil && len(block.Transactions) > 0 {
 			perBlockErr = dbTx.CleanupZeroRefCountRecentAccountTransaction()
 			if perBlockErr != nil {
-				logger.Error("failed to cleanup zero ref count recent account transaction", "chain-id", d.chainId, "height", blockHeight, "error", perBlockErr.Error())
+				logger.Error(
+					"failed to cleanup zero ref count recent account transaction",
+					"chain-id", d.chainId,
+					"height", blockHeight,
+					"error", perBlockErr.Error(),
+					"idx-mode", indexingMode.String(),
+				)
 				// to be handled with rollback operation
 			}
 		}
@@ -425,7 +485,13 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 		if perBlockErr == nil {
 			perBlockErr = dbTx.SetLatestIndexedBlock(d.chainId, blockHeight)
 			if perBlockErr != nil {
-				logger.Error("failed to set latest indexed block", "chain-id", d.chainId, "height", blockHeight, "error", perBlockErr.Error(), "tx", true)
+				logger.Error(
+					"failed to set latest indexed block",
+					"chain-id", d.chainId,
+					"height", blockHeight,
+					"error", perBlockErr.Error(),
+					"idx-mode", indexingMode.String(),
+				)
 				// to be handled with rollback operation
 			}
 		}
@@ -433,7 +499,13 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 		if perBlockErr == nil {
 			perBlockErr = dbTx.RemoveFailedBlockRecord(d.chainId, blockHeight)
 			if perBlockErr != nil {
-				logger.Error("failed to remove failed block record", "chain-id", d.chainId, "height", blockHeight, "error", perBlockErr.Error())
+				logger.Error(
+					"failed to remove failed block record",
+					"chain-id", d.chainId,
+					"height", blockHeight,
+					"error", perBlockErr.Error(),
+					"idx-mode", indexingMode.String(),
+				)
 				// to be handled with rollback operation
 			}
 		}
@@ -443,7 +515,9 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				"failed to insert block information, rollback",
 				"chain-id", d.chainId,
 				"height", blockHeight,
+				"txs", len(block.Transactions),
 				"error", perBlockErr.Error(),
+				"idx-mode", indexingMode.String(),
 			)
 			_ = dbTx.RollbackTransaction()
 			fatalError := db.InsertOrUpdateFailedBlock(d.chainId, blockHeight, perBlockErr)
@@ -453,6 +527,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 					"chain-id", d.chainId,
 					"height", blockHeight,
 					"error", fatalError.Error(),
+					"idx-mode", indexingMode.String(),
 				)
 
 				// there is no longer something that can mark the block as failed, then it is a fatal error
@@ -463,7 +538,14 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 
 		perBlockErr = dbTx.CommitTransaction()
 		if perBlockErr != nil {
-			logger.Error("failed to commit block information", "error", perBlockErr.Error(), "chain-id", d.chainId, "height", blockHeight)
+			logger.Error(
+				"failed to commit block information",
+				"chain-id", d.chainId,
+				"height", blockHeight,
+				"txs", len(block.Transactions),
+				"error", perBlockErr.Error(),
+				"idx-mode", indexingMode.String(),
+			)
 			fatalError := db.InsertOrUpdateFailedBlock(d.chainId, blockHeight, perBlockErr)
 			if fatalError != nil {
 				logger.Error(
@@ -471,6 +553,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 					"chain-id", d.chainId,
 					"height", blockHeight,
 					"error", fatalError.Error(),
+					"idx-mode", indexingMode.String(),
 				)
 
 				// there is no longer something that can mark the block as failed, then it is a fatal error
@@ -479,7 +562,13 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 			continue
 		}
 
-		logger.Debug("indexed block successfully", "chain-id", d.chainId, "height", blockHeight)
+		logger.Debug(
+			"indexed block successfully",
+			"chain-id", d.chainId,
+			"height", blockHeight,
+			"txs", len(block.Transactions),
+			"idx-mode", indexingMode.String(),
+		)
 	}
 
 	return nil
