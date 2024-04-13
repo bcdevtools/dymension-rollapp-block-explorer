@@ -13,6 +13,22 @@ CREATE TABLE chain_info (
     CONSTRAINT chain_info_pkey PRIMARY KEY (chain_id),
     CONSTRAINT chain_info_unique_chain_name UNIQUE ("name") -- chain name must be unique
 );
+-- function get_indexing_fallbehind_chains
+-- Used to get the list of chains which indexed block height is behind the current time by more than a specific threshold
+CREATE OR REPLACE FUNCTION get_indexing_fallbehind_chains(threshold_seconds BIGINT) RETURNS TABLE(chain_id TEXT, height BIGINT, epoch BIGINT, epoch_diff BIGINT) AS $$
+BEGIN
+    RETURN QUERY SELECT ci.chain_id, ci.height, ci.epoch, ci.epoch_diff FROM (
+		SELECT
+			i.chain_id,
+			i.latest_indexed_block AS height,
+			i.increased_latest_indexed_block_at AS epoch,
+			FLOOR(EXTRACT(epoch FROM NOW() AT TIME ZONE 'utc' AT TIME ZONE 'utc')::BIGINT - i.increased_latest_indexed_block_at)::BIGINT AS epoch_diff
+		FROM chain_info i
+		WHERE i.postponed IS NOT TRUE
+	) ci
+	WHERE ci.epoch_diff > threshold_seconds
+    ORDER BY ci.epoch_diff DESC;
+END;$$ LANGUAGE plpgsql;
 
 -- table account
 -- Page: search multi-chain accounts, search single-chain, showing account details

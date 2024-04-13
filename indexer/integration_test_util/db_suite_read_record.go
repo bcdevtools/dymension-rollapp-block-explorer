@@ -19,7 +19,8 @@ SELECT
 	bech32, -- 4
 	denoms, -- 5
 	be_json_rpc_urls, -- 6
-	latest_indexed_block -- 7
+	latest_indexed_block, -- 7
+	COALESCE(postponed, FALSE) -- 8
 FROM chain_info WHERE chain_id = $1
 `
 
@@ -47,6 +48,7 @@ FROM chain_info WHERE chain_id = $1
 		&res.DenomsJson,              // 5
 		pq.Array(&res.BeJsonRpcUrls), // 6
 		&res.LatestIndexedBlock,      // 7
+		&res.Postponed,               // 8
 	)
 
 	suite.Require().NoError(err, "failed to scan chain info")
