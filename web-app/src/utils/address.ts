@@ -1,4 +1,21 @@
+import {
+  COSMOS_ADDRESS_REGEX,
+  EVM_ADDRESS_REGEX,
+  TX_HASH_ADDRESS_REGEX,
+} from '@/consts/address';
 import sha3 from 'crypto-js/sha3';
+
+export function isEvmAddress(value: string) {
+  return EVM_ADDRESS_REGEX.test(value);
+}
+
+export function isCosmosAddress(value: string) {
+  return COSMOS_ADDRESS_REGEX.test(value);
+}
+
+export function isTxHash(value: string) {
+  return TX_HASH_ADDRESS_REGEX.test(value);
+}
 
 /**
  * Checks if the given string is an address

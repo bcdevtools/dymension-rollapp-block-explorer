@@ -5,6 +5,7 @@ import {
   MAX_PAGINATION_SIZE,
 } from '@/consts/setting';
 import dayjs from 'dayjs';
+import { isCosmosAddress, isEvmAddress, isTxHash } from './address';
 
 export type SearchParam = string | undefined | null;
 
@@ -25,18 +26,38 @@ export function formatUnixTime(unixTime: number) {
   return dayjs.unix(unixTime).format(DEFAULT_DATE_TIME_FORMAT);
 }
 
-export function getStringParamAsNumber(param: SearchParam): number {
-  return param ? parseInt(param) : NaN;
+export function isNullOrUndefined(value: any) {
+  return value === undefined || value === null;
+}
+
+export function getNumberFromStringParam(param: SearchParam): number {
+  if (isNullOrUndefined(param) || !/^\d+$/.test(param!)) return NaN;
+  return parseInt(param!);
 }
 
 export function getValidPageSize(pageSize: number) {
-  if (isNaN(pageSize) || pageSize <= 0) return DEFAULT_PAGINATION_SIZE;
+  if (isNaN(pageSize) || pageSize == 0) return DEFAULT_PAGINATION_SIZE;
   return Math.min(pageSize, MAX_PAGINATION_SIZE);
 }
 
 export function getValidPage(page: number, pageSize: number, total: number) {
   if (isNaN(page) || page <= 0) return 0;
   return Math.min(total === 0 ? 0 : Math.ceil(total / pageSize) - 1, page);
+}
+
+export function getPageAndPageSizeFromStringParam(
+  pageSizeParam: SearchParam,
+  pageParam: SearchParam,
+  total: number
+): [number, number] {
+  const pageSize = getValidPageSize(getNumberFromStringParam(pageSizeParam));
+  const page = getValidPage(
+    getNumberFromStringParam(pageParam),
+    pageSize,
+    total
+  );
+
+  return [pageSize, page];
 }
 
 export function getOffsetFromPageAndPageSize(page: number, pageSize: number) {
@@ -60,13 +81,10 @@ export function handleSearch(
   if (/^\d+$/.test(searchText))
     return cb(`${rollappPath}/${Path.BLOCKS}/${searchText}`);
 
-  if (
-    /^(0x)?[\da-fA-F]{40}$/.test(searchText) ||
-    /^[a-z]+1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]{38,}$/.test(searchText)
-  )
+  if (isEvmAddress(searchText) || isCosmosAddress(searchText))
     return cb(`${rollappPath}/${Path.ADDRESS}/${searchText}`);
 
-  if (/^(0x)?[\da-fA-F]{64}$/.test(searchText))
+  if (isTxHash(searchText))
     return cb(`${rollappPath}/${Path.TRANSACTIONS}/${searchText}`);
 
   return cb(`${rollappPath}/${Path.NOT_FOUND}`);

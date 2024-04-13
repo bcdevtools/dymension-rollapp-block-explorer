@@ -8,12 +8,12 @@ import {
 } from '@/services/db/transactions';
 import {
   SearchParam,
-  getValidPageSize,
-  getStringParamAsNumber,
+  getNumberFromStringParam,
   getOffsetFromPageAndPageSize,
-  getValidPage,
+  getPageAndPageSizeFromStringParam,
 } from '@/utils/common';
 import Card from '@/components/commons/Card';
+import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 
 type TransactionsProps = Readonly<{
   params: { rollappPath: string };
@@ -26,15 +26,14 @@ export default async function Transactions({
 }: TransactionsProps) {
   const rollappInfo = await getRollAppInfoByRollappPath(params.rollappPath);
   if (!rollappInfo) return null;
-  const blockNoParam = getStringParamAsNumber(searchParams.block);
-  const blockNo = blockNoParam > 0 ? blockNoParam : null;
+  const blockNoParam = getNumberFromStringParam(searchParams.block);
+  const blockNo = blockNoParam || null;
 
   const total = await countTransactionsByHeight(rollappInfo.chainId, blockNo);
 
-  const pageSize = getValidPageSize(getStringParamAsNumber(searchParams.ps));
-  const page = getValidPage(
-    getStringParamAsNumber(searchParams.p),
-    pageSize,
+  const [pageSize, page] = getPageAndPageSizeFromStringParam(
+    searchParams[PAGE_SIZE_PARAM_NAME],
+    searchParams[PAGE_PARAM_NAME],
     total
   );
   const offset = getOffsetFromPageAndPageSize(page, pageSize);

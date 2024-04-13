@@ -6,9 +6,7 @@ import useBlockList from '@/hooks/useBlockList';
 import {
   formatUnixTime,
   getNewPathByRollapp,
-  getStringParamAsNumber,
-  getValidPage,
-  getValidPageSize,
+  getPageAndPageSizeFromStringParam,
 } from '@/utils/common';
 import Link from '@mui/material/Link';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
@@ -42,12 +40,9 @@ export default function BlockListTable({
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const pageSize = getValidPageSize(
-    getStringParamAsNumber(searchParams.get(PAGE_SIZE_PARAM_NAME))
-  );
-  const page = getValidPage(
-    getStringParamAsNumber(searchParams.get(PAGE_PARAM_NAME)),
-    pageSize,
+  const [pageSize, page] = getPageAndPageSizeFromStringParam(
+    searchParams.get(PAGE_SIZE_PARAM_NAME),
+    searchParams.get(PAGE_PARAM_NAME),
     latestBlockNo
   );
 
