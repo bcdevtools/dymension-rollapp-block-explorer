@@ -253,7 +253,6 @@ func (d *defaultIndexer) Start() {
 			}
 
 			if checkRetryIndexFailedBlock && !d.indexingCfg.DisableRetryIndexFailedBlocks {
-				// TODO instead of sleeping, do resync failed blocks
 				height, err := db.GetOneFailedBlock(d.chainId)
 				if err != nil {
 					logger.Error(
