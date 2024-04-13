@@ -64,6 +64,7 @@ Templates for Unreleased:
 - (indexing) [#10](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/10) Indexing recent transactions for involvers
 - (indexing) [#16](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/16) Add ability to enable and disable indexing a chain for hot reload
 - (indexing) [#22](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/22) Provide a way to mark chain stopped operation
+- (query) [#23](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/23) Provide a way get out-dated chains
 
 ### Improvements
 
