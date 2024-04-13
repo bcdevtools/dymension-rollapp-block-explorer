@@ -47,13 +47,23 @@ func NewBeJsonRpcQueryService(chainId string) BeJsonRpcQueryService {
 }
 
 func (d *defaultBeJsonRpcQueryService) SetQueryEndpoint(url string) {
+	d.setQueryEndpointWL(url)
+}
+
+func (d *defaultBeJsonRpcQueryService) setQueryEndpointWL(url string) {
 	d.Lock()
 	defer d.Unlock()
 	d.queryEndpoint = url
 }
 
 func (d *defaultBeJsonRpcQueryService) GetQueryEndpoint() string {
-	return d.getQueryEndpointWithRLock()
+	return d.getQueryEndpointRL()
+}
+
+func (d *defaultBeJsonRpcQueryService) getQueryEndpointRL() string {
+	d.RLock()
+	defer d.RUnlock()
+	return d.queryEndpoint
 }
 
 func (d *defaultBeJsonRpcQueryService) BeGetChainInfo() (res *querytypes.ResponseBeGetChainInfo, duration time.Duration, err error) {
@@ -168,12 +178,6 @@ func (d *defaultBeJsonRpcQueryService) BeTransactionsInBlockRange(from, to int64
 	return
 }
 
-func (d *defaultBeJsonRpcQueryService) getQueryEndpointWithRLock() string {
-	d.RLock()
-	defer d.RUnlock()
-	return d.queryEndpoint
-}
-
 func (d *defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, optionalTimeout time.Duration) ([]byte, error) {
 	var timeout = optionalTimeout
 	if optionalTimeout == 0 {
@@ -187,7 +191,7 @@ func (d *defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, opt
 		Timeout: timeout,
 	}
 
-	resp, err := httpClient.Post(d.getQueryEndpointWithRLock(), "application/json", bytes.NewBuffer([]byte(qb.String())))
+	resp, err := httpClient.Post(d.getQueryEndpointRL(), "application/json", bytes.NewBuffer([]byte(qb.String())))
 	if err != nil {
 		return nil, err
 	}

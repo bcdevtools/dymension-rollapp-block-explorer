@@ -127,3 +127,19 @@ LIMIT 1
 
 	return
 }
+
+func (db *Database) RemoveFailedBlockRecord(chainId string, height int64) error {
+	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
+	_, err := db.Sql.Exec(`
+DELETE FROM failed_block WHERE chain_id = $1 AND height = $2
+`,
+		chainId, // 1
+		height,  // 2
+	)
+
+	if err != nil {
+		return errors.Wrap(err, "failed to delete failed block record")
+	}
+
+	return nil
+}

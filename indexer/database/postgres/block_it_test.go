@@ -183,3 +183,53 @@ func (suite *IntegrationTestSuite) Test_GetOneFailedBlock_IT() {
 	suite.Require().NoError(err)
 	suite.Zero(height, "must be zero when no failed block satisfy conditions")
 }
+
+//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
+func (suite *IntegrationTestSuite) Test_RemoveFailedBlockRecord_IT() {
+	db := suite.Database()
+
+	originalRowsCount := suite.CountRows2("failed_block")
+
+	firstChain := suite.DBITS.Chains.Number(1)
+
+	insertFailedBlock := func(height int64) {
+		_, err := db.Sql.Exec(`
+INSERT INTO failed_block(chain_id, height, last_retry_epoch)
+VALUES ($1, $2, $3)
+ON CONFLICT(chain_id, height) DO NOTHING
+`,
+			firstChain.ChainId,      // 1
+			height,                  // 2
+			time.Now().UTC().Unix(), // 3
+		)
+		suite.Require().NoError(err)
+	}
+
+	err := db.RemoveFailedBlockRecord(firstChain.ChainId, 2)
+	suite.Require().NoError(err)
+	suite.Equal(originalRowsCount, suite.CountRows2("failed_block"), "no change")
+
+	insertFailedBlock(2)
+	suite.Require().Equal(originalRowsCount+1, suite.CountRows2("failed_block"), "must be inserted")
+
+	insertFailedBlock(3)
+	suite.Require().Equal(originalRowsCount+2, suite.CountRows2("failed_block"), "must be inserted")
+
+	err = db.RemoveFailedBlockRecord(firstChain.ChainId, 2)
+	suite.Require().NoError(err)
+	suite.Equal(originalRowsCount+1, suite.CountRows2("failed_block"), "must be reduced by 1")
+
+	suite.Equal(
+		1,
+		suite.readCountResult(
+			db.Sql.Query("SELECT COUNT(1) FROM failed_block WHERE chain_id = $1 AND height = $2", firstChain.ChainId, 3),
+		),
+		"the rest record should be still there",
+	)
+	suite.Zero(
+		suite.readCountResult(
+			db.Sql.Query("SELECT COUNT(1) FROM failed_block WHERE chain_id = $1 AND height = $2", firstChain.ChainId, 2),
+		),
+		"the deleted record should not be there anymore",
+	)
+}

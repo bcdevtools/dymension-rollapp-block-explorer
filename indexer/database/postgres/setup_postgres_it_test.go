@@ -130,6 +130,19 @@ func (suite *IntegrationTestSuite) CountRows2(tableName string) int {
 	return count
 }
 
+func (suite *IntegrationTestSuite) readCountResult(rows *sql.Rows, err error) int {
+	suite.Require().NoError(err)
+	defer func() {
+		_ = rows.Close()
+	}()
+	suite.Require().True(rows.Next(), "expected result")
+	var count int
+	err = rows.Scan(&count)
+	suite.Require().NoError(err, "failed to scan count")
+	suite.Require().False(rows.Next(), "expect only one record")
+	return count
+}
+
 func (suite *IntegrationTestSuite) NewBaseCoin(amount int64, chainId string) sdk.Coin {
 	if len(chainId) == 0 {
 		chainId = suite.DBITS.Chains.Number(1).ChainId
