@@ -17,7 +17,11 @@ import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 
 type TransactionsProps = Readonly<{
   params: { rollappPath: string };
-  searchParams: { p: SearchParam; ps: SearchParam; block: SearchParam };
+  searchParams: {
+    [PAGE_PARAM_NAME]: SearchParam;
+    [PAGE_SIZE_PARAM_NAME]: SearchParam;
+    block: SearchParam;
+  };
 }>;
 
 export default async function Transactions({
@@ -26,22 +30,20 @@ export default async function Transactions({
 }: TransactionsProps) {
   const rollappInfo = await getRollAppInfoByRollappPath(params.rollappPath);
   if (!rollappInfo) return null;
-  const blockNoParam = getNumberFromStringParam(searchParams.block);
-  const blockNo = blockNoParam || null;
+  const blockNo = getNumberFromStringParam(searchParams.block) || null;
 
-  const total = await countTransactionsByHeight(rollappInfo.chainId, blockNo);
+  const total = await countTransactionsByHeight(rollappInfo.chain_id, blockNo);
 
   const [pageSize, page] = getPageAndPageSizeFromStringParam(
     searchParams[PAGE_SIZE_PARAM_NAME],
     searchParams[PAGE_PARAM_NAME],
     total
   );
-  const offset = getOffsetFromPageAndPageSize(page, pageSize);
 
   const transactions = await getTransactionsByHeight(
-    rollappInfo.chainId,
+    rollappInfo.chain_id,
     blockNo,
-    { limit: pageSize, offset: offset }
+    { take: pageSize, skip: getOffsetFromPageAndPageSize(page, pageSize) }
   );
 
   const subtitle = blockNo ? (

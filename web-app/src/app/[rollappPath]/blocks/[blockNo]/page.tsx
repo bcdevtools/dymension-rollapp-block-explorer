@@ -9,7 +9,7 @@ type BlockProps = Readonly<{
 
 export default function Block({ params }: BlockProps) {
   if (!/^\d+$/.test(params.blockNo))
-    permanentRedirect(`/${params.rollappPath}`);
+    return permanentRedirect(`/${params.rollappPath}`);
 
   return (
     <>

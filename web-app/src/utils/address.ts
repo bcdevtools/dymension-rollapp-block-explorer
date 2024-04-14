@@ -3,7 +3,8 @@ import {
   EVM_ADDRESS_REGEX,
   TX_HASH_ADDRESS_REGEX,
 } from '@/consts/address';
-import sha3 from 'crypto-js/sha3';
+import { bech32 } from 'bech32';
+import { getAddress } from '@ethersproject/address';
 
 export function isEvmAddress(value: string) {
   return EVM_ADDRESS_REGEX.test(value);
@@ -17,79 +18,78 @@ export function isTxHash(value: string) {
   return TX_HASH_ADDRESS_REGEX.test(value);
 }
 
-/**
- * Checks if the given string is an address
- *
- * @method isAddress
- * @param {String} address the given HEX adress
- * @return {Boolean}
- */
-export function isAddress(address: string) {
-  if (!/^(0x)?[0-9a-f]{40}$/i.test(address)) {
-    // check if it has the basic requirements of an address
-    return false;
-  } else if (
-    /^(0x)?[0-9a-f]{40}$/.test(address) ||
-    /^(0x)?[0-9A-F]{40}$/.test(address)
-  ) {
-    // If it's all small caps or all all caps, return true
-    return true;
-  } else {
-    // Otherwise check each case
-    return isChecksumAddress(address);
+export class RollappAddress {
+  static fromBech32(bech32Address: string, prefix: string) {
+    const decoded = bech32.decode(bech32Address);
+
+    return new RollappAddress(
+      new Uint8Array(bech32.fromWords(decoded.words)),
+      prefix
+    );
   }
-}
 
-/**
- * Checks if the given string is a checksummed address
- *
- * @method isChecksumAddress
- * @param {String} address the given HEX adress
- * @return {Boolean}
- */
-export function isChecksumAddress(address: string) {
-  // Check each case
-  address = address.replace('0x', '');
-  const addressHash = sha3(address.toLowerCase());
+  static fromHex(hex: string, prefix: string) {
+    hex = hex.replace('0x', '');
+    return new RollappAddress(Uint8Array.from(Buffer.from(hex, 'hex')), prefix);
+  }
 
-  for (let i = 0; i < 40; i++) {
-    // the nth letter should be uppercase if the nth digit of casemap is 1
-    if (
-      //@ts-ignore
-      (parseInt(addressHash[i], 16) > 7 &&
-        address[i].toUpperCase() !== address[i]) ||
-      //@ts-ignore
-      (parseInt(addressHash[i], 16) <= 7 &&
-        address[i].toLowerCase() !== address[i])
-    ) {
-      return false;
+  static fromString(value: string, prefix: string) {
+    if (isEvmAddress(value)) {
+      return RollappAddress.fromHex(value, prefix);
+    } else if (isCosmosAddress(value))
+      return RollappAddress.fromBech32(value, prefix);
+    else null;
+  }
+
+  constructor(
+    public readonly address: Uint8Array,
+    public readonly prefix: string
+  ) {}
+
+  toBech32() {
+    const words = bech32.toWords(this.address);
+    return bech32.encode(this.prefix, words);
+  }
+
+  toHex(checksum: boolean = true) {
+    const hex = Buffer.from(this.address).toString('hex');
+
+    if (hex.length === 0) {
+      throw new Error('Empty address');
     }
-  }
-  return true;
-}
 
-/**
- * Makes a checksum address
- *
- * @method toChecksumAddress
- * @param {String} address the given HEX adress
- * @return {String}
- */
-export function toChecksumAddress(address: string) {
-  if (typeof address === 'undefined') return '';
-
-  address = address.toLowerCase().replace('0x', '');
-  const addressHash = sha3(address);
-  let checksumAddress = '0x';
-
-  for (let i = 0; i < address.length; i++) {
-    // If ith character is 9 to f then make it uppercase
-    //@ts-ignore
-    if (parseInt(addressHash[i], 16) > 7) {
-      checksumAddress += address[i].toUpperCase();
+    if (checksum) {
+      return getAddress(hex);
     } else {
-      checksumAddress += address[i];
+      return '0x' + hex;
     }
   }
-  return checksumAddress;
+}
+
+export interface Bech32Config {
+  readonly bech32PrefixAccAddr: string;
+  readonly bech32PrefixAccPub: string;
+  readonly bech32PrefixValAddr: string;
+  readonly bech32PrefixValPub: string;
+  readonly bech32PrefixConsAddr: string;
+  readonly bech32PrefixConsPub: string;
+}
+
+export function getDefaultBech32Config(
+  mainPrefix: string,
+  validatorPrefix: string = 'val',
+  consensusPrefix: string = 'cons',
+  publicPrefix: string = 'pub',
+  operatorPrefix: string = 'oper'
+): Bech32Config {
+  return {
+    bech32PrefixAccAddr: mainPrefix,
+    bech32PrefixAccPub: mainPrefix + publicPrefix,
+    bech32PrefixValAddr: mainPrefix + validatorPrefix + operatorPrefix,
+    bech32PrefixValPub:
+      mainPrefix + validatorPrefix + operatorPrefix + publicPrefix,
+    bech32PrefixConsAddr: mainPrefix + validatorPrefix + consensusPrefix,
+    bech32PrefixConsPub:
+      mainPrefix + validatorPrefix + consensusPrefix + publicPrefix,
+  };
 }

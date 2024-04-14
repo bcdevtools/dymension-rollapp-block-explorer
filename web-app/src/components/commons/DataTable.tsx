@@ -113,6 +113,13 @@ export default function DataTable({
     ? Array(pageSize).fill(Array(headers.length).fill(<Skeleton />))
     : body;
 
+  if (!_body.length)
+    return (
+      <Box display="flex" justifyContent="center" padding={5}>
+        No data
+      </Box>
+    );
+
   return (
     <>
       <TableContainer sx={{ width: '100%' }}>

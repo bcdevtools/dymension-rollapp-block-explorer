@@ -9,6 +9,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import DoneIcon from '@mui/icons-material/Done';
 import DataDetail from '@/components/commons/DataDetail';
 import { formatNumberString } from '@/utils/common';
+import CopyButton from '../commons/CopyButton';
 
 function getStatusDisplay(success: boolean) {
   return success ? (
@@ -32,7 +33,12 @@ export default function TransactionDetailPage() {
         data={[
           {
             label: 'Transaction Hash',
-            value: <Typography>{params.txHash}</Typography>,
+            value: (
+              <Typography>
+                {params.txHash}{' '}
+                <CopyButton size="small" textToCopy={params.txHash} />
+              </Typography>
+            ),
           },
           {
             label: 'Status',

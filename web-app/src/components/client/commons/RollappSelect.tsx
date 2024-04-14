@@ -41,7 +41,7 @@ export default React.memo(function RollappSelect({
         label={label && 'Rollapp'}
         size={size}>
         {rollappInfos.map(rollapp => (
-          <MenuItem key={rollapp.chainId} value={rollapp.path}>
+          <MenuItem key={rollapp.chain_id} value={rollapp.path}>
             {rollapp.name}
           </MenuItem>
         ))}

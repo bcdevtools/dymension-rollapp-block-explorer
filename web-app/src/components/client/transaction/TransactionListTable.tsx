@@ -11,7 +11,12 @@ import LinkToBlockNo from '../block/LinkToBlockNo';
 import Chip from '@mui/material/Chip';
 
 type TransactionListTableProps = Readonly<{
-  transactions: transaction[];
+  transactions: Required<{
+    height: bigint;
+    hash: string;
+    epoch: bigint;
+    tx_type: string;
+  }>[];
   totalTransactions: number;
   pageSize: number;
   page: number;

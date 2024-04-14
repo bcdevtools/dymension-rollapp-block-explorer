@@ -16,8 +16,8 @@ export function getSelectedRollappInfoByPathname(
 export function getRpcServiceFromSelectedRollappInfo(
   selectedRollappInfo: RollappInfo | null
 ) {
-  return selectedRollappInfo && selectedRollappInfo.rpcUrls.length
-    ? new RpcService(selectedRollappInfo.rpcUrls[0])
+  return selectedRollappInfo && selectedRollappInfo.be_json_rpc_urls.length
+    ? new RpcService(selectedRollappInfo.be_json_rpc_urls[0])
     : null;
 }
 

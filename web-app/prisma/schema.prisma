@@ -29,6 +29,7 @@ model chain_info {
   be_json_rpc_urls                  String[]
   latest_indexed_block              BigInt    @default(0)
   increased_latest_indexed_block_at BigInt    @default(0)
+  postponed                         Boolean?
   account                           account[]
 }
 
