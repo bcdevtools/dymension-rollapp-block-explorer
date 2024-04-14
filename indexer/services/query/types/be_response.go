@@ -69,10 +69,23 @@ type BlockInResponseBeTransactionsInBlockRange struct {
 }
 
 type TransactionInBlockInResponseBeTransactionsInBlockRange struct {
-	TransactionHash string              `json:"hash"`
-	Involvers       map[string][]string `json:"involvers"`
-	MessagesType    []string            `json:"messagesType"`
-	TransactionType string              `json:"type"`
+	TransactionHash string                                                            `json:"hash"`
+	Involvers       InvolversInTransactionInBlockInResponseBeTransactionsInBlockRange `json:"involvers"`
+	MessagesType    []string                                                          `json:"messagesType"`
+	TransactionType string                                                            `json:"type"`
+}
+
+type InvolversInTransactionInBlockInResponseBeTransactionsInBlockRange struct {
+	Signers        []string                                                                  `json:"s,omitempty"`
+	Others         []string                                                                  `json:"0,omitempty"`
+	Erc20          []string                                                                  `json:"erc20,omitempty"`
+	NFT            []string                                                                  `json:"nft,omitempty"`
+	TokenContracts ContractInvolversInTransactionInBlockInResponseBeTransactionsInBlockRange `json:"contracts,omitempty"`
+}
+
+type ContractInvolversInTransactionInBlockInResponseBeTransactionsInBlockRange struct {
+	Erc20 map[string][]string `json:"erc20,omitempty"`
+	NFT   map[string][]string `json:"nft,omitempty"`
 }
 
 func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
