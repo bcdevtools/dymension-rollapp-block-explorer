@@ -8,6 +8,7 @@ import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 import { useEffect, useState } from 'react';
 import LinkToBlockNo from '../block/LinkToBlockNo';
 import Chip from '@mui/material/Chip';
+import { Path } from '@/consts/path';
 
 type TransactionListTableProps = Readonly<{
   transactions: Required<{
@@ -39,7 +40,7 @@ export default function TransactionListTable({
   const body = transactions.map(transaction => [
     <Link
       key={transaction.hash}
-      href={`${pathname}/${transaction.hash}`}
+      href={`${Path.TRANSACTIONS}/${transaction.hash}`}
       underline="hover">
       {transaction.hash}
     </Link>,
