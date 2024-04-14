@@ -9,8 +9,9 @@ const (
 )
 
 const (
-	InvolversTypeSenderOrSigner = "s"
-	InvolversTypeNormal         = "0"
-	InvolversTypeErc20          = "erc20"
-	InvolversTypeNft            = "nft"
+	InvolversTypeSenderOrSigner     = "s"
+	InvolversTypeNormal             = "0"
+	InvolversTypeErc20              = "erc20"
+	InvolversTypeNft                = "nft"
+	InvolversTypeContractsInvolvers = "contracts"
 )

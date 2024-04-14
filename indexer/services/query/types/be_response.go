@@ -69,10 +69,23 @@ type BlockInResponseBeTransactionsInBlockRange struct {
 }
 
 type TransactionInBlockInResponseBeTransactionsInBlockRange struct {
-	TransactionHash string              `json:"hash"`
-	Involvers       map[string][]string `json:"involvers"`
-	MessagesType    []string            `json:"messagesType"`
-	TransactionType string              `json:"type"`
+	TransactionHash string                                                            `json:"hash"`
+	Involvers       InvolversInTransactionInBlockInResponseBeTransactionsInBlockRange `json:"involvers"`
+	MessagesType    []string                                                          `json:"messagesType"`
+	TransactionType string                                                            `json:"type"`
+}
+
+type InvolversInTransactionInBlockInResponseBeTransactionsInBlockRange struct {
+	Signers        []string                                                                  `json:"s,omitempty"`
+	Others         []string                                                                  `json:"0,omitempty"`
+	Erc20          []string                                                                  `json:"erc20,omitempty"`
+	NFT            []string                                                                  `json:"nft,omitempty"`
+	TokenContracts ContractInvolversInTransactionInBlockInResponseBeTransactionsInBlockRange `json:"contracts,omitempty"`
+}
+
+type ContractInvolversInTransactionInBlockInResponseBeTransactionsInBlockRange struct {
+	Erc20 map[string][]string `json:"erc20,omitempty"`
+	NFT   map[string][]string `json:"nft,omitempty"`
 }
 
 func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
@@ -98,7 +111,7 @@ func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
 				return fmt.Errorf("missing transaction hash for tx at %d of block %s", i, heightStr)
 			}
 			switch tx.TransactionType {
-			case "cosmos":
+			case "cosmos", "wasm":
 				// ok
 				if !utils.IsValidCosmosTransactionHash(tx.TransactionHash) {
 					return fmt.Errorf("invalid cosmos transaction hash %s for tx at %d of block %s", tx.TransactionHash, i, heightStr)
@@ -110,9 +123,6 @@ func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
 				}
 			default:
 				return fmt.Errorf("unrecognised transaction type %s for tx at %d of block %s", tx.TransactionType, i, heightStr)
-			}
-			if len(tx.Involvers) < 1 {
-				return fmt.Errorf("missing involvers for tx at %d of block %s", i, heightStr)
 			}
 			if len(tx.MessagesType) < 1 {
 				return fmt.Errorf("missing messages type for tx at %d of block %s", i, heightStr)

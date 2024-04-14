@@ -312,7 +312,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 	indexingMode pcitypes.IndexingMode,
 ) (
 	fatalError pcitypes.FatalError, // is not per-block-level error since the failed-to-index block will be put into the `failed_block` table.
-	isFetchRpcErr bool, // is true if the fatal error is due to failed to fetch from RPC
+	isFetchRpcErr bool,             // is true if the fatal error is due to failed to fetch from RPC
 ) {
 	indexerCtx := types.UnwrapIndexerContext(d.ctx)
 	db := indexerCtx.GetDatabase()
@@ -614,17 +614,82 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 
 		// build involved accounts record & recent tx for accounts
 
-		var anyInvolvedAccount bool
-
-		if len(transaction.Involvers) > 0 {
-			type structInvolvedFlag struct {
-				Signer bool
-				Erc20  bool
-				NFT    bool
+		type structInvolvedFlag struct {
+			Signer bool
+			Erc20  bool
+			NFT    bool
+		}
+		mapBech32ToInvolvedFlag := make(map[string]structInvolvedFlag)
+		putInvolvedFlag := func(bech32Address string, involvedType string) {
+			sif, existing := mapBech32ToInvolvedFlag[bech32Address]
+			if !existing {
+				sif = structInvolvedFlag{}
 			}
-			mapBech32ToInvolvedFlag := make(map[string]structInvolvedFlag)
+			switch involvedType {
+			case constants.InvolversTypeSenderOrSigner:
+				sif.Signer = true
+			case constants.InvolversTypeErc20:
+				sif.Erc20 = true
+			case constants.InvolversTypeNft:
+				sif.NFT = true
+			}
+			mapBech32ToInvolvedFlag[bech32Address] = sif
+		}
 
-			for involvedType, involvers := range transaction.Involvers {
+		// handle involvers
+
+		for involvedType, involvers := range map[string][]string{
+			constants.InvolversTypeSenderOrSigner: transaction.Involvers.Signers,
+			constants.InvolversTypeErc20:          transaction.Involvers.Erc20,
+			constants.InvolversTypeNft:            transaction.Involvers.NFT,
+			constants.InvolversTypeNormal:         transaction.Involvers.Others,
+		} {
+			if len(involvers) == 0 {
+				continue
+			}
+			for _, involver := range involvers {
+				absolutelyInvalidAddress, bech32Address, err := unsafeAnyAddressToBech32Address(involver, bech32Cfg)
+				if err != nil {
+					return errors.Wrapf(err, "failed to convert involver address %s to bech32 address", involver)
+				}
+
+				if absolutelyInvalidAddress {
+					// ignore invalid records
+					continue
+				}
+
+				if _, found := mapInvolvedAccounts[bech32Address]; !found {
+					mapInvolvedAccounts[bech32Address] = dbtypes.NewRecordAccountForInsert(
+						d.chainId,
+						bech32Address,
+					)
+				}
+
+				putInvolvedFlag(bech32Address, involvedType)
+			}
+		}
+
+		// handle token contract involvers
+
+		for involvedType, byContract := range map[string]map[string][]string{
+			constants.InvolversTypeErc20: transaction.Involvers.TokenContracts.Erc20,
+			constants.InvolversTypeNft:   transaction.Involvers.TokenContracts.NFT,
+		} {
+			for contract, involvers := range byContract {
+				if len(involvers) == 0 {
+					continue
+				}
+
+				absolutelyInvalidContractAddress, _, err := unsafeAnyAddressToBech32Address(contract, bech32Cfg)
+				if err != nil {
+					return errors.Wrapf(err, "failed to check contract address %s by converting to bech32 address", contract)
+				}
+
+				if absolutelyInvalidContractAddress {
+					// ignore invalid records
+					continue
+				}
+
 				for _, involver := range involvers {
 					absolutelyInvalidAddress, bech32Address, err := unsafeAnyAddressToBech32Address(involver, bech32Cfg)
 					if err != nil {
@@ -636,53 +701,42 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 						continue
 					}
 
-					var involvedAccount dbtypes.RecordAccount
-					var found bool
-
-					if involvedAccount, found = mapInvolvedAccounts[bech32Address]; !found {
+					involvedAccount, found := mapInvolvedAccounts[bech32Address]
+					if !found {
 						involvedAccount = dbtypes.NewRecordAccountForInsert(
 							d.chainId,
 							bech32Address,
 						)
 					}
-
+					switch involvedType {
+					case constants.InvolversTypeErc20:
+						involvedAccount.BalanceOnErc20Contracts = append(involvedAccount.BalanceOnErc20Contracts, contract)
+					case constants.InvolversTypeNft:
+						involvedAccount.BalanceOnNftContracts = append(involvedAccount.BalanceOnNftContracts, contract)
+					}
 					mapInvolvedAccounts[bech32Address] = involvedAccount
 
-					anyInvolvedAccount = true
-
-					sif, existing := mapBech32ToInvolvedFlag[bech32Address]
-					if !existing {
-						sif = structInvolvedFlag{}
-					}
-					switch involvedType {
-					case constants.InvolversTypeSenderOrSigner:
-						sif.Signer = true
-					case constants.InvolversTypeErc20:
-						sif.Erc20 = true
-					case constants.InvolversTypeNft:
-						sif.NFT = true
-					}
-					mapBech32ToInvolvedFlag[bech32Address] = sif
-				}
-			}
-
-			if len(mapBech32ToInvolvedFlag) > 0 {
-				for bech32Address, involvedFlag := range mapBech32ToInvolvedFlag {
-					ref := dbtypes.NewRecordRefAccountToRecentTxForInsert(
-						d.chainId,
-						bech32Address,
-						height,
-						transaction.TransactionHash,
-					)
-					ref.Signer = involvedFlag.Signer
-					ref.Erc20 = involvedFlag.Erc20
-					ref.NFT = involvedFlag.NFT
-					refAccountToRecentTxs = append(refAccountToRecentTxs, ref)
+					putInvolvedFlag(bech32Address, involvedType)
 				}
 			}
 		}
 
-		if anyInvolvedAccount {
+		// build records
+
+		if len(mapBech32ToInvolvedFlag) > 0 {
+			for bech32Address, involvedFlag := range mapBech32ToInvolvedFlag {
+				ref := dbtypes.NewRecordRefAccountToRecentTxForInsert(
+					d.chainId,
+					bech32Address,
+					height,
+					transaction.TransactionHash,
+				)
+				ref.Signer = involvedFlag.Signer
+				ref.Erc20 = involvedFlag.Erc20
+				ref.NFT = involvedFlag.NFT
+				refAccountToRecentTxs = append(refAccountToRecentTxs, ref)
+			}
+
 			recentAccountTxs = append(
 				recentAccountTxs,
 				dbtypes.NewRecordRecentAccountTransactionForInsert(
