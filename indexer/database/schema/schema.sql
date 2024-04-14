@@ -255,7 +255,7 @@ CREATE TABLE transaction (
     -- other fields
     epoch               BIGINT  NOT NULL, -- epoch UTC seconds
     message_types       TEXT[]  NOT NULL, -- proto message types of inner messages
-    tx_type             TEXT    NOT NULL, -- tx type, eg: cosmos or evm
+    tx_type             TEXT    NOT NULL, -- tx type, eg: cosmos or evm or wasm
 
     CONSTRAINT transaction_pkey PRIMARY KEY (chain_id, height, hash, partition_id)
 ) PARTITION BY LIST(partition_id);

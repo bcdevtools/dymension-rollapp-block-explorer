@@ -98,7 +98,7 @@ func (t RecordTransaction) ValidateBasic() error {
 	}
 
 	switch t.TxType {
-	case "cosmos":
+	case "cosmos", "wasm":
 		// ok
 		if !utils.IsValidCosmosTransactionHash(t.Hash) {
 			return fmt.Errorf("invalid cosmos transaction hash %s of block %d", t.Hash, t.Height)
