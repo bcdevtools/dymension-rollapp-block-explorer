@@ -11,7 +11,6 @@ import Widgets from '@mui/icons-material/Widgets';
 import Receipt from '@mui/icons-material/Receipt';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
-import { SelectChangeEvent } from '@mui/material/Select';
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';

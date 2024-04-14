@@ -1,6 +1,5 @@
 'use client';
 
-import { transaction } from '@prisma/client';
 import { formatUnixTime } from '@/utils/common';
 import Link from '@mui/material/Link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';

@@ -8,7 +8,7 @@ import {
   AddressTransactionType,
 } from '@/consts/addressPage';
 import Box from '@mui/material/Box';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const transactionTabs = [
   { value: AddressTransactionType.TRANSACTIONS, label: 'Transactions' },
