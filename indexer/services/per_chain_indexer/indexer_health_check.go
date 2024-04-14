@@ -2,6 +2,7 @@ package per_chain_indexer
 
 //goland:noinspection SpellCheckingInspection
 import (
+	querysvc "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query"
 	querytypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/types"
 	"slices"
@@ -27,11 +28,20 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 	var responsesByJsonRpcUrl responseByJsonRpcUrlSlice
 	for _, url := range d.getBeRpcUrlsRL() {
 		d.querySvc.SetQueryEndpoint(url)
-		resBeGetChainInfo, duration, err := d.querySvc.BeGetChainInfo()
+		resBeGetChainInfo, duration, err := querysvc.BeJsonRpcQueryWithRetry[*querytypes.ResponseBeGetChainInfo](
+			d.querySvc,
+			func(service querysvc.BeJsonRpcQueryService) (*querytypes.ResponseBeGetChainInfo, time.Duration, error) {
+				return d.querySvc.BeGetChainInfo()
+			},
+			querytypes.DefaultRetryOption().
+				MinCount(3).                // maximum number of retry
+				MaxDuration(3*time.Second), /*RPC is not good if response time is too long*/
+		)
 		if err != nil {
 			logger.Error("failed to get chain info", "url", url, "chain-id", d.chainId, "error", err.Error())
 			continue
 		}
+
 		responsesByJsonRpcUrl = append(responsesByJsonRpcUrl, responseByJsonRpcUrl{
 			url:      url,
 			res:      resBeGetChainInfo,
