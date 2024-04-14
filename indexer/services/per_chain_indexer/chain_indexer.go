@@ -176,6 +176,7 @@ func (d *defaultIndexer) Start() {
 		}
 
 		_ = d.genericLoop(func(beGetChainInfo querytypes.ResponseBeGetChainInfo) error {
+			startTime := time.Now().UTC()
 			catchUp = false
 
 			// perform indexing
@@ -242,6 +243,14 @@ func (d *defaultIndexer) Start() {
 						"error", fatalErr.Error(),
 					)
 					return fatalErr
+				}
+
+				if time.Since(startTime) > 20*time.Second {
+					// if the operation was too long, let's refresh the upstream latest block number
+					beGetLatestBlockNumber, _, err := d.querySvc.BeGetLatestBlockNumber()
+					if err == nil && beGetLatestBlockNumber != nil && beGetLatestBlockNumber.LatestBlock > upstreamRpcLatestBlock {
+						upstreamRpcLatestBlock = beGetLatestBlockNumber.LatestBlock
+					}
 				}
 
 				if nextBlockToIndexTo < upstreamRpcLatestBlock {
@@ -312,7 +321,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 	indexingMode pcitypes.IndexingMode,
 ) (
 	fatalError pcitypes.FatalError, // is not per-block-level error since the failed-to-index block will be put into the `failed_block` table.
-	isFetchRpcErr bool,             // is true if the fatal error is due to failed to fetch from RPC
+	isFetchRpcErr bool, // is true if the fatal error is due to failed to fetch from RPC
 ) {
 	indexerCtx := types.UnwrapIndexerContext(d.ctx)
 	db := indexerCtx.GetDatabase()

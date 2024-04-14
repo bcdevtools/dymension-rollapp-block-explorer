@@ -22,6 +22,9 @@ type BeJsonRpcQueryService interface {
 	// BeGetChainInfo is `be_getChainInfo`
 	BeGetChainInfo() (res *querytypes.ResponseBeGetChainInfo, duration time.Duration, err error)
 
+	// BeGetLatestBlockNumber is `be_getLatestBlockNumber`
+	BeGetLatestBlockNumber() (res *querytypes.ResponseBeGetLatestBlockNumber, duration time.Duration, err error)
+
 	// BeTransactionsInBlockRange is `be_getTransactionsInBlockRange`
 	BeTransactionsInBlockRange(from, to int64) (res *querytypes.TransformedResponseBeTransactionsInBlockRange, duration time.Duration, err error)
 }
@@ -93,6 +96,35 @@ func (d *defaultBeJsonRpcQueryService) BeGetChainInfo() (res *querytypes.Respons
 
 	if responseBeGetChainInfo.ChainId != d.chainId {
 		err = errors.Wrapf(querytypes.ErrBlackListDueToMisMatchChainId, "want %s, got %s", d.chainId, responseBeGetChainInfo.ChainId)
+		return
+	}
+
+	res = responseBeGetChainInfo
+	return
+}
+
+func (d *defaultBeJsonRpcQueryService) BeGetLatestBlockNumber() (res *querytypes.ResponseBeGetLatestBlockNumber, duration time.Duration, err error) {
+	startTime := time.Now().UTC()
+
+	var bz []byte
+	bz, err = d.doQuery(
+		types.NewJsonRpcQueryBuilder("be_getLatestBlockNumber"),
+		2*time.Second,
+	)
+	if err != nil {
+		return
+	}
+	duration = time.Since(startTime)
+
+	var resAny any
+	resAny, err = types.ParseJsonRpcResponse[querytypes.ResponseBeGetLatestBlockNumber](bz)
+	if err != nil {
+		return
+	}
+
+	responseBeGetChainInfo := resAny.(*querytypes.ResponseBeGetLatestBlockNumber)
+	if err = responseBeGetChainInfo.ValidateBasic(); err != nil {
+		err = errors.Wrap(err, "response validation failed")
 		return
 	}
 

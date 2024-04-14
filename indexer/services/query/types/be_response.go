@@ -45,6 +45,24 @@ func (r ResponseBeGetChainInfo) ValidateBasic() error {
 	return nil
 }
 
+var _ BeJsonRpcResponse = ResponseBeGetLatestBlockNumber{}
+
+// ResponseBeGetLatestBlockNumber is the response for `be_getLatestBlockNumber`
+type ResponseBeGetLatestBlockNumber struct {
+	LatestBlock             int64 `json:"latestBlock"`
+	LatestBlockTimeEpochUTC int64 `json:"latestBlockTimeEpochUTC"`
+}
+
+func (r ResponseBeGetLatestBlockNumber) ValidateBasic() error {
+	if r.LatestBlock < 1 {
+		return fmt.Errorf("missing latest block height information")
+	}
+	if r.LatestBlockTimeEpochUTC < 1 {
+		return fmt.Errorf("missing latest block time information")
+	}
+	return nil
+}
+
 var _ BeJsonRpcResponse = ResponseBeTransactionsInBlockRange{}
 
 // ResponseBeTransactionsInBlockRange is the response for `be_getTransactionsInBlockRange`
