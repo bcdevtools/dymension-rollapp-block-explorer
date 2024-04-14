@@ -247,7 +247,15 @@ func (d *defaultIndexer) Start() {
 
 				if time.Since(startTime) > 20*time.Second {
 					// if the operation was too long, let's refresh the upstream latest block number
-					beGetLatestBlockNumber, _, err := d.querySvc.BeGetLatestBlockNumber()
+					beGetLatestBlockNumber, _, err := querysvc.BeJsonRpcQueryWithRetry[*querytypes.ResponseBeGetLatestBlockNumber](
+						d.querySvc,
+						func(service querysvc.BeJsonRpcQueryService) (*querytypes.ResponseBeGetLatestBlockNumber, time.Duration, error) {
+							return d.querySvc.BeGetLatestBlockNumber()
+						},
+						querytypes.DefaultRetryOption().
+							MinCount(5).
+							MaxDuration(10*time.Second),
+					)
 					if err == nil && beGetLatestBlockNumber != nil && beGetLatestBlockNumber.LatestBlock > upstreamRpcLatestBlock {
 						upstreamRpcLatestBlock = beGetLatestBlockNumber.LatestBlock
 					}
@@ -327,7 +335,15 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 	db := indexerCtx.GetDatabase()
 	logger := indexerCtx.GetLogger()
 
-	beTransactionsInBlockRange, _, fetchErr := d.querySvc.BeTransactionsInBlockRange(nextBlockToIndexFrom, nextBlockToIndexTo)
+	beTransactionsInBlockRange, _, fetchErr := querysvc.BeJsonRpcQueryWithRetry[*querytypes.TransformedResponseBeTransactionsInBlockRange](
+		d.querySvc,
+		func(service querysvc.BeJsonRpcQueryService) (*querytypes.TransformedResponseBeTransactionsInBlockRange, time.Duration, error) {
+			return d.querySvc.BeTransactionsInBlockRange(nextBlockToIndexFrom, nextBlockToIndexTo)
+		},
+		querytypes.DefaultRetryOption().
+			MinCount(5).
+			MaxDuration(30*time.Second),
+	)
 
 	if fetchErr != nil && querytypes.IsErrBlackList(fetchErr) {
 		// it's a malformed response, then it is a fatal error
@@ -808,7 +824,12 @@ func (d *defaultIndexer) genericLoop(f func(querytypes.ResponseBeGetChainInfo) e
 	d.querySvc.SetQueryEndpoint(activeJsonRpcUrl)
 
 	if beGetChainInfo == nil {
-		beGetChainInfo, _, err = d.querySvc.BeGetChainInfo()
+		beGetChainInfo, _, err = querysvc.BeJsonRpcQueryWithRetry[*querytypes.ResponseBeGetChainInfo](
+			d.querySvc,
+			func(service querysvc.BeJsonRpcQueryService) (*querytypes.ResponseBeGetChainInfo, time.Duration, error) {
+				return d.querySvc.BeGetChainInfo()
+			},
+		)
 		if err != nil {
 			logger.Error("failed to get chain info, waiting for next round", "chain-id", d.chainId, "error", err.Error())
 			return err
