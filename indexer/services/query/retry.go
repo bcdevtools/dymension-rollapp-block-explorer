@@ -2,6 +2,7 @@ package query
 
 import (
 	querytypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query/types"
+	"strings"
 	"time"
 )
 
@@ -18,6 +19,9 @@ func BeJsonRpcQueryWithRetry[T any](
 	if len(retryOption) == 0 {
 		retryOption = []querytypes.RetryOption{defaultRetryOption}
 	}
+
+	minRetryCount := retryOption[0].MinRetryCount
+	maximumRetryDuration := retryOption[0].MaximumRetryDuration
 
 	var firstErr error
 	for {
@@ -36,11 +40,20 @@ func BeJsonRpcQueryWithRetry[T any](
 			firstErr = err
 		}
 
-		if tryCount < retryOption[0].MinRetryCount {
+		errMsg := err.Error()
+		if strings.Contains(errMsg, "connection refused") {
+			break
+		} else if strings.Contains(errMsg, "-32601") && strings.Contains(errMsg, "not available") {
+			break
+		} else if strings.Contains(errMsg, "-32602") /*invalid params*/ {
+			break
+		}
+
+		if tryCount < minRetryCount {
 			continue
 		}
 
-		if time.Since(startTime) < retryOption[0].MaximumRetryDuration {
+		if time.Since(startTime) < maximumRetryDuration {
 			continue
 		}
 
