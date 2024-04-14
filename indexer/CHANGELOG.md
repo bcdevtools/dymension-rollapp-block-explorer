@@ -80,4 +80,5 @@ Templates for Unreleased:
 ### Bug Fixes
 
 - (indexing) [#19](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/19) Skip retry indexing failed block with `height = 0`
-- (indexing) [#20](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/20) Fix ultimately retry indexing failed block 
+- (indexing) [#20](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/20) Fix ultimately retry indexing failed block
+- (indexing) [#31](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/31) Fix tx type `wasm` not indexed into DB & improve Be-Json-RPC retry
