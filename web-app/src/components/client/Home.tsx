@@ -56,22 +56,22 @@ export default function Home() {
       container
       sx={{ width: { xs: '75vw', lg: '50vw' } }}
       spacing={1}>
-      <Fade appear in>
-        <Grid item xs={12} md={3}>
-          <RollappSelect
-            value={rollappPath}
-            label="Rollapp"
-            onValueChange={e => setRollappPath(e.target.value)}
-            fullWidth
-            error={error}
-            size="small"
-          />
-        </Grid>
-      </Fade>
+      {/* <Fade appear in> */}
+      <Grid item xs={12}>
+        <RollappSelect
+          value={rollappPath}
+          label="Rollapp"
+          onValueChange={e => setRollappPath(e.target.value)}
+          fullWidth
+          error={error}
+          size="small"
+        />
+      </Grid>
+      {/* </Fade> */}
       {rollappPath && (
         <>
           <Fade appear in>
-            <Grid item xs={12} md={9}>
+            <Grid item xs={12}>
               <TextField
                 value={searchValue}
                 onChange={e => setSearchValue(e.target.value)}
@@ -79,17 +79,6 @@ export default function Home() {
                 placeholder={SEARCH_PLACEHOLDER}
                 size="small"
               />
-              {/* <StyledPaper sx={{ width: '100%' }}>
-          <InputBase
-            sx={{ ml: 1, flex: 1 }}
-            placeholder={SEARCH_PLACEHOLDER}
-            value={searchValue}
-            onChange={e => void setSearchValue(e.target.value)}
-          />
-          <IconButton type="submit" sx={{ p: '10px' }} aria-label="search">
-            <SearchIcon />
-          </IconButton>
-        </StyledPaper> */}
             </Grid>
           </Fade>
           <Fade appear in>
