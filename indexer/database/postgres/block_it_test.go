@@ -185,6 +185,36 @@ func (suite *IntegrationTestSuite) Test_GetOneFailedBlock_IT() {
 }
 
 //goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
+func (suite *IntegrationTestSuite) Test_GetFailedBlocksInRange_IT() {
+	db := suite.Database()
+
+	firstChain := suite.DBITS.Chains.Number(1).ChainId
+
+	var failedBlocks, wantFailedBlocks []int64
+	for i := 5; i <= 10; i++ {
+		failedBlocks = append(failedBlocks, int64(i))
+		wantFailedBlocks = append(wantFailedBlocks, int64(i))
+	}
+
+	for i := 15; i <= 20; i++ {
+		failedBlocks = append(failedBlocks, int64(i))
+		wantFailedBlocks = append(wantFailedBlocks, int64(i))
+	}
+
+	for i := 26; i <= 31; i++ {
+		failedBlocks = append(failedBlocks, int64(i))
+	}
+
+	err := db.InsertOrUpdateFailedBlocks(firstChain, wantFailedBlocks, nil)
+	suite.Require().NoError(err)
+
+	gotFailedBlocks, err := db.GetFailedBlocksInRange(firstChain, 3, 25)
+	suite.Require().NoError(err)
+
+	suite.ElementsMatch(wantFailedBlocks, gotFailedBlocks)
+}
+
+//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
 func (suite *IntegrationTestSuite) Test_RemoveFailedBlockRecord_IT() {
 	db := suite.Database()
 
