@@ -76,6 +76,7 @@ Templates for Unreleased:
 - (refactor) [#26](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/26) Refactor naming for methods of RWMutex structs
 - (indexing) [#29](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/29) Indexing token contract into account ERC-20/NFT balance contract list
 - (rpc) [#30](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/30) Fetch BE-Json-RPC with retry
+- (indexing) [#33](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/33) Exclude failed blocks when indexing new blocks
 
 ### Bug Fixes
 

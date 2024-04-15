@@ -128,6 +128,45 @@ LIMIT 1
 	return
 }
 
+func (db *Database) GetFailedBlocksInRange(chainId string, from, to int64) (blocksHeight []int64, err error) {
+	defer func() {
+		if err != nil {
+			blocksHeight = nil
+		}
+	}()
+
+	tableName := utils.GetPartitionedTableNameByChainId("failed_block", chainId)
+
+	var rows *sql.Rows
+
+	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
+	rows, err = db.Sql.Query(`
+SELECT height FROM `+tableName+`
+WHERE chain_id = $1 AND height >= $2 AND height <= $3
+`,
+		chainId, // 1
+		from,    // 2
+		to,      // 3
+	)
+
+	if err != nil {
+		err = errors.Wrap(err, "failed to get failed block")
+		return
+	}
+
+	for rows.Next() {
+		var height int64
+		err = rows.Scan(&height)
+		if err != nil {
+			err = errors.Wrap(err, "failed to scan result of failed block")
+			return
+		}
+		blocksHeight = append(blocksHeight, height)
+	}
+
+	return
+}
+
 func (db *Database) RemoveFailedBlockRecord(chainId string, height int64) error {
 	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
 	_, err := db.Sql.Exec(`
