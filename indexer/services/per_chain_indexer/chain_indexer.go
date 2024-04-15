@@ -223,48 +223,53 @@ func (d *defaultIndexer) Start() {
 			} else {
 				checkRetryIndexFailedBlock = false
 
-				nextBlockToIndexFrom := latestIndexedBlock + 1
-				nextBlockToIndexTo := libutils.MinInt64(
-					upstreamRpcLatestBlock,
-					nextBlockToIndexFrom+constants.MaximumNumberOfBlocksToIndexPerBatch-1,
-				)
-
-				fatalErr, _ := d.fetchAndIndexingBlockRange(
-					nextBlockToIndexFrom, nextBlockToIndexTo,
-					bech32Cfg,
-					pcitypes.IndexingModeNewBlocks,
-				)
-				if fatalErr != nil {
-					logger.Error(
-						"fatal error while fetching and indexing block range",
-						"from", nextBlockToIndexFrom,
-						"to", nextBlockToIndexTo,
-						"chain-id", d.chainId,
-						"error", fatalErr.Error(),
-					)
-					return fatalErr
+				anyBlock, nextBlockToIndexFrom, nextBlockToIndexTo, err := d.determineBlockRangeToIndex(latestIndexedBlock, upstreamRpcLatestBlock)
+				if err != nil {
+					logger.Error("failed to determine block range to index", "chain-id", d.chainId, "error", err.Error())
+					return err
 				}
 
-				if time.Since(startTime) > 20*time.Second {
-					// if the operation was too long, let's refresh the upstream latest block number
-					beGetLatestBlockNumber, _, err := querysvc.BeJsonRpcQueryWithRetry[*querytypes.ResponseBeGetLatestBlockNumber](
-						d.querySvc,
-						func(service querysvc.BeJsonRpcQueryService) (*querytypes.ResponseBeGetLatestBlockNumber, time.Duration, error) {
-							return d.querySvc.BeGetLatestBlockNumber()
-						},
-						querytypes.DefaultRetryOption().
-							MinCount(5).
-							MaxDuration(10*time.Second),
+				if anyBlock {
+					fatalErr, _ := d.fetchAndIndexingBlockRange(
+						nextBlockToIndexFrom, nextBlockToIndexTo,
+						bech32Cfg,
+						pcitypes.IndexingModeNewBlocks,
 					)
-					if err == nil && beGetLatestBlockNumber != nil && beGetLatestBlockNumber.LatestBlock > upstreamRpcLatestBlock {
-						upstreamRpcLatestBlock = beGetLatestBlockNumber.LatestBlock
+					if fatalErr != nil {
+						logger.Error(
+							"fatal error while fetching and indexing block range",
+							"from", nextBlockToIndexFrom,
+							"to", nextBlockToIndexTo,
+							"chain-id", d.chainId,
+							"error", fatalErr.Error(),
+						)
+						return fatalErr
 					}
-				}
 
-				if nextBlockToIndexTo < upstreamRpcLatestBlock {
-					catchUp = true
-					logger.Debug("catching up", "chain-id", d.chainId, "from", nextBlockToIndexTo+1, "to", upstreamRpcLatestBlock)
-				} else {
+					if time.Since(startTime) > 20*time.Second {
+						// if the operation was too long, let's refresh the upstream latest block number
+						beGetLatestBlockNumber, _, err := querysvc.BeJsonRpcQueryWithRetry[*querytypes.ResponseBeGetLatestBlockNumber](
+							d.querySvc,
+							func(service querysvc.BeJsonRpcQueryService) (*querytypes.ResponseBeGetLatestBlockNumber, time.Duration, error) {
+								return d.querySvc.BeGetLatestBlockNumber()
+							},
+							querytypes.DefaultRetryOption().
+								MinCount(5).
+								MaxDuration(10*time.Second),
+						)
+						if err == nil && beGetLatestBlockNumber != nil && beGetLatestBlockNumber.LatestBlock > upstreamRpcLatestBlock {
+							upstreamRpcLatestBlock = beGetLatestBlockNumber.LatestBlock
+						}
+					}
+
+					if nextBlockToIndexTo < upstreamRpcLatestBlock {
+						catchUp = true
+						logger.Debug("catching up", "chain-id", d.chainId, "from", nextBlockToIndexTo+1, "to", upstreamRpcLatestBlock)
+					} else {
+						checkRetryIndexFailedBlock = true
+					}
+				} else if upstreamRpcLatestBlock-latestIndexedBlock < 5 {
+					// fall behind but not too much, try re-index failed block instead of sleeping
 					checkRetryIndexFailedBlock = true
 				}
 			}
@@ -845,6 +850,31 @@ func (d *defaultIndexer) genericLoop(f func(querytypes.ResponseBeGetChainInfo) e
 	}
 
 	return f(*beGetChainInfo)
+}
+
+// determineBlockRangeToIndex performs some logic like excluding failed blocks to determine the block range to index.
+func (d *defaultIndexer) determineBlockRangeToIndex(latestIndexedBlock, upstreamRpcLatestBlock int64) (anyBlock bool, from, to int64, err error) {
+	if latestIndexedBlock < 1 || latestIndexedBlock > upstreamRpcLatestBlock {
+		panic(fmt.Sprintf("invalid input param %d, %d", latestIndexedBlock, upstreamRpcLatestBlock))
+	}
+
+	indexerCtx := types.UnwrapIndexerContext(d.ctx)
+	db := indexerCtx.GetDatabase()
+
+	from = latestIndexedBlock + 1
+	to = libutils.MinInt64(
+		upstreamRpcLatestBlock,
+		from+constants.MaximumNumberOfBlocksToIndexPerBatch-1,
+	)
+
+	var excludeFailedBlocks []int64
+	excludeFailedBlocks, err = db.GetFailedBlocksInRange(d.chainId, from, to)
+	if err != nil {
+		return
+	}
+
+	anyBlock, from, to = utils.GetClosesRange(from, to, excludeFailedBlocks)
+	return
 }
 
 // isShuttingDownRL returns true of the indexer is flagged as in shutting down state.
