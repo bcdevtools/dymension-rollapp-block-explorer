@@ -77,6 +77,7 @@ Templates for Unreleased:
 - (indexing) [#29](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/29) Indexing token contract into account ERC-20/NFT balance contract list
 - (rpc) [#30](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/30) Fetch BE-Json-RPC with retry
 - (indexing) [#33](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/33) Exclude failed blocks when indexing new blocks
+- (indexing) [#34](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/34) Mark failed blocks when failed to index new blocks range
 
 ### Bug Fixes
 
