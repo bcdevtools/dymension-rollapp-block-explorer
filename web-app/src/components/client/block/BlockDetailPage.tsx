@@ -2,12 +2,13 @@
 
 import Typography from '@mui/material/Typography';
 import useBlockDetail from '@/hooks/useBlockDetail';
-import { formatUnixTime, getNewPathByRollapp } from '@/utils/common';
+import { getNewPathByRollapp } from '@/utils/common';
 import Link from '@mui/material/Link';
 import { Block } from '@/consts/rpcResTypes';
 import { useParams, usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
 import DataDetail from '@/components/commons/DataDetail';
+import { formatUnixTime } from '@/utils/datetime';
 
 function getTxsDisplay(blockDetail: Block, pathname: string) {
   const txCount = blockDetail.txs.length;

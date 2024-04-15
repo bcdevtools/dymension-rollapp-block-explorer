@@ -1,13 +1,15 @@
-import _Card from '@mui/material/Card';
+import _Card, { CardProps as _CardProps } from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 
-type CardProps = Readonly<{
-  children: React.ReactNode;
-}>;
+type CardProps = Readonly<
+  _CardProps & {
+    children: React.ReactNode;
+  }
+>;
 
-export default function Card({ children }: CardProps) {
+export default function Card({ children, ...props }: CardProps) {
   return (
-    <_Card variant="outlined">
+    <_Card {...props} variant="outlined">
       <CardContent>{children}</CardContent>
     </_Card>
   );

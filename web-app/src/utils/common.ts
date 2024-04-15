@@ -1,10 +1,5 @@
 import { Path } from '@/consts/path';
-import {
-  DEFAULT_DATE_TIME_FORMAT,
-  DEFAULT_PAGINATION_SIZE,
-  MAX_PAGINATION_SIZE,
-} from '@/consts/setting';
-import dayjs from 'dayjs';
+import { DEFAULT_PAGINATION_SIZE, MAX_PAGINATION_SIZE } from '@/consts/setting';
 import { isCosmosAddress, isEvmAddress, isTxHash } from './address';
 
 export type SearchParam = string | undefined | null;
@@ -20,10 +15,6 @@ export function isNotFoundPath(pathname: string) {
 export function getNewPathByRollapp(pathname: string, newPath: string) {
   const slittedPath = pathname.split('/');
   return `${slittedPath[1] ? '/' : ''}${slittedPath[1]}${newPath}`;
-}
-
-export function formatUnixTime(unixTime: number) {
-  return dayjs.unix(unixTime).format(DEFAULT_DATE_TIME_FORMAT);
 }
 
 export function isNullOrUndefined(value: any) {
@@ -79,13 +70,13 @@ export function handleSearch(
   if (!searchText) return;
 
   if (/^\d+$/.test(searchText))
-    return cb(`${rollappPath}/${Path.BLOCKS}/${searchText}`);
+    return cb(`${rollappPath}${Path.BLOCKS}/${searchText}`);
 
   if (isEvmAddress(searchText) || isCosmosAddress(searchText))
-    return cb(`${rollappPath}/${Path.ADDRESS}/${searchText}`);
+    return cb(`${rollappPath}${Path.ADDRESS}/${searchText}`);
 
   if (isTxHash(searchText))
-    return cb(`${rollappPath}/${Path.TRANSACTIONS}/${searchText}`);
+    return cb(`${rollappPath}${Path.TRANSACTIONS}/${searchText}`);
 
-  return cb(`${rollappPath}/${Path.NOT_FOUND}`);
+  return cb(`${rollappPath}${Path.NOT_FOUND}`);
 }

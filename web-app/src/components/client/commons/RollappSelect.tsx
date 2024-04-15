@@ -7,6 +7,7 @@ import MenuItem from '@mui/material/MenuItem';
 import React from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import FormHelperText from '@mui/material/FormHelperText';
+import Typography from '@mui/material/Typography';
 
 type RollappSelectProps = Readonly<
   FormControlProps & {
@@ -42,7 +43,12 @@ export default React.memo(function RollappSelect({
         size={size}>
         {rollappInfos.map(rollapp => (
           <MenuItem key={rollapp.chain_id} value={rollapp.path}>
-            {rollapp.name}
+            <Typography variant="h6" marginRight={1}>
+              {rollapp.name}
+            </Typography>
+            <Typography variant="subtitle2" color="grey">
+              {rollapp.chain_id}
+            </Typography>
           </MenuItem>
         ))}
       </Select>

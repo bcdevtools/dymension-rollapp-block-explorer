@@ -1,14 +1,19 @@
 'use client';
 
-import { formatUnixTime } from '@/utils/common';
+import { getNewPathByRollapp } from '@/utils/common';
 import Link from '@mui/material/Link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import DataTable from '../../commons/DataTable';
-import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
+import {
+  DEFAULT_PAGINATION_SIZE,
+  PAGE_PARAM_NAME,
+  PAGE_SIZE_PARAM_NAME,
+} from '@/consts/setting';
 import { useEffect, useState } from 'react';
 import LinkToBlockNo from '../block/LinkToBlockNo';
 import Chip from '@mui/material/Chip';
 import { Path } from '@/consts/path';
+import { formatUnixTime } from '@/utils/datetime';
 
 type TransactionListTableProps = Readonly<{
   transactions: Required<{
@@ -17,16 +22,18 @@ type TransactionListTableProps = Readonly<{
     epoch: bigint;
     tx_type: string;
   }>[];
-  totalTransactions: number;
-  pageSize: number;
-  page: number;
+  totalTransactions?: number;
+  pageSize?: number;
+  page?: number;
+  enablePagination?: boolean;
 }>;
 
 export default function TransactionListTable({
   transactions,
-  totalTransactions,
-  pageSize,
-  page,
+  totalTransactions = 0,
+  pageSize = DEFAULT_PAGINATION_SIZE,
+  page = 0,
+  enablePagination = true,
 }: TransactionListTableProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -40,7 +47,10 @@ export default function TransactionListTable({
   const body = transactions.map(transaction => [
     <Link
       key={transaction.hash}
-      href={`${Path.TRANSACTIONS}/${transaction.hash}`}
+      href={getNewPathByRollapp(
+        pathname,
+        `/${Path.TRANSACTIONS}/${transaction.hash}`
+      )}
       underline="hover">
       {transaction.hash}
     </Link>,
@@ -65,6 +75,7 @@ export default function TransactionListTable({
       page={page}
       pageSize={pageSize}
       loading={loading}
+      enablePagination={enablePagination}
       onPageChange={newPage => {
         setLoading(true);
         const newSearchParams = new URLSearchParams(searchParams);

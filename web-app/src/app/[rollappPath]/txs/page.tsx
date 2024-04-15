@@ -28,8 +28,8 @@ export default async function Transactions({
   params,
   searchParams,
 }: TransactionsProps) {
-  const rollappInfo = await getRollAppInfoByRollappPath(params.rollappPath);
-  if (!rollappInfo) return null;
+  const rollappInfo = (await getRollAppInfoByRollappPath(params.rollappPath))!;
+
   const blockNo = getNumberFromStringParam(searchParams.block) || null;
 
   const total = await countTransactionsByHeight(rollappInfo.chain_id, blockNo);

@@ -53,8 +53,7 @@ function getFilterOptionsFromTxType(
 }
 
 export default async function Address({ params, searchParams }: AddressProps) {
-  const rollappInfo = await getRollAppInfoByRollappPath(params.rollappPath);
-  if (!rollappInfo) return null;
+  const rollappInfo = (await getRollAppInfoByRollappPath(params.rollappPath))!;
 
   const { address } = params;
 

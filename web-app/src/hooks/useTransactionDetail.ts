@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 export default function useTransactionDetail(
   txHash: string
 ): [Transaction | null, boolean] {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [{ rpcService }] = useRollappStore();
 

@@ -2,12 +2,12 @@ import DataTable from '@/components/commons/DataTable';
 import { Path } from '@/consts/path';
 import { Block } from '@/consts/rpcResTypes';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
-import useBlockList from '@/hooks/useBlockList';
+import { useBlockList } from '@/hooks/useBlockList';
 import {
-  formatUnixTime,
   getNewPathByRollapp,
   getPageAndPageSizeFromStringParam,
 } from '@/utils/common';
+import { formatUnixTime } from '@/utils/datetime';
 import Link from '@mui/material/Link';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import React from 'react';

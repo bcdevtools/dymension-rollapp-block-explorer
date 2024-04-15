@@ -25,6 +25,7 @@ type DataTableProps = Readonly<{
   onPageChange: (page: number) => void;
   onRowsPerPageChange: (pageSize: string) => void;
   loading?: boolean;
+  enablePagination?: boolean;
 }>;
 
 type TablePaginationActionsProps = Readonly<{
@@ -108,6 +109,7 @@ export default function DataTable({
   onRowsPerPageChange,
   onPageChange,
   loading,
+  enablePagination = true,
 }: DataTableProps) {
   const _body: React.ReactNode[][] = loading
     ? Array(pageSize).fill(Array(headers.length).fill(<Skeleton />))
@@ -133,7 +135,13 @@ export default function DataTable({
           </TableHead>
           <TableBody>
             {_body.map((row, idx) => (
-              <TableRow key={rowKeys[idx] || idx}>
+              <TableRow
+                key={rowKeys[idx] || idx}
+                sx={
+                  !enablePagination
+                    ? { '&:last-child td, &:last-child th': { border: 0 } }
+                    : {}
+                }>
                 {row.map((cell, idx) => (
                   <TableCell key={idx}>{cell}</TableCell>
                 ))}
@@ -142,22 +150,24 @@ export default function DataTable({
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
-        component="div"
-        rowsPerPageOptions={[10, 25, 50, 100]}
-        count={total}
-        rowsPerPage={pageSize}
-        page={page}
-        slotProps={{
-          select: {
-            inputProps: { 'aria-label': 'rows per page' },
-            native: true,
-          },
-        }}
-        onPageChange={(e, newPage: number) => void onPageChange(newPage)}
-        onRowsPerPageChange={e => void onRowsPerPageChange(e.target.value)}
-        ActionsComponent={TablePaginationActions}
-      />
+      {enablePagination && (
+        <TablePagination
+          component="div"
+          rowsPerPageOptions={[10, 25, 50, 100]}
+          count={total}
+          rowsPerPage={pageSize}
+          page={page}
+          slotProps={{
+            select: {
+              inputProps: { 'aria-label': 'rows per page' },
+              native: true,
+            },
+          }}
+          onPageChange={(e, newPage: number) => void onPageChange(newPage)}
+          onRowsPerPageChange={e => void onRowsPerPageChange(e.target.value)}
+          ActionsComponent={TablePaginationActions}
+        />
+      )}
     </>
   );
 }

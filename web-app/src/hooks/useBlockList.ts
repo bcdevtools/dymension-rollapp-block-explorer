@@ -2,12 +2,12 @@ import { Block } from '@/consts/rpcResTypes';
 import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
 
-export default function useBlockList(
+export function useBlockList(
   latestBlockNo: number,
   page: number,
   pageSize: number
 ): [Block[], boolean] {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [{ rpcService }] = useRollappStore();
 
