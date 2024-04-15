@@ -78,6 +78,7 @@ Templates for Unreleased:
 - (rpc) [#30](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/30) Fetch BE-Json-RPC with retry
 - (indexing) [#33](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/33) Exclude failed blocks when indexing new blocks
 - (indexing) [#34](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/34) Mark failed blocks when failed to index new blocks range
+- (indexing) [#35](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/35) Index EVM/Wasm `action` into 2 transaction tables
 
 ### Bug Fixes
 

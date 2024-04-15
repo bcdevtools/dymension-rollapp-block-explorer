@@ -17,6 +17,7 @@ type RecordRecentAccountTransaction struct {
 
 	Epoch        int64
 	MessageTypes []string
+	Action       string
 }
 
 // NewRecordRecentAccountTransactionForInsert procedures a new RecordRecentAccountTransaction for insertion into database

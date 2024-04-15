@@ -91,6 +91,8 @@ type TransactionInBlockInResponseBeTransactionsInBlockRange struct {
 	Involvers       InvolversInTransactionInBlockInResponseBeTransactionsInBlockRange `json:"involvers"`
 	MessagesType    []string                                                          `json:"messagesType"`
 	TransactionType string                                                            `json:"type"`
+	EvmTxInfo       *InfoInTransactionInBlockInResponseBeTransactionsInBlockRange     `json:"evmTx,omitempty"`
+	WasmTxInfo      *InfoInTransactionInBlockInResponseBeTransactionsInBlockRange     `json:"wasmTx,omitempty"`
 }
 
 type InvolversInTransactionInBlockInResponseBeTransactionsInBlockRange struct {
@@ -99,6 +101,11 @@ type InvolversInTransactionInBlockInResponseBeTransactionsInBlockRange struct {
 	Erc20          []string                                                                  `json:"erc20,omitempty"`
 	NFT            []string                                                                  `json:"nft,omitempty"`
 	TokenContracts ContractInvolversInTransactionInBlockInResponseBeTransactionsInBlockRange `json:"contracts,omitempty"`
+}
+
+type InfoInTransactionInBlockInResponseBeTransactionsInBlockRange struct {
+	Action          string `json:"action,omitempty"`
+	MethodSignature string `json:"sig,omitempty"`
 }
 
 type ContractInvolversInTransactionInBlockInResponseBeTransactionsInBlockRange struct {
@@ -128,8 +135,10 @@ func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
 			if len(tx.TransactionHash) < 1 {
 				return fmt.Errorf("missing transaction hash for tx at %d of block %s", i, heightStr)
 			}
+
+			var possibleEvmTxInfo, possibleWasmTxInfo bool
 			switch tx.TransactionType {
-			case "cosmos", "wasm":
+			case "cosmos":
 				// ok
 				if !utils.IsValidCosmosTransactionHash(tx.TransactionHash) {
 					return fmt.Errorf("invalid cosmos transaction hash %s for tx at %d of block %s", tx.TransactionHash, i, heightStr)
@@ -139,13 +148,43 @@ func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
 				if !utils.IsValidEvmTransactionHash(tx.TransactionHash) {
 					return fmt.Errorf("invalid evm transaction hash %s for tx at %d of block %s", tx.TransactionHash, i, heightStr)
 				}
+				possibleEvmTxInfo = true
+			case "wasm":
+				// ok
+				if !utils.IsValidCosmosTransactionHash(tx.TransactionHash) {
+					return fmt.Errorf("invalid wasm transaction hash %s for tx at %d of block %s", tx.TransactionHash, i, heightStr)
+				}
+				possibleWasmTxInfo = true
 			default:
 				return fmt.Errorf("unrecognised transaction type %s for tx at %d of block %s", tx.TransactionType, i, heightStr)
 			}
 			if len(tx.MessagesType) < 1 {
 				return fmt.Errorf("missing messages type for tx at %d of block %s", i, heightStr)
 			}
+
+			if !possibleEvmTxInfo && tx.EvmTxInfo != nil {
+				return fmt.Errorf("unexpected evm tx info for tx at %d of block %s", i, heightStr)
+			}
+			if !possibleWasmTxInfo && tx.WasmTxInfo != nil {
+				return fmt.Errorf("unexpected wasm tx info for tx at %d of block %s", i, heightStr)
+			}
 		}
 	}
 	return nil
+}
+
+func (m *InfoInTransactionInBlockInResponseBeTransactionsInBlockRange) String() string {
+	if m == nil {
+		return ""
+	}
+
+	if m.Action == "" {
+		return ""
+	}
+
+	if m.MethodSignature == "" {
+		return m.Action
+	}
+
+	return fmt.Sprintf("%s|%s", m.Action, m.MethodSignature)
 }

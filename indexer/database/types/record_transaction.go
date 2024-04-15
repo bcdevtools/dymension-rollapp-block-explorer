@@ -16,6 +16,7 @@ type RecordTransaction struct {
 	Epoch        int64
 	MessageTypes []string
 	TxType       string
+	Action       string
 }
 
 // NewRecordTransactionForInsert procedures a new RecordTransaction for insertion into database
