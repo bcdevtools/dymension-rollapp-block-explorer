@@ -29,18 +29,19 @@ INSERT INTO recent_account_transaction (
 	height,
 	hash,
 	epoch,
-	message_types
+	message_types,
+	"action"
 ) VALUES `
 
 	var params []interface{}
 
 	for i, tx := range txs {
-		pi := i * 5
+		pi := i * 6
 
 		if i > 0 {
 			stmt += ","
 		}
-		stmt += fmt.Sprintf("($%d,$%d,$%d,$%d,$%d)", pi+1, pi+2, pi+3, pi+4, pi+5)
+		stmt += fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d)", pi+1, pi+2, pi+3, pi+4, pi+5, pi+6)
 		params = append(
 			params,
 			tx.ChainId,                // 1
@@ -48,6 +49,10 @@ INSERT INTO recent_account_transaction (
 			tx.Hash,                   // 3
 			tx.Epoch,                  // 4
 			pq.Array(tx.MessageTypes), // 5
+			sql.NullString{ // 6
+				String: tx.Action,
+				Valid:  tx.Action != "",
+			},
 		)
 	}
 

@@ -1,6 +1,7 @@
 package pg_db_tx
 
 import (
+	"database/sql"
 	"fmt"
 	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
 	"github.com/lib/pq"
@@ -24,18 +25,19 @@ INSERT INTO transaction (
 	partition_id,
 	epoch,
 	message_types,
-	tx_type
+	tx_type,
+	"action"
 ) VALUES `
 
 	var params []interface{}
 
 	for i, account := range txs {
-		pi := i * 7
+		pi := i * 8
 
 		if i > 0 {
 			stmt += ","
 		}
-		stmt += fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d,$%d)", pi+1, pi+2, pi+3, pi+4, pi+5, pi+6, pi+7)
+		stmt += fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d)", pi+1, pi+2, pi+3, pi+4, pi+5, pi+6, pi+7, pi+8)
 		params = append(
 			params,
 			account.ChainId,                // 1
@@ -45,6 +47,10 @@ INSERT INTO transaction (
 			account.Epoch,                  // 5
 			pq.Array(account.MessageTypes), // 6
 			account.TxType,                 // 7
+			sql.NullString{ // 8
+				String: account.Action,
+				Valid:  account.Action != "",
+			},
 		)
 	}
 

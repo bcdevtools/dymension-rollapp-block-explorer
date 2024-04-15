@@ -25,6 +25,7 @@ func (suite *IntegrationTestSuite) Test_InsertRecordTransactionsIfNotExists_IT()
 		[]string{"type-1"},
 		"cosmos",
 	)
+	originalRecord1.Action = "action-1"
 
 	//goland:noinspection SpellCheckingInspection
 	originalRecord2 := dbtypes.NewRecordTransactionForInsert(
@@ -48,6 +49,7 @@ func (suite *IntegrationTestSuite) Test_InsertRecordTransactionsIfNotExists_IT()
 		suite.Equal(originalRecord1.Epoch, record1.Epoch)
 		suite.Equal(originalRecord1.MessageTypes, record1.MessageTypes)
 		suite.Equal(originalRecord1.TxType, record1.TxType)
+		suite.Equal(originalRecord1.Action, record1.Action.String)
 
 		record2 := suite.DBITS.ReadTransactionRecord(originalRecord2.Hash, originalRecord2.Height, originalRecord2.ChainId, tx.Tx)
 		suite.Equal(originalRecord2.ChainId, record2.ChainId)
@@ -57,6 +59,7 @@ func (suite *IntegrationTestSuite) Test_InsertRecordTransactionsIfNotExists_IT()
 		suite.Equal(originalRecord2.Epoch, record2.Epoch)
 		suite.Equal(originalRecord2.MessageTypes, record2.MessageTypes)
 		suite.Equal(originalRecord2.TxType, record2.TxType)
+		suite.False(record2.Action.Valid)
 
 		suite.Equal(originalRowsCount+2, suite.CountRows(tx.Tx, "transaction"))
 		originalRowsCount += 2
