@@ -656,6 +656,11 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 			transaction.MessagesType,
 			transaction.TransactionType,
 		)
+		if transaction.EvmTxInfo != nil {
+			recordTx.Action = transaction.EvmTxInfo.Action
+		} else if transaction.WasmTxInfo != nil {
+			recordTx.Action = transaction.WasmTxInfo.Action
+		}
 
 		recordsTxs = append(recordsTxs, recordTx)
 
@@ -784,16 +789,19 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 				refAccountToRecentTxs = append(refAccountToRecentTxs, ref)
 			}
 
-			recentAccountTxs = append(
-				recentAccountTxs,
-				dbtypes.NewRecordRecentAccountTransactionForInsert(
-					d.chainId,
-					height,
-					transaction.TransactionHash,
-					block.TimeEpochUTC,
-					transaction.MessagesType,
-				),
+			recentAccountTx := dbtypes.NewRecordRecentAccountTransactionForInsert(
+				d.chainId,
+				height,
+				transaction.TransactionHash,
+				block.TimeEpochUTC,
+				transaction.MessagesType,
 			)
+			if transaction.EvmTxInfo != nil {
+				recentAccountTx.Action = transaction.EvmTxInfo.Action
+			} else if transaction.WasmTxInfo != nil {
+				recentAccountTx.Action = transaction.WasmTxInfo.Action
+			}
+			recentAccountTxs = append(recentAccountTxs, recentAccountTx)
 		}
 	}
 
