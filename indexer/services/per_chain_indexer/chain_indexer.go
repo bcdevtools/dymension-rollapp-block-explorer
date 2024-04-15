@@ -243,6 +243,23 @@ func (d *defaultIndexer) Start() {
 							"chain-id", d.chainId,
 							"error", fatalErr.Error(),
 						)
+
+						var failedBlocksToInsert []int64
+						for h := nextBlockToIndexFrom; h <= nextBlockToIndexTo; h++ {
+							failedBlocksToInsert = append(failedBlocksToInsert, h)
+						}
+						sqlErr := db.InsertOrUpdateFailedBlocks(d.chainId, failedBlocksToInsert, fatalErr)
+						if sqlErr != nil {
+							logger.Error(
+								"failed to insert/update failed block for block range",
+								"chain-id", d.chainId,
+								"from", nextBlockToIndexFrom,
+								"to", nextBlockToIndexTo,
+								"error", sqlErr.Error(),
+							)
+							// it is not critical if failed
+						}
+
 						return fatalErr
 					}
 
