@@ -867,13 +867,18 @@ func (d *defaultIndexer) determineBlockRangeToIndex(latestIndexedBlock, upstream
 		from+constants.MaximumNumberOfBlocksToIndexPerBatch-1,
 	)
 
-	var excludeFailedBlocks []int64
-	excludeFailedBlocks, err = db.GetFailedBlocksInRange(d.chainId, from, to)
+	anyBlock, from, to, err = utils.GetClosesRangeWithExtensible(
+		from, to,
+		func(f int64, t int64) ([]int64, error) {
+			return db.GetFailedBlocksInRange(d.chainId, f, t)
+		},
+		upstreamRpcLatestBlock,                         // retry up to
+		constants.MaximumNumberOfBlocksToIndexPerBatch, // extend size
+	)
 	if err != nil {
 		return
 	}
 
-	anyBlock, from, to = utils.GetClosesRange(from, to, excludeFailedBlocks)
 	return
 }
 
