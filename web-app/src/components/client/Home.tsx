@@ -10,17 +10,8 @@ import { useRouter } from 'next/navigation';
 import { handleSearch } from '@/utils/common';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import Fade from '@mui/material/Fade';
+import Slide from '@mui/material/Slide';
 import Link from 'next/link';
-
-// const StyledPaper = styled(Paper)(({ theme }) => ({
-//   p: '2px 4px',
-//   display: 'flex',
-//   alignItems: 'center',
-//   height: 40,
-//   width: '100%',
-//   backgroundColor: theme.palette.background.default,
-// }));
 
 export default function Home() {
   const [rollappPath, setRollappPath] = useState<string>('');
@@ -56,7 +47,6 @@ export default function Home() {
       container
       sx={{ width: { xs: '75vw', lg: '50vw' } }}
       spacing={1}>
-      {/* <Fade appear in> */}
       <Grid item xs={12}>
         <RollappSelect
           value={rollappPath}
@@ -67,10 +57,9 @@ export default function Home() {
           size="small"
         />
       </Grid>
-      {/* </Fade> */}
       {rollappPath && (
         <>
-          <Fade appear in>
+          <Slide in direction="up">
             <Grid item xs={12}>
               <TextField
                 value={searchValue}
@@ -80,8 +69,8 @@ export default function Home() {
                 size="small"
               />
             </Grid>
-          </Fade>
-          <Fade appear in>
+          </Slide>
+          <Slide in direction="up">
             <Grid item xs={12} display="flex" justifyContent="center">
               <Button
                 component={Link}
@@ -99,7 +88,7 @@ export default function Home() {
                 Search
               </Button>
             </Grid>
-          </Fade>
+          </Slide>
         </>
       )}
     </Grid>
