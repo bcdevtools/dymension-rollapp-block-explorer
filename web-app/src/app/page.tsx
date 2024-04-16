@@ -12,8 +12,8 @@ export default async function Home() {
       justifyContent="space-between"
       flexDirection="column"
       marginTop={5}
-      minHeight={225}
-      height="35vh"
+      minHeight={320}
+      height="40vh"
       width="100vw">
       <Typography variant="h4" display="flex" alignItems="center">
         <Box display="flex" marginRight={2}>

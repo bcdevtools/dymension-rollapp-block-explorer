@@ -65,7 +65,10 @@ export default async function Address({ params, searchParams }: AddressProps) {
   );
   if (!rollappAddress) return permanentRedirect(`/${params.rollappPath}`);
 
+  const isEVMChain = rollappInfo.chain_type === ChainType.EVM;
   const bech32Address = rollappAddress.toBech32();
+  const evmAddress = isEVMChain ? rollappAddress.toHex() : null;
+
   const filterOptions = getFilterOptionsFromTxType(
     searchParams[AddressPageSearchParams.TX_TYPE]
   );
@@ -96,12 +99,12 @@ export default async function Address({ params, searchParams }: AddressProps) {
         subtitle={
           <>
             {bech32Address}
-            <CopyButton size="small" textToCopy={address} />
-            {rollappInfo.chain_type === ChainType.EVM && (
+            <CopyButton size="small" textToCopy={bech32Address} />
+            {isEVMChain && (
               <>
                 <br />
-                {rollappAddress.toHex()}
-                <CopyButton size="small" textToCopy={address} />
+                {evmAddress}
+                <CopyButton size="small" textToCopy={evmAddress!} />
               </>
             )}
           </>

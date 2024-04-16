@@ -10,6 +10,7 @@ import DoneIcon from '@mui/icons-material/Done';
 import DataDetail from '@/components/commons/DataDetail';
 import { formatNumberString } from '@/utils/common';
 import CopyButton from '../commons/CopyButton';
+import round from 'lodash/round';
 
 function getStatusDisplay(success: boolean) {
   return success ? (
@@ -35,8 +36,8 @@ export default function TransactionDetailPage() {
             label: 'Transaction Hash',
             value: (
               <Typography>
-                {params.txHash}{' '}
-                <CopyButton size="small" textToCopy={params.txHash} />
+                {transactionDetail.hash}{' '}
+                <CopyButton size="small" textToCopy={transactionDetail.hash} />
               </Typography>
             ),
           },
@@ -54,7 +55,7 @@ export default function TransactionDetailPage() {
             value: (
               <Typography>
                 {formatNumberString(limit)} | {formatNumberString(used)} (
-                {(used / limit) * 100}%)
+                {round((used / limit) * 100, 2)}%)
               </Typography>
             ),
           },

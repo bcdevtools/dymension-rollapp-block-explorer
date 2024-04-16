@@ -56,6 +56,7 @@ model transaction {
   epoch         BigInt
   message_types String[]
   tx_type       String
+  action        String?
 
   @@id([chain_id, height, hash, partition_id])
   @@index([hash], map: "transaction_hash_index")
@@ -80,6 +81,7 @@ model recent_account_transaction {
   ref_count                Int                        @default(0) @db.SmallInt
   epoch                    BigInt
   message_types            String[]
+  action                   String?
   ref_account_to_recent_tx ref_account_to_recent_tx[]
 
   @@id([chain_id, height, hash])

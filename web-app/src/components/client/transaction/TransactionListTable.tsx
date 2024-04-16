@@ -9,7 +9,7 @@ import {
   PAGE_PARAM_NAME,
   PAGE_SIZE_PARAM_NAME,
 } from '@/consts/setting';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import LinkToBlockNo from '../block/LinkToBlockNo';
 import Chip from '@mui/material/Chip';
 import { Path } from '@/consts/path';
@@ -21,12 +21,23 @@ type TransactionListTableProps = Readonly<{
     hash: string;
     epoch: bigint;
     tx_type: string;
+    message_types: string[];
+    action: string | null;
   }>[];
   totalTransactions?: number;
   pageSize?: number;
   page?: number;
   enablePagination?: boolean;
 }>;
+
+const headers = [
+  'TxHash',
+  'Method',
+  'Msg Types',
+  'Block',
+  'Date Time',
+  'Action',
+];
 
 export default function TransactionListTable({
   transactions,
@@ -44,31 +55,34 @@ export default function TransactionListTable({
     setLoading(false);
   }, [transactions]);
 
-  const body = transactions.map(transaction => [
-    <Link
-      key={transaction.hash}
-      href={getNewPathByRollapp(
-        pathname,
-        `/${Path.TRANSACTIONS}/${transaction.hash}`
-      )}
-      underline="hover">
-      {transaction.hash}
-    </Link>,
-    <Chip
-      key={transaction.hash}
-      label={transaction.tx_type}
-      variant="outlined"
-    />,
-    <LinkToBlockNo
-      key={transaction.hash}
-      blockNo={transaction.height.toString()}
-    />,
-    formatUnixTime(Number(transaction.epoch)),
-  ]);
+  const body = transactions.map(
+    ({ hash, epoch, message_types, action, tx_type, height }) => [
+      <Link
+        key={hash}
+        href={getNewPathByRollapp(pathname, `/${Path.TRANSACTIONS}/${hash}`)}
+        underline="hover">
+        {hash.substring(0, 12)}...
+      </Link>,
+      <Chip key={hash} label={tx_type} variant="outlined" />,
+      message_types.map((i, idx) => (
+        <React.Fragment key={idx}>
+          {i.match(/[^.]+$/)![0]}
+          {idx + 1 !== message_types.length && <br />}
+        </React.Fragment>
+      )),
+      <LinkToBlockNo key={hash} blockNo={height.toString()} />,
+      formatUnixTime(Number(epoch)),
+      action &&
+        (function () {
+          const splitted = action.split(':');
+          return splitted[1] || splitted[0];
+        })(),
+    ]
+  );
 
   return (
     <DataTable
-      headers={['TxHash', 'Method', 'Block', 'Date Time']}
+      headers={headers}
       body={body}
       rowKeys={transactions.map(transaction => transaction.hash)}
       total={totalTransactions}
