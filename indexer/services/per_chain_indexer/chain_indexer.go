@@ -477,7 +477,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				return
 			}
 
-			return
+			continue
 		}
 
 		epochWeek := utils.GetEpochWeek(block.TimeEpochUTC)
