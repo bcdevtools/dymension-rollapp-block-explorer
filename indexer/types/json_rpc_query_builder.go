@@ -24,6 +24,7 @@ func nextRequestId() uint64 {
 }
 
 type JsonRpcQueryBuilder interface {
+	Method() string
 	String() string
 }
 
@@ -44,6 +45,10 @@ func NewJsonRpcQueryBuilder(
 		method:      method,
 		queryParams: params,
 	}
+}
+
+func (j *jsonRpcQueryBuilder) Method() string {
+	return j.method
 }
 
 func (j *jsonRpcQueryBuilder) String() string {

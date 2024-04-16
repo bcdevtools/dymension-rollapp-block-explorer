@@ -4,6 +4,7 @@ package query
 import (
 	"bytes"
 	"fmt"
+	"github.com/EscanBE/go-lib/logging"
 	querytypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/types"
 	"github.com/pkg/errors"
@@ -35,16 +36,18 @@ type defaultBeJsonRpcQueryService struct {
 	sync.RWMutex
 
 	chainId string
+	logger  logging.Logger
 
 	// queryEndpoint is the active query endpoint
 	queryEndpoint string
 }
 
 // NewBeJsonRpcQueryService initialize and returns a BeJsonRpcQueryService instance
-func NewBeJsonRpcQueryService(chainId string) BeJsonRpcQueryService {
+func NewBeJsonRpcQueryService(chainId string, logger logging.Logger) BeJsonRpcQueryService {
 	return &defaultBeJsonRpcQueryService{
 		RWMutex:       sync.RWMutex{},
 		chainId:       chainId,
+		logger:        logger,
 		queryEndpoint: "",
 	}
 }
@@ -223,7 +226,11 @@ func (d *defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, opt
 		Timeout: timeout,
 	}
 
-	resp, err := httpClient.Post(d.getQueryEndpointRL(), "application/json", bytes.NewBuffer([]byte(qb.String())))
+	payload := qb.String()
+
+	d.logger.Debug("query Be Json-RPC", "method", qb.Method(), "payload", payload)
+
+	resp, err := httpClient.Post(d.getQueryEndpointRL(), "application/json", bytes.NewBuffer([]byte(payload)))
 	if err != nil {
 		return nil, err
 	}

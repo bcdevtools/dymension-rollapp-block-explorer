@@ -60,14 +60,15 @@ func NewIndexer(
 	chainConfig types.ChainConfig,
 	sharedCache pcitypes.SharedCache,
 ) Indexer {
-	indexingConfig := types.UnwrapIndexerContext(ctx).GetConfig().IndexingConfig
+	indexerCtx := types.UnwrapIndexerContext(ctx)
+	indexingConfig := indexerCtx.GetConfig().IndexingConfig
 	return &defaultIndexer{
 		ctx:         ctx,
 		indexingCfg: indexingConfig,
 		chainName:   chainName,
 		chainId:     chainConfig.ChainId,
 		chainConfig: chainConfig,
-		querySvc:    querysvc.NewBeJsonRpcQueryService(chainConfig.ChainId),
+		querySvc:    querysvc.NewBeJsonRpcQueryService(chainConfig.ChainId, indexerCtx.GetLogger()),
 
 		sharedCache: sharedCache,
 	}
