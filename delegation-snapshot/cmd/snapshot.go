@@ -392,7 +392,10 @@ var snapshotCmd = &cobra.Command{
 			panic(errors.Wrap(err, "failed to marshal multi-send message"))
 		}
 
-		gasLimit := 200_000 * len(records)
+		gasLimit := 38_000 * len(records)
+		if gasLimit < 400_000 {
+			gasLimit = 400_000
+		}
 		txFee := gasPrice.Mul(sdkmath.NewInt(int64(gasLimit)))
 		unsignedMsg := fmt.Sprintf(`{
   "body": {
