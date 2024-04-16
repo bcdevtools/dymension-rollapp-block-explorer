@@ -12,6 +12,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Fade from '@mui/material/Fade';
 import Link from 'next/link';
+import { useRollappStore } from '@/stores/rollappStore';
 
 // const StyledPaper = styled(Paper)(({ theme }) => ({
 //   p: '2px 4px',
@@ -23,6 +24,7 @@ import Link from 'next/link';
 // }));
 
 export default function Home() {
+  const [{ rollappInfos }] = useRollappStore(true);
   const [rollappPath, setRollappPath] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
   const [error, setError] = useState(false);
@@ -44,7 +46,11 @@ export default function Home() {
       setHasTriedSubmit(true);
       return;
     }
-    handleSearch(rollappPath, searchValue, newPath => router.push(newPath));
+    handleSearch(
+      rollappInfos.find(i => i.path === rollappPath)!,
+      searchValue,
+      newPath => router.push(newPath)
+    );
   };
 
   return (

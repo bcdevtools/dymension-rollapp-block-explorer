@@ -57,9 +57,12 @@ export default async function Address({ params, searchParams }: AddressProps) {
 
   const { address } = params;
 
-  const rollappBech32Data = rollappInfo.bech32! as JsonObject;
-  const prefix = rollappBech32Data!.addr as string;
-  const rollappAddress = RollappAddress.fromString(address, prefix);
+  const prefix = (rollappInfo.bech32 as JsonObject).addr as string;
+  const rollappAddress = RollappAddress.fromString(
+    address.toLowerCase(),
+    prefix,
+    rollappInfo.chain_type === ChainType.EVM
+  );
   if (!rollappAddress) return permanentRedirect(`/${params.rollappPath}`);
 
   const bech32Address = rollappAddress.toBech32();

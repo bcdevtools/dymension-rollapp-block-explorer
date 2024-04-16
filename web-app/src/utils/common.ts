@@ -1,6 +1,17 @@
 import { Path } from '@/consts/path';
-import { DEFAULT_PAGINATION_SIZE, MAX_PAGINATION_SIZE } from '@/consts/setting';
-import { isCosmosAddress, isEvmAddress, isTxHash } from './address';
+import {
+  ChainType,
+  DEFAULT_PAGINATION_SIZE,
+  MAX_PAGINATION_SIZE,
+} from '@/consts/setting';
+import {
+  RollappAddress,
+  isCosmosAddress,
+  isEvmAddress,
+  isTxHash,
+} from './address';
+import { RollappInfo } from './rollapp';
+import { JsonObject } from '@prisma/client/runtime/library';
 
 export type SearchParam = string | undefined | null;
 
@@ -61,10 +72,11 @@ export function formatNumberString(value: number) {
 }
 
 export function handleSearch(
-  rollappPath: string,
+  rollappInfo: RollappInfo,
   searchText: string,
   cb: (newPath: string) => void
 ) {
+  const { path: rollappPath } = rollappInfo;
   searchText = searchText.trim();
 
   if (!searchText) return;
@@ -72,8 +84,21 @@ export function handleSearch(
   if (/^\d+$/.test(searchText))
     return cb(`${rollappPath}${Path.BLOCKS}/${searchText}`);
 
-  if (isEvmAddress(searchText) || isCosmosAddress(searchText))
+  if (rollappInfo.chain_type === ChainType.EVM && isEvmAddress(searchText))
     return cb(`${rollappPath}${Path.ADDRESS}/${searchText}`);
+
+  const searchTextInLowerCase = searchText.toLowerCase();
+  if (isCosmosAddress(searchTextInLowerCase)) {
+    try {
+      RollappAddress.fromBech32(
+        searchTextInLowerCase,
+        (rollappInfo.bech32! as JsonObject).addr as string
+      );
+      return cb(`${rollappPath}${Path.ADDRESS}/${searchText}`);
+    } catch (e) {
+      return cb(`${rollappPath}${Path.NOT_FOUND}`);
+    }
+  }
 
   if (isTxHash(searchText))
     return cb(`${rollappPath}${Path.TRANSACTIONS}/${searchText}`);

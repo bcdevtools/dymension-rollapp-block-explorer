@@ -19,12 +19,16 @@ export function isTxHash(value: string) {
 }
 
 export class RollappAddress {
-  static fromBech32(bech32Address: string, prefix: string) {
+  static fromBech32(bech32Address: string, prefix?: string) {
     const decoded = bech32.decode(bech32Address);
+
+    if (prefix && decoded.prefix !== prefix) {
+      throw new Error('Unmatched prefix');
+    }
 
     return new RollappAddress(
       new Uint8Array(bech32.fromWords(decoded.words)),
-      prefix
+      decoded.prefix
     );
   }
 
@@ -33,12 +37,16 @@ export class RollappAddress {
     return new RollappAddress(Uint8Array.from(Buffer.from(hex, 'hex')), prefix);
   }
 
-  static fromString(value: string, prefix: string) {
-    if (isEvmAddress(value)) {
+  static fromString(value: string, prefix: string, isEvmChain: boolean = true) {
+    if (isEvmChain && isEvmAddress(value))
       return RollappAddress.fromHex(value, prefix);
-    } else if (isCosmosAddress(value))
-      return RollappAddress.fromBech32(value, prefix);
-    else null;
+    else if (isCosmosAddress(value)) {
+      try {
+        return RollappAddress.fromBech32(value, prefix);
+      } catch (e) {
+        return null;
+      }
+    } else null;
   }
 
   constructor(

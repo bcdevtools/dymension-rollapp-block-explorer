@@ -102,7 +102,7 @@ export default React.memo(function Header({ handleMenuToggle }: HeaderProps) {
       return;
     }
 
-    handleSearch(selectedRollappInfo!.path, searchValue, newPath => {
+    handleSearch(selectedRollappInfo!, searchValue, newPath => {
       if (pathname !== newPath) router.push(newPath);
       setSearchValue('');
     });
