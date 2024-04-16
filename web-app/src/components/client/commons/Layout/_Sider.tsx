@@ -61,6 +61,7 @@ export default React.memo(function Sider({
         <ListItem>
           <RollappSelect
             fullWidth
+            size="small"
             value={selectedRollappInfo!.path}
             onValueChange={e => {
               void router.push(

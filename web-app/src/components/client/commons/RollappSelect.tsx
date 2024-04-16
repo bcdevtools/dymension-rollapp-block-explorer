@@ -43,7 +43,7 @@ export default React.memo(function RollappSelect({
         size={size}>
         {rollappInfos.map(rollapp => (
           <MenuItem key={rollapp.chain_id} value={rollapp.path}>
-            <Typography variant="h6" marginRight={1}>
+            <Typography variant="button" marginRight={1}>
               {rollapp.name}
             </Typography>
             <Typography variant="subtitle2" color="grey">

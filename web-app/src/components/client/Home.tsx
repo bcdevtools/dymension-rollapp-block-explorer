@@ -10,18 +10,9 @@ import { useRouter } from 'next/navigation';
 import { handleSearch } from '@/utils/common';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import Fade from '@mui/material/Fade';
+import Slide from '@mui/material/Slide';
 import Link from 'next/link';
 import { useRollappStore } from '@/stores/rollappStore';
-
-// const StyledPaper = styled(Paper)(({ theme }) => ({
-//   p: '2px 4px',
-//   display: 'flex',
-//   alignItems: 'center',
-//   height: 40,
-//   width: '100%',
-//   backgroundColor: theme.palette.background.default,
-// }));
 
 export default function Home() {
   const [{ rollappInfos }] = useRollappStore(true);
@@ -62,22 +53,20 @@ export default function Home() {
       container
       sx={{ width: { xs: '75vw', lg: '50vw' } }}
       spacing={1}>
-      <Fade appear in>
-        <Grid item xs={12} md={3}>
-          <RollappSelect
-            value={rollappPath}
-            label="Rollapp"
-            onValueChange={e => setRollappPath(e.target.value)}
-            fullWidth
-            error={error}
-            size="small"
-          />
-        </Grid>
-      </Fade>
+      <Grid item xs={12}>
+        <RollappSelect
+          value={rollappPath}
+          label="Rollapp"
+          onValueChange={e => setRollappPath(e.target.value)}
+          fullWidth
+          error={error}
+          size="small"
+        />
+      </Grid>
       {rollappPath && (
         <>
-          <Fade appear in>
-            <Grid item xs={12} md={9}>
+          <Slide in direction="up">
+            <Grid item xs={12}>
               <TextField
                 value={searchValue}
                 onChange={e => setSearchValue(e.target.value)}
@@ -85,20 +74,9 @@ export default function Home() {
                 placeholder={SEARCH_PLACEHOLDER}
                 size="small"
               />
-              {/* <StyledPaper sx={{ width: '100%' }}>
-          <InputBase
-            sx={{ ml: 1, flex: 1 }}
-            placeholder={SEARCH_PLACEHOLDER}
-            value={searchValue}
-            onChange={e => void setSearchValue(e.target.value)}
-          />
-          <IconButton type="submit" sx={{ p: '10px' }} aria-label="search">
-            <SearchIcon />
-          </IconButton>
-        </StyledPaper> */}
             </Grid>
-          </Fade>
-          <Fade appear in>
+          </Slide>
+          <Slide in direction="up">
             <Grid item xs={12} display="flex" justifyContent="center">
               <Button
                 component={Link}
@@ -116,7 +94,7 @@ export default function Home() {
                 Search
               </Button>
             </Grid>
-          </Fade>
+          </Slide>
         </>
       )}
     </Grid>
