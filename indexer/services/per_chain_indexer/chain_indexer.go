@@ -229,6 +229,15 @@ func (d *defaultIndexer) Start() {
 					return err
 				}
 
+				logger.Debug(
+					"determined block range to indexed",
+					"anyBlock", anyBlock,
+					"nextBlockToIndexFrom", nextBlockToIndexFrom,
+					"nextBlockToIndexTo", nextBlockToIndexTo,
+					"latestIndexedBlock", latestIndexedBlock,
+					"upstreamRpcLatestBlock", upstreamRpcLatestBlock,
+				)
+
 				if anyBlock {
 					fatalErr, _ := d.fetchAndIndexingBlockRange(
 						nextBlockToIndexFrom, nextBlockToIndexTo,
