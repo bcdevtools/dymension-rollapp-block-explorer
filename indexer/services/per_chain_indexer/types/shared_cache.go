@@ -3,8 +3,8 @@ package types
 import "sync"
 
 type SharedCache interface {
-	MarkCreatedPartitionsForEpochWeek(epochWeek int64)
-	IsCreatedPartitionsForEpochWeek(epochWeek int64) bool
+	MarkCreatedPartitionsForEpochWeekWL(epochWeek int64)
+	IsCreatedPartitionsForEpochWeekRL(epochWeek int64) bool
 }
 
 var _ SharedCache = &sharedCache{}
@@ -21,13 +21,13 @@ func NewSharedCache() SharedCache {
 	}
 }
 
-func (s *sharedCache) MarkCreatedPartitionsForEpochWeek(epochWeek int64) {
+func (s *sharedCache) MarkCreatedPartitionsForEpochWeekWL(epochWeek int64) {
 	s.Lock()
 	defer s.Unlock()
 	s.createdPartitionsForEpochWeek[epochWeek] = true
 }
 
-func (s *sharedCache) IsCreatedPartitionsForEpochWeek(epochWeek int64) bool {
+func (s *sharedCache) IsCreatedPartitionsForEpochWeekRL(epochWeek int64) bool {
 	s.RLock()
 	defer s.RUnlock()
 	_, found := s.createdPartitionsForEpochWeek[epochWeek]

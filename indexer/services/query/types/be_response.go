@@ -45,6 +45,24 @@ func (r ResponseBeGetChainInfo) ValidateBasic() error {
 	return nil
 }
 
+var _ BeJsonRpcResponse = ResponseBeGetLatestBlockNumber{}
+
+// ResponseBeGetLatestBlockNumber is the response for `be_getLatestBlockNumber`
+type ResponseBeGetLatestBlockNumber struct {
+	LatestBlock             int64 `json:"latestBlock"`
+	LatestBlockTimeEpochUTC int64 `json:"latestBlockTimeEpochUTC"`
+}
+
+func (r ResponseBeGetLatestBlockNumber) ValidateBasic() error {
+	if r.LatestBlock < 1 {
+		return fmt.Errorf("missing latest block height information")
+	}
+	if r.LatestBlockTimeEpochUTC < 1 {
+		return fmt.Errorf("missing latest block time information")
+	}
+	return nil
+}
+
 var _ BeJsonRpcResponse = ResponseBeTransactionsInBlockRange{}
 
 // ResponseBeTransactionsInBlockRange is the response for `be_getTransactionsInBlockRange`
@@ -69,10 +87,30 @@ type BlockInResponseBeTransactionsInBlockRange struct {
 }
 
 type TransactionInBlockInResponseBeTransactionsInBlockRange struct {
-	TransactionHash string              `json:"hash"`
-	Involvers       map[string][]string `json:"involvers"`
-	MessagesType    []string            `json:"messagesType"`
-	TransactionType string              `json:"type"`
+	TransactionHash string                                                            `json:"hash"`
+	Involvers       InvolversInTransactionInBlockInResponseBeTransactionsInBlockRange `json:"involvers"`
+	MessagesType    []string                                                          `json:"messagesType"`
+	TransactionType string                                                            `json:"type"`
+	EvmTxInfo       *InfoInTransactionInBlockInResponseBeTransactionsInBlockRange     `json:"evmTx,omitempty"`
+	WasmTxInfo      *InfoInTransactionInBlockInResponseBeTransactionsInBlockRange     `json:"wasmTx,omitempty"`
+}
+
+type InvolversInTransactionInBlockInResponseBeTransactionsInBlockRange struct {
+	Signers        []string                                                                  `json:"s,omitempty"`
+	Others         []string                                                                  `json:"0,omitempty"`
+	Erc20          []string                                                                  `json:"erc20,omitempty"`
+	NFT            []string                                                                  `json:"nft,omitempty"`
+	TokenContracts ContractInvolversInTransactionInBlockInResponseBeTransactionsInBlockRange `json:"contracts,omitempty"`
+}
+
+type InfoInTransactionInBlockInResponseBeTransactionsInBlockRange struct {
+	Action          string `json:"action,omitempty"`
+	MethodSignature string `json:"sig,omitempty"`
+}
+
+type ContractInvolversInTransactionInBlockInResponseBeTransactionsInBlockRange struct {
+	Erc20 map[string][]string `json:"erc20,omitempty"`
+	NFT   map[string][]string `json:"nft,omitempty"`
 }
 
 func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
@@ -97,6 +135,8 @@ func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
 			if len(tx.TransactionHash) < 1 {
 				return fmt.Errorf("missing transaction hash for tx at %d of block %s", i, heightStr)
 			}
+
+			var possibleEvmTxInfo, possibleWasmTxInfo bool
 			switch tx.TransactionType {
 			case "cosmos":
 				// ok
@@ -108,16 +148,43 @@ func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
 				if !utils.IsValidEvmTransactionHash(tx.TransactionHash) {
 					return fmt.Errorf("invalid evm transaction hash %s for tx at %d of block %s", tx.TransactionHash, i, heightStr)
 				}
+				possibleEvmTxInfo = true
+			case "wasm":
+				// ok
+				if !utils.IsValidCosmosTransactionHash(tx.TransactionHash) {
+					return fmt.Errorf("invalid wasm transaction hash %s for tx at %d of block %s", tx.TransactionHash, i, heightStr)
+				}
+				possibleWasmTxInfo = true
 			default:
 				return fmt.Errorf("unrecognised transaction type %s for tx at %d of block %s", tx.TransactionType, i, heightStr)
-			}
-			if len(tx.Involvers) < 1 {
-				return fmt.Errorf("missing involvers for tx at %d of block %s", i, heightStr)
 			}
 			if len(tx.MessagesType) < 1 {
 				return fmt.Errorf("missing messages type for tx at %d of block %s", i, heightStr)
 			}
+
+			if !possibleEvmTxInfo && tx.EvmTxInfo != nil {
+				return fmt.Errorf("unexpected evm tx info for tx at %d of block %s", i, heightStr)
+			}
+			if !possibleWasmTxInfo && tx.WasmTxInfo != nil {
+				return fmt.Errorf("unexpected wasm tx info for tx at %d of block %s", i, heightStr)
+			}
 		}
 	}
 	return nil
+}
+
+func (m *InfoInTransactionInBlockInResponseBeTransactionsInBlockRange) String() string {
+	if m == nil {
+		return ""
+	}
+
+	if m.Action == "" {
+		return ""
+	}
+
+	if m.MethodSignature == "" {
+		return m.Action
+	}
+
+	return fmt.Sprintf("%s|%s", m.Action, m.MethodSignature)
 }

@@ -41,15 +41,28 @@ type Database interface {
 	// GetBech32Config returns the bech32 config of the chain info record with the given chain ID.
 	GetBech32Config(chainId string) (bech32Cfg dbtypes.Bech32PrefixOfChainInfo, err error)
 
+	// IsChainPostponed returns true if the chain is postponed. If the chain is not exists, it returns false.
+	IsChainPostponed(chainId string) (postponed bool, err error)
+
 	// GetLatestIndexedBlock returns the latest indexed block height of the chain info record with the given chain ID.
-	GetLatestIndexedBlock(chainId string) (int64, error)
+	GetLatestIndexedBlock(chainId string) (height int64, postponed bool, err error)
 
 	// SetLatestIndexedBlock updates the latest indexed block height of the chain info record with the given chain ID.
 	SetLatestIndexedBlock(chainId string, height int64) error
 
 	// Failed blocks
 
-	// InsertOrUpdateFailedBlock inserts a new failed block record into the database.
+	// InsertOrUpdateFailedBlocks inserts a batch of failed block records into the database.
 	// If the record is already present, the logic fields will be updated.
-	InsertOrUpdateFailedBlock(chainId string, height int64, optionalReason error) error
+	InsertOrUpdateFailedBlocks(chainId string, blocksHeight []int64, optionalReason error) error
+
+	// GetOneFailedBlock returns the height of a failed block record of the chain with the given chain ID.
+	GetOneFailedBlock(chainId string) (height int64, err error)
+
+	// GetFailedBlocksInRange returns the heights of failed block records in the given range, inclusive.
+	GetFailedBlocksInRange(chainId string, from, to int64) (blocksHeight []int64, err error)
+
+	// RemoveFailedBlockRecord removes a failed block record from the database.
+	// Typically, this is used when the failed block is successfully processed.
+	RemoveFailedBlockRecord(chainId string, height int64) error
 }

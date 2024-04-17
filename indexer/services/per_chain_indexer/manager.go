@@ -1,5 +1,6 @@
 package per_chain_indexer
 
+//goland:noinspection SpellCheckingInspection
 import (
 	"context"
 	pcitypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/per_chain_indexer/types"
@@ -35,6 +36,10 @@ func NewIndexerManager(ctx context.Context) IndexerManager {
 }
 
 func (d *defaultIndexerManager) Reload(cl types.ChainList) {
+	d.reloadWL(cl)
+}
+
+func (d *defaultIndexerManager) reloadWL(cl types.ChainList) {
 	d.Lock()
 	defer d.Unlock()
 
@@ -44,7 +49,7 @@ func (d *defaultIndexerManager) Reload(cl types.ChainList) {
 	// Step 1: shutdown un-used indexer
 	var shutdownIndexers []string
 	for name, existingIndexer := range d.indexerByChainName {
-		if _, found := cl[name]; found {
+		if c, found := cl[name]; found && !c.Disable {
 			// keep
 			continue
 		}
@@ -58,8 +63,12 @@ func (d *defaultIndexerManager) Reload(cl types.ChainList) {
 
 	// Step 2: launching indexer for new records
 	var createIndexerForChains []string
-	for name := range cl {
+	for name, c := range cl {
 		if _, found := d.indexerByChainName[name]; found {
+			// skip
+			continue
+		}
+		if c.Disable {
 			// skip
 			continue
 		}
@@ -80,6 +89,10 @@ func (d *defaultIndexerManager) Reload(cl types.ChainList) {
 	for chainName, chainConfig := range cl {
 		indexerByName, found := d.indexerByChainName[chainName]
 		if !found {
+			// ignore
+			continue
+		}
+		if chainConfig.Disable {
 			// ignore
 			continue
 		}

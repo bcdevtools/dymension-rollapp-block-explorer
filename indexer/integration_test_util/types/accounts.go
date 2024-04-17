@@ -51,8 +51,7 @@ func (a TestAccount) GetTmPrivKey() tmcrypto.PrivKey {
 		},
 	}
 
-	var tmPrivEd25519 tmed25519.PrivKey
-	tmPrivEd25519 = pv.PrivKey.Bytes()
+	var tmPrivEd25519 tmed25519.PrivKey = pv.PrivKey.Bytes()
 
 	return tmPrivEd25519
 }

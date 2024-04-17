@@ -5,18 +5,15 @@ import (
 	"context"
 	sdkmath "cosmossdk.io/math"
 	"database/sql"
-	"encoding/hex"
 	"fmt"
 	"github.com/EscanBE/go-lib/logging"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/integration_test_util"
-	itutildbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/integration_test_util/types/db"
 	itutilutils "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/integration_test_util/utils"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
-	tmcrypto "github.com/tendermint/tendermint/crypto"
 	"math"
 	"strings"
 	"sync"
@@ -133,34 +130,6 @@ func (suite *IntegrationTestSuite) CountRows2(tableName string) int {
 	return count
 }
 
-func (suite *IntegrationTestSuite) cosmosAddr(number int) string {
-	return suite.DBITS.WalletAccounts.Number(number).GetCosmosAddress().String()
-}
-
-func (suite *IntegrationTestSuite) randomCosmosAddr() string {
-	return integration_test_util.NewTestAccount(suite.T(), nil).GetCosmosAddress().String()
-}
-
-func (suite *IntegrationTestSuite) ethAddr(number int) string {
-	return strings.ToLower(suite.DBITS.WalletAccounts.Number(number).GetEthAddress().String())
-}
-
-func (suite *IntegrationTestSuite) randomEthAddr() string {
-	return integration_test_util.NewTestAccount(suite.T(), nil).GetEthAddress().String()
-}
-
-func (suite *IntegrationTestSuite) randomBytes(bytes int) []byte {
-	return tmcrypto.CRandBytes(bytes)
-}
-
-func (suite *IntegrationTestSuite) randomInterchainAccountCosmosAddress() string {
-	return sdk.AccAddress(hex.EncodeToString(suite.randomBytes(32))).String()
-}
-
-func (suite *IntegrationTestSuite) randomInterchainAccountBytesAddress() string {
-	return strings.ToLower("0x" + hex.EncodeToString(suite.randomBytes(32)))
-}
-
 func (suite *IntegrationTestSuite) readCountResult(rows *sql.Rows, err error) int {
 	suite.Require().NoError(err)
 	defer func() {
@@ -172,13 +141,6 @@ func (suite *IntegrationTestSuite) readCountResult(rows *sql.Rows, err error) in
 	suite.Require().NoError(err, "failed to scan count")
 	suite.Require().False(rows.Next(), "expect only one record")
 	return count
-}
-
-func (suite *IntegrationTestSuite) readTransactionRecord(hash string, height int64, chainId string, optionalTx *sql.Tx) itutildbtypes.TransactionRecord {
-	if len(chainId) == 0 {
-		chainId = suite.DBITS.Chains.Number(1).ChainId
-	}
-	return suite.DBITS.ReadTransactionRecord(hash, height, chainId, optionalTx)
 }
 
 func (suite *IntegrationTestSuite) NewBaseCoin(amount int64, chainId string) sdk.Coin {
@@ -212,33 +174,4 @@ func (suite *IntegrationTestSuite) NewBaseCoinWithLow(amountH, amountL int64, ch
 
 func randomPositiveInt64() int64 {
 	return itutilutils.RandomPositiveInt64()
-}
-
-func randomHeight() int64 {
-	return itutilutils.RandomBlockHeight()
-}
-
-func genRandomBytes(size int) []byte {
-	return itutilutils.GenRandomBytes(size)
-}
-
-func strPtrOrNil(v string) *string {
-	if v == "" {
-		return nil
-	}
-	return &v
-}
-
-func int32PtrOrNil(v int32) *int32 {
-	if v == 0 {
-		return nil
-	}
-	return &v
-}
-
-func boolPtrOrNil(v bool) *bool {
-	if v == false {
-		return nil
-	}
-	return &v
 }

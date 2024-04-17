@@ -1,8 +1,10 @@
 package query
 
+//goland:noinspection SpellCheckingInspection
 import (
 	"bytes"
 	"fmt"
+	"github.com/EscanBE/go-lib/logging"
 	querytypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/types"
 	"github.com/pkg/errors"
@@ -21,6 +23,9 @@ type BeJsonRpcQueryService interface {
 	// BeGetChainInfo is `be_getChainInfo`
 	BeGetChainInfo() (res *querytypes.ResponseBeGetChainInfo, duration time.Duration, err error)
 
+	// BeGetLatestBlockNumber is `be_getLatestBlockNumber`
+	BeGetLatestBlockNumber() (res *querytypes.ResponseBeGetLatestBlockNumber, duration time.Duration, err error)
+
 	// BeTransactionsInBlockRange is `be_getTransactionsInBlockRange`
 	BeTransactionsInBlockRange(from, to int64) (res *querytypes.TransformedResponseBeTransactionsInBlockRange, duration time.Duration, err error)
 }
@@ -28,31 +33,43 @@ type BeJsonRpcQueryService interface {
 var _ BeJsonRpcQueryService = &defaultBeJsonRpcQueryService{}
 
 type defaultBeJsonRpcQueryService struct {
-	mutex sync.RWMutex
+	sync.RWMutex
 
 	chainId string
+	logger  logging.Logger
 
 	// queryEndpoint is the active query endpoint
 	queryEndpoint string
 }
 
 // NewBeJsonRpcQueryService initialize and returns a BeJsonRpcQueryService instance
-func NewBeJsonRpcQueryService(chainId string) BeJsonRpcQueryService {
+func NewBeJsonRpcQueryService(chainId string, logger logging.Logger) BeJsonRpcQueryService {
 	return &defaultBeJsonRpcQueryService{
-		mutex:         sync.RWMutex{},
+		RWMutex:       sync.RWMutex{},
 		chainId:       chainId,
+		logger:        logger,
 		queryEndpoint: "",
 	}
 }
 
 func (d *defaultBeJsonRpcQueryService) SetQueryEndpoint(url string) {
-	d.mutex.Lock()
-	defer d.mutex.Unlock()
+	d.setQueryEndpointWL(url)
+}
+
+func (d *defaultBeJsonRpcQueryService) setQueryEndpointWL(url string) {
+	d.Lock()
+	defer d.Unlock()
 	d.queryEndpoint = url
 }
 
 func (d *defaultBeJsonRpcQueryService) GetQueryEndpoint() string {
-	return d.getQueryEndpointWithRLock()
+	return d.getQueryEndpointRL()
+}
+
+func (d *defaultBeJsonRpcQueryService) getQueryEndpointRL() string {
+	d.RLock()
+	defer d.RUnlock()
+	return d.queryEndpoint
 }
 
 func (d *defaultBeJsonRpcQueryService) BeGetChainInfo() (res *querytypes.ResponseBeGetChainInfo, duration time.Duration, err error) {
@@ -82,6 +99,35 @@ func (d *defaultBeJsonRpcQueryService) BeGetChainInfo() (res *querytypes.Respons
 
 	if responseBeGetChainInfo.ChainId != d.chainId {
 		err = errors.Wrapf(querytypes.ErrBlackListDueToMisMatchChainId, "want %s, got %s", d.chainId, responseBeGetChainInfo.ChainId)
+		return
+	}
+
+	res = responseBeGetChainInfo
+	return
+}
+
+func (d *defaultBeJsonRpcQueryService) BeGetLatestBlockNumber() (res *querytypes.ResponseBeGetLatestBlockNumber, duration time.Duration, err error) {
+	startTime := time.Now().UTC()
+
+	var bz []byte
+	bz, err = d.doQuery(
+		types.NewJsonRpcQueryBuilder("be_getLatestBlockNumber"),
+		2*time.Second,
+	)
+	if err != nil {
+		return
+	}
+	duration = time.Since(startTime)
+
+	var resAny any
+	resAny, err = types.ParseJsonRpcResponse[querytypes.ResponseBeGetLatestBlockNumber](bz)
+	if err != nil {
+		return
+	}
+
+	responseBeGetChainInfo := resAny.(*querytypes.ResponseBeGetLatestBlockNumber)
+	if err = responseBeGetChainInfo.ValidateBasic(); err != nil {
+		err = errors.Wrap(err, "response validation failed")
 		return
 	}
 
@@ -167,12 +213,6 @@ func (d *defaultBeJsonRpcQueryService) BeTransactionsInBlockRange(from, to int64
 	return
 }
 
-func (d *defaultBeJsonRpcQueryService) getQueryEndpointWithRLock() string {
-	d.mutex.RLock()
-	defer d.mutex.RUnlock()
-	return d.queryEndpoint
-}
-
 func (d *defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, optionalTimeout time.Duration) ([]byte, error) {
 	var timeout = optionalTimeout
 	if optionalTimeout == 0 {
@@ -186,7 +226,11 @@ func (d *defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, opt
 		Timeout: timeout,
 	}
 
-	resp, err := httpClient.Post(d.getQueryEndpointWithRLock(), "application/json", bytes.NewBuffer([]byte(qb.String())))
+	payload := qb.String()
+
+	d.logger.Debug("query Be Json-RPC", "method", qb.Method(), "payload", payload)
+
+	resp, err := httpClient.Post(d.getQueryEndpointRL(), "application/json", bytes.NewBuffer([]byte(payload)))
 	if err != nil {
 		return nil, err
 	}

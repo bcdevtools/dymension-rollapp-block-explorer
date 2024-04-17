@@ -16,6 +16,7 @@ type RecordTransaction struct {
 	Epoch        int64
 	MessageTypes []string
 	TxType       string
+	Action       string
 }
 
 // NewRecordTransactionForInsert procedures a new RecordTransaction for insertion into database
@@ -98,7 +99,7 @@ func (t RecordTransaction) ValidateBasic() error {
 	}
 
 	switch t.TxType {
-	case "cosmos":
+	case "cosmos", "wasm":
 		// ok
 		if !utils.IsValidCosmosTransactionHash(t.Hash) {
 			return fmt.Errorf("invalid cosmos transaction hash %s of block %d", t.Hash, t.Height)

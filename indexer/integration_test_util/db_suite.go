@@ -100,8 +100,7 @@ func NewDatabaseIntegrationTestSuite(
 	err = rows.Scan(&count)
 	require.NoError(t, err)
 
-	var remakeDb bool
-	remakeDb = count != 1
+	remakeDb := count != 1
 
 	if remakeDb {
 		require.NoError(
@@ -152,6 +151,7 @@ func NewDatabaseIntegrationTestSuite(
 	// Initialize connection
 	pgDbByOwner := openDbConnection(t, databaseName, databaseOwner)
 
+	//goland:noinspection SpellCheckingInspection
 	result := &DatabaseIntegrationTestSuite{
 		t:       t,
 		require: r,
@@ -252,6 +252,7 @@ func (suite *DatabaseIntegrationTestSuite) TruncateAll() {
 	suite.Truncate("failed_block")
 	suite.Truncate("account")
 	suite.Truncate("chain_info")
+	suite.Truncate("ibc_transaction")
 }
 
 // createPartitionedTableForChainId  creates a new partition for the given chain-id.
@@ -361,7 +362,6 @@ func isPgClosed() (closed bool, err error) {
 		errMsg := err.Error()
 		dialingError := strings.Contains(errMsg, "error while dialing") || strings.Contains(errMsg, "connection refused")
 		if dialingError {
-			closed = true
 			err = nil
 		} else {
 			fmt.Println(err)

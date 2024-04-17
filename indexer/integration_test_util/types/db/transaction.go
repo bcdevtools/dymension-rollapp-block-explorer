@@ -1,5 +1,7 @@
 package db
 
+import "database/sql"
+
 type TransactionRecord struct {
 	ChainId     string
 	Height      int64
@@ -9,4 +11,5 @@ type TransactionRecord struct {
 	Epoch        int64
 	MessageTypes []string
 	TxType       string
+	Action       sql.NullString
 }

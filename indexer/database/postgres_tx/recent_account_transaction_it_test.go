@@ -1,8 +1,11 @@
 package pg_db_tx
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
+	"strings"
 	"time"
 )
 
@@ -26,6 +29,7 @@ func (suite *IntegrationTestSuite) Test_InsertRecordsRecentAccountTransactionIfN
 		time.Now().UTC().Unix(),
 		[]string{"type-1"},
 	)
+	originalRecord1.Action = "action-1"
 
 	//goland:noinspection SpellCheckingInspection
 	originalRecord2 := dbtypes.NewRecordRecentAccountTransactionForInsert(
@@ -49,6 +53,7 @@ func (suite *IntegrationTestSuite) Test_InsertRecordsRecentAccountTransactionIfN
 		suite.Equal(int16(0), record1.RefCount)
 		suite.Equal(originalRecord1.Epoch, record1.Epoch)
 		suite.Equal(originalRecord1.MessageTypes, record1.MessageTypes)
+		suite.Equal(originalRecord1.Action, record1.Action.String)
 
 		record2 := suite.DBITS.ReadRecentAccountTransactionRecord(originalRecord2.Hash, originalRecord2.Height, originalRecord2.ChainId, tx.Tx)
 		suite.Equal(originalRecord2.ChainId, record2.ChainId)
@@ -57,6 +62,7 @@ func (suite *IntegrationTestSuite) Test_InsertRecordsRecentAccountTransactionIfN
 		suite.Equal(int16(0), record2.RefCount)
 		suite.Equal(originalRecord2.Epoch, record2.Epoch)
 		suite.Equal(originalRecord2.MessageTypes, record2.MessageTypes)
+		suite.False(record2.Action.Valid)
 
 		suite.Equal(originalRowsCount+2, suite.CountRows(tx.Tx, "recent_account_transaction"))
 		suite.Equal(2, suite.CountRows(tx.Tx, "reduced_ref_count_recent_account_transaction"), "inserted record should be inserted into reduced_ref_count_recent_account_transaction via trigger")
@@ -289,4 +295,149 @@ func (suite *IntegrationTestSuite) Test_InsertRecordsRefAccountToRecentTxIfNotEx
 
 	suite.Equal(2, suite.CountRows2("recent_account_transaction"), "two recent txs with reference should be kept")
 	suite.Zero(suite.CountRows2("reduced_ref_count_recent_account_transaction"))
+}
+
+//goland:noinspection SqlDialectInspection,SqlNoDataSourceInspection
+func (suite *IntegrationTestSuite) Test_KeepRecentAccountTx_IT() {
+	const defaultKeepRecent = 50
+
+	pint := func(i int) *int {
+		return &i
+	}
+
+	tests := []struct {
+		name     string
+		keep     *int
+		wantSize int
+	}{
+		{
+			name:     "keep default",
+			keep:     nil,
+			wantSize: defaultKeepRecent,
+		},
+		{
+			name:     "keep less than default",
+			keep:     pint(defaultKeepRecent - 1),
+			wantSize: defaultKeepRecent,
+		},
+		{
+			name:     "keep less than default",
+			keep:     pint(0),
+			wantSize: defaultKeepRecent,
+		},
+		{
+			name:     "keep less than default",
+			keep:     pint(-1 * (defaultKeepRecent + 1)),
+			wantSize: defaultKeepRecent,
+		},
+		{
+			name:     "keep more than default",
+			keep:     pint(defaultKeepRecent + 1),
+			wantSize: defaultKeepRecent + 1,
+		},
+		{
+			name:     "keep more than default",
+			keep:     pint(defaultKeepRecent * 2),
+			wantSize: defaultKeepRecent * 2,
+		},
+	}
+	for _, tt := range tests {
+		suite.Run(tt.name, func() {
+			suite.SetupTest()
+
+			suite.InsertChainInfoRecords()
+
+			firstChain := suite.DBITS.Chains.Number(1)
+
+			db := suite.DB()
+
+			if tt.keep != nil {
+				_, err := db.Exec("UPDATE chain_info SET keep_recent_account_tx_count = $1 WHERE chain_id = $2", *tt.keep, firstChain.ChainId)
+				suite.Require().NoError(err)
+			}
+
+			startHeight := randomPositiveInt64()
+
+			var accounts dbtypes.RecordsAccount
+			account := dbtypes.RecordAccount{
+				ChainId:                 firstChain.ChainId,
+				Bech32Address:           suite.DBITS.WalletAccounts.Number(1).GetCosmosAddress().String(),
+				BalanceOnErc20Contracts: []string{"a", "b"},
+				BalanceOnNftContracts:   []string{"c", "d"},
+			}
+			accounts = append(accounts, account)
+
+			tx, commit := suite.TX()
+
+			var err error
+
+			err = tx.InsertOrUpdateRecordsAccount(accounts)
+			suite.Require().NoError(err)
+			suite.Require().Equal(1, suite.CountRows(tx.Tx, "account"))
+
+			const recordsToInsert = 200
+
+			for offsetHeight := 1; offsetHeight <= recordsToInsert; offsetHeight++ {
+				bz := make([]byte, 32)
+				_, err = rand.Read(bz)
+				suite.Require().NoError(err)
+				txHash := strings.ToUpper(hex.EncodeToString(bz))
+
+				height := startHeight + int64(offsetHeight)
+
+				recentTx := dbtypes.NewRecordRecentAccountTransactionForInsert(
+					firstChain.ChainId,
+					height,
+					txHash,
+					time.Now().UTC().Unix(),
+					[]string{"t"},
+				)
+
+				refRecord := dbtypes.NewRecordRefAccountToRecentTxForInsert(
+					firstChain.ChainId,
+					account.Bech32Address,
+					height,
+					txHash,
+				)
+
+				err = tx.InsertRecordsRecentAccountTransactionIfNotExists(dbtypes.RecordsRecentAccountTransaction{recentTx})
+				suite.Require().NoError(err)
+
+				err = tx.InsertRecordsRefAccountToRecentTxIfNotExists(dbtypes.RecordsRefAccountToRecentTx{refRecord})
+				suite.Require().NoError(err)
+			}
+
+			suite.Equal(recordsToInsert, suite.CountRows(tx.Tx, "recent_account_transaction"), "before trigger pruning, records must be kept")
+			suite.Equal(tt.wantSize, suite.CountRows(tx.Tx, "ref_account_to_recent_tx"), "ref_account_to_recent_tx must be reduced immediately after insert if excess quota")
+
+			// call prune function
+			err = tx.CleanupZeroRefCountRecentAccountTransaction()
+			suite.Require().NoError(err)
+
+			suite.Require().Equal(tt.wantSize, suite.CountRows(tx.Tx, "recent_account_transaction"))
+			suite.Require().Equal(tt.wantSize, suite.CountRows(tx.Tx, "ref_account_to_recent_tx"))
+
+			commit()
+
+			suite.Equal(tt.wantSize, suite.CountRows2("recent_account_transaction"), "recent txs with reference should be kept")
+			suite.Zero(suite.CountRows2("reduced_ref_count_recent_account_transaction"))
+
+			rows, err := db.Query(`SELECT MIN(height), MAX(height) FROM recent_account_transaction WHERE chain_id = $1`, firstChain.ChainId)
+			suite.Require().NoError(err)
+			defer func() {
+				_ = rows.Close()
+			}()
+
+			suite.Require().True(rows.Next())
+			var min, max int64
+			err = rows.Scan(&min, &max)
+			suite.Require().NoError(err)
+			suite.Require().False(rows.Next())
+
+			wantMax := startHeight + recordsToInsert
+			wantMin := wantMax - int64(tt.wantSize) + 1
+			suite.Equal(wantMin, min, "kept txs must be in descending order")
+			suite.Equal(wantMax, max, "kept txs must be in descending order")
+		})
+	}
 }

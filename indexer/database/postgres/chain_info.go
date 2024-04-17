@@ -7,6 +7,7 @@ import (
 	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
+	"time"
 )
 
 func (db *Database) InsertOrUpdateRecordChainInfo(chainInfo dbtypes.RecordChainInfo) (insertedOrUpdated bool, err error) {
@@ -104,6 +105,37 @@ SELECT bech32 FROM chain_info WHERE chain_id = $1
 	if err != nil {
 		err = errors.Wrap(err, "bech32 config does not pass basic validation")
 		return
+	}
+
+	return
+}
+
+func (db *Database) IsChainPostponed(chainId string) (postponed bool, err error) {
+	var rows *sql.Rows
+
+	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
+	rows, err = db.Sql.Query(`
+SELECT COALESCE(postponed, FALSE), expiry_at_epoch FROM chain_info WHERE chain_id = $1
+`, chainId)
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		_ = rows.Close()
+	}()
+
+	if !rows.Next() {
+		return
+	}
+
+	var expiryAtEpoch sql.NullInt64
+	err = rows.Scan(&postponed, &expiryAtEpoch)
+	if err != nil {
+		return
+	}
+	if !postponed {
+		postponed = expiryAtEpoch.Valid && expiryAtEpoch.Int64 < time.Now().UTC().Unix()
 	}
 
 	return

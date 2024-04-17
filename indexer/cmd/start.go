@@ -1,5 +1,6 @@
 package cmd
 
+//goland:noinspection SpellCheckingInspection
 import (
 	"fmt"
 	libapp "github.com/EscanBE/go-lib/app"
@@ -110,7 +111,7 @@ var startCmd = &cobra.Command{
 				secondaryWait = 5 * time.Second
 			}
 
-			for true {
+			for {
 				time.Sleep(primaryWait)
 
 				chainList, err := loadChainList(homeDir)
@@ -135,7 +136,7 @@ func init() {
 
 // trapExitSignal traps the signal which being emitted when interrupting the application. Implement connection/resource close to prevent resource leaks
 func trapExitSignal(ctx types.Context) {
-	var sigCh = make(chan os.Signal)
+	var sigCh = make(chan os.Signal, 1)
 
 	signal.Notify(sigCh, libcons.TrapExitSignals...)
 

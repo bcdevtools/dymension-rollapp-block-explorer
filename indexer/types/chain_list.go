@@ -17,6 +17,7 @@ type ChainList map[string]ChainConfig
 type ChainConfig struct {
 	ChainId       string   `mapstructure:"chain_id"`
 	BeJsonRpcUrls []string `mapstructure:"be_json_rpc_urls"`
+	Disable       bool     `mapstructure:"disable"`
 }
 
 // LoadConfig load the configuration from `chains.yaml` file within the specified application's home directory
@@ -77,7 +78,19 @@ func (cl ChainList) Validate() error {
 func (cl ChainList) PrintOptions() {
 	headerPrintf("- Manage %d chains\n", len(cl))
 	for chainName, config := range cl {
-		headerPrintf("  + %s (%s): %d urls\n", chainName, config.ChainId, len(config.BeJsonRpcUrls))
+		headerPrintf(
+			"  +%s%s (%s): %d urls\n",
+			func() string {
+				if config.Disable {
+					return " (disabled) "
+				} else {
+					return " "
+				}
+			}(),
+			chainName,
+			config.ChainId,
+			len(config.BeJsonRpcUrls),
+		)
 	}
 }
 

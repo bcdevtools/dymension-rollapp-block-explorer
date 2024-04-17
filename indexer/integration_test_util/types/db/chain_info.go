@@ -8,4 +8,5 @@ type ChainInfoRecord struct {
 	DenomsJson         string
 	BeJsonRpcUrls      []string
 	LatestIndexedBlock int64
+	Postponed          bool
 }
