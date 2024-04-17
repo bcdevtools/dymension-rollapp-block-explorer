@@ -30,6 +30,8 @@ model chain_info {
   latest_indexed_block              BigInt    @default(0)
   increased_latest_indexed_block_at BigInt    @default(0)
   postponed                         Boolean?
+  keep_recent_account_tx_count      Int?
+  expiry_at_epoch                   BigInt?
   account                           account[]
 }
 
@@ -93,4 +95,21 @@ model reduced_ref_count_recent_account_transaction {
   hash     String
 
   @@id([chain_id, height, hash])
+}
+
+/// This table is a partition table and requires additional setup for migrations. Visit https://pris.ly/d/partition-tables for more info.
+model ibc_transaction {
+  chain_id              String
+  height                BigInt
+  hash                  String
+  type                  String
+  sequence_no           String
+  port                  String
+  channel               String
+  counter_party_port    String
+  counter_party_channel String
+  incoming              Boolean?
+
+  @@id([chain_id, height, hash])
+  @@index([chain_id, sequence_no, port, channel, incoming], map: "ibctx_same_sequence_index")
 }

@@ -1,12 +1,18 @@
+'use client';
+
 import { Transaction } from '@/consts/rpcResTypes';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Accordion from '@mui/material/Accordion';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AccordionDetails from '@mui/material/AccordionDetails';
-import { getMessageName } from '@/utils/transaction';
+import { getMessageName, translateCts } from '@/utils/transaction';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
+import { getNewPathByRollapp } from '@/utils/common';
+import { usePathname } from 'next/navigation';
+import { Path } from '@/consts/path';
+import Link from '@mui/material/Link';
 
 function MessageItem({
   label,
@@ -29,6 +35,7 @@ export default function Messages({
 }: Readonly<{
   transaction: Transaction;
 }>) {
+  const pathname = usePathname();
   return transaction.msgs.map((msg, idx) => (
     <Accordion key={msg.idx}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -43,7 +50,17 @@ export default function Messages({
             label="Content"
             value={
               <Typography sx={{ fontStyle: 'italic' }}>
-                {msg.content.cts}
+                {translateCts(msg.content.ctm, address => (
+                  <Link
+                    href={getNewPathByRollapp(
+                      pathname,
+                      `${Path.ADDRESS}/${address}`
+                    )}
+                    underline="hover"
+                    sx={{ fontStyle: 'normal' }}>
+                    {address}
+                  </Link>
+                ))}
               </Typography>
             }
           />
