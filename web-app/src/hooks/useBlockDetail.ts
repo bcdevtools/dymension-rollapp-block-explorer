@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 export default function useBlockDetail(
   blockNo: number
 ): [Block | null, boolean] {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [block, setBlock] = useState<Block | null>(null);
   const [{ rpcService }] = useRollappStore();
 

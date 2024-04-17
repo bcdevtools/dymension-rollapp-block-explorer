@@ -16,6 +16,7 @@ import TransactionData from './TransactionData';
 import Grid from '@mui/material/Grid';
 import { DetailItem } from '@/components/commons/DetailItem';
 import Divider from '@mui/material/Divider';
+import get from 'lodash/get';
 
 function getStatusDisplay(success: boolean) {
   return success ? (
@@ -31,13 +32,12 @@ export default function TransactionDetailPage() {
   const pathname = usePathname();
   const [transactionDetail, loading] = useTransactionDetail(params.txHash);
 
-  if (loading) return null;
-  if (!transactionDetail) {
-    if (!loading)
-      return void router.push(getNewPathByRollapp(pathname, Path.NOT_FOUND));
-    return null;
+  if (!transactionDetail && !loading) {
+    return void router.push(getNewPathByRollapp(pathname, Path.NOT_FOUND));
   }
-  const { used, limit } = transactionDetail.result.gas;
+
+  const used: number = get(transactionDetail, 'result.gas.used', 0);
+  const limit: number = get(transactionDetail, 'result.gas.limit', 0);
 
   return (
     <>
@@ -46,19 +46,34 @@ export default function TransactionDetailPage() {
           <DetailItem
             label="Transaction Hash"
             value={
-              <Typography sx={{ wordBreak: 'break-word' }}>
-                {transactionDetail.hash}{' '}
-                <CopyButton size="small" textToCopy={transactionDetail.hash} />
-              </Typography>
+              transactionDetail && (
+                <Typography sx={{ wordBreak: 'break-word' }}>
+                  {transactionDetail.hash}{' '}
+                  <CopyButton
+                    size="small"
+                    textToCopy={transactionDetail.hash}
+                  />
+                </Typography>
+              )
             }
+            loading={loading}
           />
           <DetailItem
             label="Status"
-            value={getStatusDisplay(transactionDetail.result.success)}
+            value={
+              transactionDetail &&
+              getStatusDisplay(transactionDetail.result.success)
+            }
+            loading={loading}
           />
           <DetailItem
             label="Block"
-            value={<LinkToBlockNo blockNo={transactionDetail.height} />}
+            value={
+              transactionDetail && (
+                <LinkToBlockNo blockNo={transactionDetail.height} />
+              )
+            }
+            loading={loading}
           />
           <Grid item xs={12} sx={{ my: 2 }}>
             <Divider />
@@ -66,11 +81,14 @@ export default function TransactionDetailPage() {
           <DetailItem
             label="Gas Usage & Limit"
             value={
-              <Typography>
-                {formatNumberString(used)} | {formatNumberString(limit)} (
-                {round((used / limit) * 100, 2)}%)
-              </Typography>
+              transactionDetail && (
+                <Typography>
+                  {formatNumberString(used)} | {formatNumberString(limit)} (
+                  {round((used / limit) * 100, 2)}%)
+                </Typography>
+              )
             }
+            loading={loading}
           />
         </Grid>
       </Card>

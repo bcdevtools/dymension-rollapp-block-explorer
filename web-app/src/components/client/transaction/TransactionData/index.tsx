@@ -5,9 +5,10 @@ import { Transaction } from '@/consts/rpcResTypes';
 import { useState } from 'react';
 import EventLogs from './_EventLogs';
 import Messages from './_Messages';
+import DefaultLoading from '@/components/commons/DefaultLoading';
 
 type TransactionDataProps = Readonly<{
-  transaction: Transaction;
+  transaction: Transaction | null;
 }>;
 
 const enum TabValue {
@@ -24,16 +25,23 @@ export default function TransactionData({ transaction }: TransactionDataProps) {
         sx={{ mb: 2 }}
         onChange={(e, newValue) => setCurrentTab(newValue)}>
         <Tab
-          label={`Messages (${transaction.msgs.length})`}
+          label={
+            transaction ? `Messages (${transaction.msgs.length})` : 'Messages'
+          }
           value={TabValue.MESSAGES}
         />
         <Tab label="Event Logs" value={TabValue.EVENT_LOGS} />
       </Tabs>
-      {currentTab === TabValue.MESSAGES ? (
-        <Messages transaction={transaction} />
-      ) : (
-        <EventLogs transaction={transaction} />
-      )}
+      {(function () {
+        if (!transaction) return <DefaultLoading />;
+        switch (currentTab) {
+          case TabValue.MESSAGES:
+          default:
+            return <Messages transaction={transaction} />;
+          case TabValue.EVENT_LOGS:
+            return <EventLogs transaction={transaction} />;
+        }
+      })()}
     </Card>
   );
 }

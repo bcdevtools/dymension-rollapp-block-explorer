@@ -4,18 +4,18 @@ import useBlockDetail from '@/hooks/useBlockDetail';
 import { getNewPathByRollapp } from '@/utils/common';
 import Link from '@mui/material/Link';
 import { Block } from '@/consts/rpcResTypes';
-import { useParams, usePathname } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { Path } from '@/consts/path';
 import { formatUnixTime } from '@/utils/datetime';
 import { DetailItem } from '@/components/commons/DetailItem';
 import Grid from '@mui/material/Grid';
 
-function getTxsDisplay(blockDetail: Block, pathname: string) {
-  const txCount = blockDetail.txs.length;
+function getTxsDisplay(blockDetail: Block | null, pathname: string) {
+  const txCount = blockDetail ? blockDetail.txs.length : 0;
   return txCount ? (
     <Link
       href={`${getNewPathByRollapp(pathname, Path.TRANSACTIONS)}?block=${
-        blockDetail.height
+        blockDetail!.height
       }`}
       underline="hover">
       {txCount} transacion{txCount > 1 && 's'}
@@ -30,19 +30,25 @@ export default function BlockDetailPage() {
   const blockNo = parseInt(params.blockNo);
   const [blockDetail, loading] = useBlockDetail(blockNo);
   const pathname = usePathname();
+  const router = useRouter();
 
-  if (loading) return null;
-  if (!blockDetail) return null;
+  if (!blockDetail && !loading)
+    return void router.push(getNewPathByRollapp(pathname, Path.NOT_FOUND));
 
   const txsDisplay = getTxsDisplay(blockDetail, pathname);
   return (
     <Grid container spacing={1}>
-      <DetailItem label="Block height" value={blockNo} />
+      <DetailItem label="Block height" value={blockNo} loading={loading} />
       <DetailItem
         label="Date Time"
-        value={formatUnixTime(blockDetail.timeEpochUTC)}
+        value={blockDetail && formatUnixTime(blockDetail.timeEpochUTC)}
+        loading={loading}
       />
-      <DetailItem label="Transactions" value={`${txsDisplay} in this block`} />
+      <DetailItem
+        label="Transactions"
+        value={`${txsDisplay} in this block`}
+        loading={loading}
+      />
     </Grid>
   );
 }
