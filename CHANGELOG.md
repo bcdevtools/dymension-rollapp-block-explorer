@@ -66,6 +66,7 @@ Templates for Unreleased:
 - (indexing) [#22](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/22) Provide a way to mark chain stopped operation
 - (query) [#23](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/23) Provide a way get out-dated chains
 - (other) [#37](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/37) Add delegation snapshot helper
+- (sql) [#38](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/38) Define new SQL table `ibc_transaction` for storing IBC transactions
 
 ### Improvements
 
