@@ -65,12 +65,10 @@ export default function TransactionListTable({
         {hash.substring(0, 6)}...{hash.substring(hash.length - 6)}
       </Link>,
       <Chip key={hash} label={tx_type} variant="outlined" />,
-      message_types.map((i, idx) => (
-        <React.Fragment key={idx}>
-          {getMessageName(i)}
-          {idx + 1 !== message_types.length && <br />}
-        </React.Fragment>
-      )),
+      message_types.map((i, idx) => [
+        getMessageName(i),
+        idx + 1 !== message_types.length && <br />,
+      ]),
       <LinkToBlockNo key={hash} blockNo={height.toString()} />,
       formatUnixTime(Number(epoch)),
       action &&
