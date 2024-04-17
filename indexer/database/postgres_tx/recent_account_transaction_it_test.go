@@ -1,8 +1,11 @@
 package pg_db_tx
 
 import (
+	"crypto/rand"
 	"database/sql"
+	"encoding/hex"
 	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
+	"strings"
 	"time"
 )
 
@@ -291,5 +294,74 @@ func (suite *IntegrationTestSuite) Test_InsertRecordsRefAccountToRecentTxIfNotEx
 	commit()
 
 	suite.Equal(2, suite.CountRows2("recent_account_transaction"), "two recent txs with reference should be kept")
+	suite.Zero(suite.CountRows2("reduced_ref_count_recent_account_transaction"))
+}
+
+//goland:noinspection SqlDialectInspection,SqlNoDataSourceInspection
+func (suite *IntegrationTestSuite) Test_KeepRecentAccountTx_IT() {
+	suite.InsertChainInfoRecords()
+
+	firstChain := suite.DBITS.Chains.Number(1)
+
+	startHeight := randomPositiveInt64()
+
+	const wantSize = 100
+
+	var accounts dbtypes.RecordsAccount
+	account := dbtypes.RecordAccount{
+		ChainId:                 firstChain.ChainId,
+		Bech32Address:           suite.DBITS.WalletAccounts.Number(1).GetCosmosAddress().String(),
+		BalanceOnErc20Contracts: []string{"a", "b"},
+		BalanceOnNftContracts:   []string{"c", "d"},
+	}
+	accounts = append(accounts, account)
+
+	tx, commit := suite.TX()
+
+	var err error
+
+	err = tx.InsertOrUpdateRecordsAccount(accounts)
+	suite.Require().NoError(err)
+	suite.Require().Equal(1, suite.CountRows(tx.Tx, "account"))
+
+	for i := 0; i < 200; i++ {
+		bz := make([]byte, 32)
+		_, _ = rand.Read(bz)
+		txHash := strings.ToUpper(hex.EncodeToString(bz))
+
+		height := startHeight + int64(i)
+
+		recentTx := dbtypes.NewRecordRecentAccountTransactionForInsert(
+			firstChain.ChainId,
+			height,
+			txHash,
+			time.Now().UTC().Unix(),
+			[]string{"t"},
+		)
+
+		refRecord := dbtypes.NewRecordRefAccountToRecentTxForInsert(
+			firstChain.ChainId,
+			account.Bech32Address,
+			height,
+			txHash,
+		)
+
+		err = tx.InsertRecordsRecentAccountTransactionIfNotExists(dbtypes.RecordsRecentAccountTransaction{recentTx})
+		suite.Require().NoError(err)
+
+		err = tx.InsertRecordsRefAccountToRecentTxIfNotExists(dbtypes.RecordsRefAccountToRecentTx{refRecord})
+		suite.Require().NoError(err)
+	}
+	
+	// call prune function
+	err = tx.CleanupZeroRefCountRecentAccountTransaction()
+	suite.Require().NoError(err)
+
+	suite.Require().Equal(wantSize, suite.CountRows(tx.Tx, "recent_account_transaction"))
+	suite.Require().Equal(wantSize, suite.CountRows(tx.Tx, "ref_account_to_recent_tx"))
+
+	commit()
+
+	suite.Equal(wantSize, suite.CountRows2("recent_account_transaction"), "recent txs with reference should be kept")
 	suite.Zero(suite.CountRows2("reduced_ref_count_recent_account_transaction"))
 }
