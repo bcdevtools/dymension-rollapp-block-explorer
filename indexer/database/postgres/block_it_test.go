@@ -50,6 +50,12 @@ func (suite *IntegrationTestSuite) TestDatabase_GetSetLatestIndexedBlock_IT() {
 	suite.Require().NoError(err)
 	suite.Equal(int64(9), height, "must be the greater one")
 	suite.False(postponed)
+
+	_, err = db.Sql.Exec(`UPDATE chain_info SET postponed = FALSE, expiry_at_epoch = $1 WHERE chain_id = $2`, time.Now().UTC().Unix()-1, firstChain.ChainId)
+	suite.Require().NoError(err)
+	_, postponed, err = db.GetLatestIndexedBlock(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.True(postponed, "postponed state must be effective due to value of expiry_at_epoch")
 }
 
 func (suite *IntegrationTestSuite) Test_InsertOrUpdateFailedBlocks_IT() {
