@@ -264,6 +264,25 @@ CREATE TABLE transaction (
 -- index for lookup transaction by hash, multi-chain & single-chain
 CREATE INDEX transaction_hash_index ON transaction(hash);
 
+-- table ibc_transaction
+-- Data on this table should be stored permanently, as it is used for mapping IBC transactions.
+CREATE TABLE ibc_transaction
+(
+    -- pk fields
+    chain_id                TEXT    NOT NULL,
+    height                  BIGINT  NOT NULL,
+    hash                    TEXT    NOT NULL,
+    -- other fields
+    sequence_no             TEXT    NOT NULL,
+    port                    TEXT    NOT NULL,
+    channel                 TEXT    NOT NULL,
+    counter_party_port      TEXT    NOT NULL,
+    counter_party_channel   TEXT    NOT NULL,
+    incoming                BOOLEAN,
+    CONSTRAINT ibc_transaction_pkey PRIMARY KEY (chain_id, height, hash)
+) PARTITION BY LIST(chain_id);
+CREATE INDEX ibctx_same_sequence_index ON ibc_transaction(chain_id, sequence_no, port, channel, incoming);
+
 -- table failed_block
 -- For storing failed to index - blocks
 CREATE TABLE failed_block (

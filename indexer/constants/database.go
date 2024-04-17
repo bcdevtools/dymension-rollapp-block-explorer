@@ -17,5 +17,6 @@ func GetTablesPartitionedByChainId() []string {
 		"recent_account_transaction",
 		"ref_account_to_recent_tx",
 		"failed_block",
+		"ibc_transaction",
 	}
 }

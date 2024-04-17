@@ -252,6 +252,7 @@ func (suite *DatabaseIntegrationTestSuite) TruncateAll() {
 	suite.Truncate("failed_block")
 	suite.Truncate("account")
 	suite.Truncate("chain_info")
+	suite.Truncate("ibc_transaction")
 }
 
 // createPartitionedTableForChainId  creates a new partition for the given chain-id.
