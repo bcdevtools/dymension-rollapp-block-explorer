@@ -273,12 +273,13 @@ CREATE TABLE ibc_transaction
     height                  BIGINT  NOT NULL,
     hash                    TEXT    NOT NULL,
     -- other fields
+    "type"                  TEXT    NOT NULL, -- "TRF", "RECV", "ACK", "TO"
     sequence_no             TEXT    NOT NULL,
     port                    TEXT    NOT NULL,
     channel                 TEXT    NOT NULL,
     counter_party_port      TEXT    NOT NULL,
     counter_party_channel   TEXT    NOT NULL,
-    incoming                BOOLEAN,
+    incoming                BOOLEAN,          -- true if the transaction is incoming (MsgRecvPacket), false if outgoing
     CONSTRAINT ibc_transaction_pkey PRIMARY KEY (chain_id, height, hash)
 ) PARTITION BY LIST(chain_id);
 CREATE INDEX ibctx_same_sequence_index ON ibc_transaction(chain_id, sequence_no, port, channel, incoming);
