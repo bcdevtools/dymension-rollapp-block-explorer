@@ -66,6 +66,38 @@ func (suite *IntegrationTestSuite) Test_InsertOrUpdateRecordChainInfo_IT() {
 
 		suite.Equal(originalRowsCount, suite.CountRows2("chain_info"))
 	})
+
+	suite.Run("inserting conflict chain-name should reject", func() {
+		newRecord := dbtypes.RecordChainInfo{
+			ChainId:            firstChain.ChainId,
+			Name:               firstChain.ChainId,
+			ChainType:          "evm",
+			Bech32:             `{"c": "d"}`,
+			Denoms:             `{"1": "2", "3": "4"}`,
+			BeJsonRpcUrls:      []string{"4"},
+			LatestIndexedBlock: randomPositiveInt64() + 1,
+		}
+		insertedOrUpdated, err = db.InsertOrUpdateRecordChainInfo(newRecord)
+		suite.Require().NoError(err)
+		suite.Require().True(insertedOrUpdated)
+
+		suite.Equal(originalRowsCount, suite.CountRows2("chain_info"))
+
+		newRecordWithConflictName := dbtypes.RecordChainInfo{
+			ChainId:            "another-chain",
+			Name:               firstChain.ChainId,
+			ChainType:          "evm",
+			Bech32:             `{"c": "d"}`,
+			Denoms:             `{"1": "2", "3": "4"}`,
+			BeJsonRpcUrls:      []string{"4"},
+			LatestIndexedBlock: randomPositiveInt64() + 1,
+		}
+		insertedOrUpdated, err = db.InsertOrUpdateRecordChainInfo(newRecordWithConflictName)
+		suite.Require().Error(err)
+		suite.Require().False(insertedOrUpdated)
+
+		suite.Equal(originalRowsCount, suite.CountRows2("chain_info"))
+	})
 }
 
 func (suite *IntegrationTestSuite) Test_UpdateBeJsonRpcUrlsIfExists_IT() {
