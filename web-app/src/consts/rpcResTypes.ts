@@ -19,15 +19,15 @@ export interface Fee {
   gasLimit: number;
 }
 
-export interface Transaction {
-  code: number;
-  fee: Fee;
-  gasLimit: number;
-  gasUsed: number;
-  hash: string;
-  messages: string[];
-  type: string;
-}
+// export interface Transaction {
+//   code: number;
+//   fee: Fee;
+//   gasLimit: number;
+//   gasUsed: number;
+//   hash: string;
+//   messages: string[];
+//   type: string;
+// }
 
 export interface ChainInfo {
   bech32: Bech32;
@@ -59,10 +59,17 @@ export interface Event {
   attributes: { key: string; value: string }[];
 }
 
+export interface Msg {
+  content: any;
+  idx: number;
+  type: string;
+  protoContent: any;
+}
+
 export interface Transaction {
   hash: string;
   height: number;
-  msgs: any[];
+  msgs: Msg[];
 
   result: {
     code: number;

@@ -14,6 +14,7 @@ import LinkToBlockNo from '../block/LinkToBlockNo';
 import Chip from '@mui/material/Chip';
 import { Path } from '@/consts/path';
 import { formatUnixTime } from '@/utils/datetime';
+import { getMessageName } from '@/utils/transaction';
 
 type TransactionListTableProps = Readonly<{
   transactions: Required<{
@@ -31,7 +32,7 @@ type TransactionListTableProps = Readonly<{
 }>;
 
 const headers = [
-  'TxHash',
+  'Transaction Hash',
   'Method',
   'Msg Types',
   'Block',
@@ -61,12 +62,12 @@ export default function TransactionListTable({
         key={hash}
         href={getNewPathByRollapp(pathname, `/${Path.TRANSACTIONS}/${hash}`)}
         underline="hover">
-        {hash.substring(0, 12)}...
+        {hash.substring(0, 6)}...{hash.substring(hash.length - 6)}
       </Link>,
       <Chip key={hash} label={tx_type} variant="outlined" />,
       message_types.map((i, idx) => (
         <React.Fragment key={idx}>
-          {i.match(/[^.]+$/)![0]}
+          {getMessageName(i)}
           {idx + 1 !== message_types.length && <br />}
         </React.Fragment>
       )),

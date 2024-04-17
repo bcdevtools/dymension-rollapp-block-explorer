@@ -1,14 +1,14 @@
 'use client';
 
-import Typography from '@mui/material/Typography';
 import useBlockDetail from '@/hooks/useBlockDetail';
 import { getNewPathByRollapp } from '@/utils/common';
 import Link from '@mui/material/Link';
 import { Block } from '@/consts/rpcResTypes';
 import { useParams, usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
-import DataDetail from '@/components/commons/DataDetail';
 import { formatUnixTime } from '@/utils/datetime';
+import { DetailItem } from '@/components/commons/DetailItem';
+import Grid from '@mui/material/Grid';
 
 function getTxsDisplay(blockDetail: Block, pathname: string) {
   const txCount = blockDetail.txs.length;
@@ -36,20 +36,13 @@ export default function BlockDetailPage() {
 
   const txsDisplay = getTxsDisplay(blockDetail, pathname);
   return (
-    <DataDetail
-      data={[
-        { label: 'Block height', value: <Typography>{blockNo}</Typography> },
-        {
-          label: 'Date Time',
-          value: (
-            <Typography>{formatUnixTime(blockDetail.timeEpochUTC)}</Typography>
-          ),
-        },
-        {
-          label: 'Transactions',
-          value: <Typography>{txsDisplay} in this block</Typography>,
-        },
-      ]}
-    />
+    <Grid container spacing={1}>
+      <DetailItem label="Block height" value={blockNo} />
+      <DetailItem
+        label="Date Time"
+        value={formatUnixTime(blockDetail.timeEpochUTC)}
+      />
+      <DetailItem label="Transactions" value={`${txsDisplay} in this block`} />
+    </Grid>
   );
 }
