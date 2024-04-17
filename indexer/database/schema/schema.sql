@@ -1,14 +1,15 @@
 -- table chain_info
 CREATE TABLE chain_info (
-    chain_id                TEXT    NOT NULL,
-    "name"                  TEXT    NOT NULL,
-    chain_type              TEXT    NOT NULL, -- "evm", "wasm", "cosmos" or empty. Currently only the first 2 values are available
-    bech32                  JSONB   NOT NULL,
-    denoms                  JSONB   NOT NULL,
-    be_json_rpc_urls        TEXT[], -- sorted, the best one is the first, might be empty
-    latest_indexed_block    BIGINT  NOT NULL DEFAULT 0, -- the latest successfully indexed block height
-    increased_latest_indexed_block_at BIGINT NOT NULL DEFAULT 0, -- the epoch UTC seconds when the latest_indexed_block updated with greater value
-    postponed               BOOLEAN, -- true if the chain is postponed/stopped operation
+    chain_id                            TEXT    NOT NULL,
+    "name"                              TEXT    NOT NULL,
+    chain_type                          TEXT    NOT NULL, -- "evm", "wasm", "cosmos" or empty. Currently only the first 2 values are available
+    bech32                              JSONB   NOT NULL,
+    denoms                              JSONB   NOT NULL,
+    be_json_rpc_urls                    TEXT[], -- sorted, the best one is the first, might be empty
+    latest_indexed_block                BIGINT  NOT NULL DEFAULT 0, -- the latest successfully indexed block height
+    increased_latest_indexed_block_at   BIGINT NOT NULL DEFAULT 0, -- the epoch UTC seconds when the latest_indexed_block updated with greater value
+    postponed                           BOOLEAN, -- true if the chain is postponed/stopped operation
+    keep_recent_account_tx_count        INT, -- number of recent account txs to keep
 
     CONSTRAINT chain_info_pkey PRIMARY KEY (chain_id),
     CONSTRAINT chain_info_unique_chain_name UNIQUE ("name") -- chain name must be unique
@@ -154,8 +155,14 @@ DECLARE
     -- keep most recent X records for each type,
     -- for the corresponding account
     pruning_after_X_continous_insert CONSTANT INTEGER := 10;
-    pruning_keep_recent CONSTANT INTEGER := 100;
+    pruning_keep_recent_min_default CONSTANT INTEGER := 50;
+    pruning_keep_recent INTEGER;
 BEGIN
+    -- get the pruning_keep_recent value from chain_info
+    SELECT GREATEST(COALESCE(ci.keep_recent_account_tx_count, pruning_keep_recent_min_default), pruning_keep_recent_min_default)
+    INTO pruning_keep_recent
+    FROM chain_info ci WHERE ci.chain_id = NEW.chain_id;
+
     -- check if the counter reaches a specific number
     SELECT acc.continous_insert_ref_cur_tx_counter INTO later_continous_insert_ref_cur_tx_counter
     FROM account acc WHERE acc.chain_id = NEW.chain_id AND acc.bech32_address = NEW.bech32_address;
