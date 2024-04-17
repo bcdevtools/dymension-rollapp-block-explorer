@@ -129,7 +129,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Jetbrain
+# ide
+*.code-workspace
 .idea/
 
 # Mac

@@ -1,0 +1,3 @@
+export const enum RollappActionTypes {
+  POPULATE_CHAIN_DATA_BY_PATHNAME = 'POPULATE_CHAIN_DATA_BY_PATHNAME',
+}
