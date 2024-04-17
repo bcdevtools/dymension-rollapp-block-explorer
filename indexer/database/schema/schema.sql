@@ -10,6 +10,7 @@ CREATE TABLE chain_info (
     increased_latest_indexed_block_at   BIGINT NOT NULL DEFAULT 0, -- the epoch UTC seconds when the latest_indexed_block updated with greater value
     postponed                           BOOLEAN, -- true if the chain is postponed/stopped operation
     keep_recent_account_tx_count        INT, -- number of recent account txs to keep
+    expiry_at_epoch                     BIGINT, -- the epoch UTC seconds when the chain is expired
 
     CONSTRAINT chain_info_pkey PRIMARY KEY (chain_id),
     CONSTRAINT chain_info_unique_chain_name UNIQUE ("name") -- chain name must be unique
@@ -17,15 +18,18 @@ CREATE TABLE chain_info (
 -- function get_indexing_fallbehind_chains
 -- Used to get the list of chains which indexed block height is behind the current time by more than a specific threshold
 CREATE OR REPLACE FUNCTION get_indexing_fallbehind_chains(threshold_seconds BIGINT) RETURNS TABLE(chain_id TEXT, height BIGINT, epoch BIGINT, epoch_diff BIGINT) AS $$
+DECLARE
+    epoch_utc_now BIGINT;
 BEGIN
+    SELECT FLOOR(EXTRACT(epoch FROM NOW() AT TIME ZONE 'utc' AT TIME ZONE 'utc')::BIGINT)::BIGINT INTO epoch_utc_now;
     RETURN QUERY SELECT ci.chain_id, ci.height, ci.epoch, ci.epoch_diff FROM (
 		SELECT
 			i.chain_id,
 			i.latest_indexed_block AS height,
 			i.increased_latest_indexed_block_at AS epoch,
-			FLOOR(EXTRACT(epoch FROM NOW() AT TIME ZONE 'utc' AT TIME ZONE 'utc')::BIGINT - i.increased_latest_indexed_block_at)::BIGINT AS epoch_diff
+			epoch_utc_now - i.increased_latest_indexed_block_at AS epoch_diff
 		FROM chain_info i
-		WHERE i.postponed IS NOT TRUE
+		WHERE i.postponed IS NOT TRUE AND (i.expiry_at_epoch IS NULL OR i.expiry_at_epoch < epoch_utc_now)
 	) ci
 	WHERE ci.epoch_diff > threshold_seconds
     ORDER BY ci.epoch_diff DESC;
