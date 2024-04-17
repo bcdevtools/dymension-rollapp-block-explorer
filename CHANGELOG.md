@@ -68,7 +68,7 @@ Templates for Unreleased:
 - (other) [#37](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/37) Add delegation snapshot helper
 - (sql) [#39](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/39) + [#40](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/40) Define new SQL table `ibc_transaction` for storing IBC transactions
 - (indexing) [#41](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/41) Chain based config keep recent account txs
-- (indexing) [#42](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/42) Chain based config expiry
+- (chain) [#42](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/42) Chain based config expiry
 
 ### Improvements
 
@@ -90,3 +90,4 @@ Templates for Unreleased:
 - (indexing) [#20](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/20) Fix ultimately retry indexing failed block
 - (indexing) [#31](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/31) Fix tx type `wasm` not indexed into DB & improve Be-Json-RPC retry
 - (indexing) [#36](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/36) Fix issue only one block indexed per batch
+- (chain) [#43](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/43) Fix expiration check logic for SQL function `get_indexing_fallbehind_chains`

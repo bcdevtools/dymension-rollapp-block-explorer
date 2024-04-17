@@ -29,7 +29,7 @@ BEGIN
 			i.increased_latest_indexed_block_at AS epoch,
 			epoch_utc_now - i.increased_latest_indexed_block_at AS epoch_diff
 		FROM chain_info i
-		WHERE i.postponed IS NOT TRUE AND (i.expiry_at_epoch IS NULL OR i.expiry_at_epoch < epoch_utc_now)
+		WHERE i.postponed IS NOT TRUE AND (i.expiry_at_epoch IS NULL OR i.expiry_at_epoch > epoch_utc_now)
 	) ci
 	WHERE ci.epoch_diff > threshold_seconds
     ORDER BY ci.epoch_diff DESC;
