@@ -296,7 +296,7 @@ var snapshotCmd = &cobra.Command{
 			highEffectiveDelegationAmount, lowEffectiveDelegationAmount,
 			highAllocateTokenAmount, lowAllocateTokenAmount string) {
 			fmt.Printf(
-				"%-42s | %9s.%-18s | %9s.%-18s | %9s.%-18s |\n",
+				"| %-42s | %9s.%-18s | %9s.%-18s | %9s.%-18s |\n",
 				delegator,
 				highDelegationAmount, lowDelegationAmount,
 				highEffectiveDelegationAmount, lowEffectiveDelegationAmount,
@@ -358,6 +358,7 @@ var snapshotCmd = &cobra.Command{
 		})
 
 		printTable("Delegator", "D", "Amount", "Ef. D", "Amount", "Allocate", "Token")
+		fmt.Println("| ------------------------------------------ | ---------------------------- | ---------------------------- | ---------------------------- |")
 		for _, r := range records {
 			highDelegationAmount, lowDelegationAmount := splitDisplayNumber(r.delegationAmount.String(), bondDenomExponent)
 			highEffectiveDelegationAmount, lowEffectiveDelegationAmount := splitDisplayNumber(r.effectiveDelegationAmount.String(), bondDenomExponent)
@@ -397,7 +398,8 @@ var snapshotCmd = &cobra.Command{
 			gasLimit = 400_000
 		}
 		txFee := gasPrice.Mul(sdkmath.NewInt(int64(gasLimit)))
-		unsignedMsg := fmt.Sprintf(`{
+		unsignedMsg := fmt.Sprintf(`
+{
   "body": {
     "messages": [
       %s%s
@@ -424,7 +426,7 @@ var snapshotCmd = &cobra.Command{
   },
   "signatures": []
 }`, `{"@type": "/cosmos.bank.v1beta1.MsgMultiSend",`, string(bz)[1:], strings.ReplaceAll(memo, `"`, `\"`), bondDenom, txFee.String(), gasLimit)
-		fmt.Println("Unsigned message:")
+		fmt.Println("\nUnsigned message:")
 		fmt.Println(unsignedMsg)
 	},
 }
