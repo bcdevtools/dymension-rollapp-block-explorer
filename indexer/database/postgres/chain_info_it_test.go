@@ -155,6 +155,13 @@ func (suite *IntegrationTestSuite) Test_IsChainPostponed_IT() {
 	postponed, err = db.IsChainPostponed(firstChain.ChainId)
 	suite.Require().NoError(err)
 	suite.Require().True(postponed)
+
+	_, err = db.Sql.Exec(`UPDATE chain_info SET postponed = false, expiry_at_epoch = $1 WHERE chain_id = $2`, time.Now().UTC().Unix()-1, firstChain.ChainId)
+	suite.Require().NoError(err)
+
+	postponed, err = db.IsChainPostponed(firstChain.ChainId)
+	suite.Require().NoError(err)
+	suite.Require().True(postponed, "postponed state must be effective due to value of expiry_at_epoch")
 }
 
 //goland:noinspection SqlNoDataSourceInspection,SqlDialectInspection,SpellCheckingInspection

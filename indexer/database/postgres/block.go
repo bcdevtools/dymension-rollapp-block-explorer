@@ -13,15 +13,19 @@ import (
 func (db *Database) GetLatestIndexedBlock(chainId string) (height int64, postponed bool, err error) {
 	//goland:noinspection SpellCheckingInspection,SqlDialectInspection,SqlNoDataSourceInspection
 	row := db.Sql.QueryRow(`
-SELECT latest_indexed_block, COALESCE(postponed, FALSE) FROM chain_info WHERE chain_id = $1
+SELECT latest_indexed_block, COALESCE(postponed, FALSE), expiry_at_epoch FROM chain_info WHERE chain_id = $1
 `,
 		chainId, // 1
 	)
 
-	err = row.Scan(&height, &postponed)
+	var expiryAtEpoch sql.NullInt64
+	err = row.Scan(&height, &postponed, &expiryAtEpoch)
 	if err != nil {
 		err = errors.Wrapf(err, "failed to get latest indexed block for %s", chainId)
 		return
+	}
+	if !postponed {
+		postponed = expiryAtEpoch.Valid && expiryAtEpoch.Int64 < time.Now().UTC().Unix()
 	}
 
 	return

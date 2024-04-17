@@ -4,7 +4,6 @@ Cap Delegation: 1000000.000000000000000000 exponent 18
 Min Delegation: 10.000000000000000000 exponent 18
 Allocate Gift Token: 10000.000000 exponent 6
 Cap Allocate Gift Token to individual: 2000.000000 exponent 6
-Gas Price: 20000000000 adym
 Total Delegation: 2000393.659947484309987597 exponent 18
 Total Effective Delegation: 1000393.659947484309987597 exponent 18
 Total Allocate Token: 2003.935044 exponent 6
