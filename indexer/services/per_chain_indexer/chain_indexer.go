@@ -889,7 +889,7 @@ func (d *defaultIndexer) genericLoop(f func(querytypes.ResponseBeGetChainInfo) e
 
 // determineBlockRangeToIndex performs some logic like excluding failed blocks to determine the block range to index.
 func (d *defaultIndexer) determineBlockRangeToIndex(latestIndexedBlock, upstreamRpcLatestBlock int64) (anyBlock bool, from, to int64, err error) {
-	if latestIndexedBlock < 1 || latestIndexedBlock > upstreamRpcLatestBlock {
+	if latestIndexedBlock < 0 || latestIndexedBlock > upstreamRpcLatestBlock {
 		panic(fmt.Sprintf("invalid input param %d, %d", latestIndexedBlock, upstreamRpcLatestBlock))
 	}
 
