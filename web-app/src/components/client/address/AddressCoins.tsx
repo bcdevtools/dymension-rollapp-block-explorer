@@ -30,6 +30,7 @@ export default function AddressCoins({
       page={page}
       pageSize={ADDRESS_SUMMARY_COINS_PAGE_SIZE}
       loading={loading}
+      loadingItems={1}
       onPageChange={setPage}
       onRowsPerPageChange={() => {}}
     />

@@ -26,6 +26,7 @@ type DataTableProps = Readonly<{
   onRowsPerPageChange: (pageSize: string) => void;
   loading?: boolean;
   enablePagination?: boolean;
+  loadingItems?: number;
 }>;
 
 type TablePaginationActionsProps = Readonly<{
@@ -109,10 +110,13 @@ export default function DataTable({
   onRowsPerPageChange,
   onPageChange,
   loading,
+  loadingItems,
   enablePagination = true,
 }: DataTableProps) {
   const _body: React.ReactNode[][] = loading
-    ? Array(pageSize).fill(Array(headers.length).fill(<Skeleton />))
+    ? Array(loadingItems || pageSize).fill(
+        Array(headers.length).fill(<Skeleton />)
+      )
     : body;
 
   if (!_body.length)
