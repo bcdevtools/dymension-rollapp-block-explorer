@@ -91,3 +91,4 @@ Templates for Unreleased:
 - (indexing) [#31](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/31) Fix tx type `wasm` not indexed into DB & improve Be-Json-RPC retry
 - (indexing) [#36](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/36) Fix issue only one block indexed per batch
 - (chain) [#43](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/43) Fix expiration check logic for SQL function `get_indexing_fallbehind_chains`
+- (indexing) [#44](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/44) Handle panic when latest indexed block is zero for new chains
