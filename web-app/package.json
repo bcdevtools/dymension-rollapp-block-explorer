@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "analyze": "ANALYZE=true next build",
-    "start": "next start",
+    "start": "next start --hostname 0.0.0.0",
     "lint": "next lint",
     "prisma:pull": "prisma db pull",
     "prisma:generate": "prisma generate",
