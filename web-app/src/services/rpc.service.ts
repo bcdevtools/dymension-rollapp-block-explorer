@@ -1,4 +1,5 @@
 import {
+  AccountBalances,
   Block,
   ChainInfo,
   LatestBlockNumber,
@@ -8,6 +9,7 @@ import {
 import {
   FetchOptions,
   RpcClient,
+  getAccountBalancesParam,
   getBlockByNumberParam,
   getChainInfoParam,
   getLatestBlockNumber,
@@ -77,6 +79,15 @@ export class RpcService {
       getTransactionByHashParam(txHash),
       fetchOptions
     );
+    return getResponseResult(response);
+  }
+
+  async getAccountBalances(address: string, fetchOptions?: FetchOptions) {
+    const response: RpcResponse<AccountBalances> =
+      await this._rpcClient.callRpc(
+        getAccountBalancesParam(address),
+        fetchOptions
+      );
     return getResponseResult(response);
   }
 }

@@ -7,7 +7,8 @@ import Chip from '@mui/material/Chip';
 import LinkToBlockNo from '../block/LinkToBlockNo';
 import ClearIcon from '@mui/icons-material/Clear';
 import DoneIcon from '@mui/icons-material/Done';
-import { formatNumberString, getNewPathByRollapp } from '@/utils/common';
+import { getNewPathByRollapp } from '@/utils/common';
+import { formatNumber } from '@/utils/number';
 import CopyButton from '../commons/CopyButton';
 import round from 'lodash/round';
 import { Path } from '@/consts/path';
@@ -83,7 +84,7 @@ export default function TransactionDetailPage() {
             value={
               transactionDetail && (
                 <Typography>
-                  {formatNumberString(used)} | {formatNumberString(limit)} (
+                  {formatNumber(used)} | {formatNumber(limit)} (
                   {round((used / limit) * 100, 2)}%)
                 </Typography>
               )

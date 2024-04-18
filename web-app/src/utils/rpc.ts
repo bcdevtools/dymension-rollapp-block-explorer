@@ -71,3 +71,11 @@ export function getTransactionByHashParam(txHash: string): RpcCallParam {
     jsonrpc: '2.0',
   };
 }
+
+export function getAccountBalancesParam(address: string): RpcCallParam {
+  return {
+    method: 'be_getAccountBalances',
+    params: [address],
+    jsonrpc: '2.0',
+  };
+}

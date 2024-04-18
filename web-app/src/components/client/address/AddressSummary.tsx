@@ -1,41 +1,49 @@
 'use client';
 
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Skeleton from '@mui/material/Skeleton';
+import Card from '@/components/commons/Card';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import { useState } from 'react';
+import AddressCoins from './AddressCoins';
 
-function SummaryCard({
-  title,
-  loading = false,
-  children,
-}: Readonly<{ title: string; loading?: boolean; children: React.ReactNode }>) {
-  return (
-    <Grid item xs={6}>
-      <Paper sx={{ p: 1, height: 80 }} variant="outlined">
-        <Box
-          display="flex"
-          flexDirection="column"
-          height="100%"
-          width="100%"
-          justifyContent="space-between">
-          <Typography variant="subtitle1" gutterBottom>
-            <b>{title}</b>
-          </Typography>
-          {loading ? <Skeleton /> : children}
-        </Box>
-      </Paper>
-    </Grid>
-  );
+const enum AccountSummaryTab {
+  COINS = 'Coins',
+  TOKENS = 'Tokens',
 }
 
-export default function AddressSummary() {
+function getContent(address: string, tab: AccountSummaryTab) {
+  switch (tab) {
+    case AccountSummaryTab.COINS:
+    default:
+      return <AddressCoins address={address} />;
+    case AccountSummaryTab.TOKENS:
+      return <></>;
+  }
+}
+
+export default function AddressSummary({
+  address,
+}: Readonly<{ address: string }>) {
+  const [tab, setTab] = useState(AccountSummaryTab.COINS);
+
   return (
     <>
-      <Box marginBottom={3}>
-        <SummaryCard title="Overview">Test</SummaryCard>
-      </Box>
+      <Card sx={{ mb: 3 }}>
+        <Tabs
+          value={tab}
+          sx={{ mb: 2 }}
+          onChange={(e, value) => void setTab(value)}>
+          <Tab
+            value={AccountSummaryTab.COINS}
+            label={AccountSummaryTab.COINS}
+          />
+          <Tab
+            value={AccountSummaryTab.TOKENS}
+            label={AccountSummaryTab.TOKENS}
+          />
+        </Tabs>
+        {getContent(address, tab)}
+      </Card>
     </>
   );
 }

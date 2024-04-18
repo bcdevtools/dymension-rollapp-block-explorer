@@ -122,6 +122,7 @@ export default function DataTable({
       </Box>
     );
 
+  const showPagniation = enablePagination && total > pageSize;
   return (
     <>
       <TableContainer sx={{ width: '100%' }}>
@@ -138,7 +139,7 @@ export default function DataTable({
               <TableRow
                 key={rowKeys[idx] || idx}
                 sx={
-                  !enablePagination
+                  !showPagniation
                     ? { '&:last-child td, &:last-child th': { border: 0 } }
                     : {}
                 }>
@@ -150,7 +151,7 @@ export default function DataTable({
           </TableBody>
         </Table>
       </TableContainer>
-      {enablePagination && (
+      {showPagniation && (
         <TablePagination
           component="div"
           rowsPerPageOptions={[10, 25, 50, 100]}

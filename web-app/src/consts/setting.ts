@@ -7,6 +7,9 @@ export const APP_NAME =
 const defaultPaginationSize = Number(
   process.env.NEXT_PUBLIC_DEFAULT_PAGINATION_SIZE
 );
+
+export const ADDRESS_SUMMARY_COINS_PAGE_SIZE: number = 10;
+
 export const DEFAULT_PAGINATION_SIZE: number = !isNaN(defaultPaginationSize)
   ? defaultPaginationSize
   : 25;
