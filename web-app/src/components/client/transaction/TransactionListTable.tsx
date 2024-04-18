@@ -33,9 +33,9 @@ type TransactionListTableProps = Readonly<{
 
 const headers = [
   'Transaction Hash',
+  'Messages',
   'Block',
   'Date Time',
-  'Messages',
 ];
 
 export default function TransactionListTable({
@@ -67,14 +67,6 @@ export default function TransactionListTable({
         {hash.substring(0, 6)}...{hash.substring(hash.length - 6)}
       </Link>);
 
-      // Block height
-
-      cells.push(<LinkToBlockNo key={hash} blockNo={height.toString()} />);
-
-      // Date Time
-
-      cells.push(formatUnixTime(Number(epoch)));
-
       // Messages
 
       let messages;
@@ -100,6 +92,14 @@ export default function TransactionListTable({
       }
 
       cells.push(messages);
+
+      // Block height
+
+      cells.push(<LinkToBlockNo key={hash} blockNo={height.toString()} />);
+
+      // Date Time
+
+      cells.push(formatUnixTime(Number(epoch)));
 
       return cells;
     }
