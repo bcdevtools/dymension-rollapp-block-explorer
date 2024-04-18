@@ -9,6 +9,7 @@ import { Path } from '@/consts/path';
 import { formatUnixTime } from '@/utils/datetime';
 import { DetailItem } from '@/components/commons/DetailItem';
 import Grid from '@mui/material/Grid';
+import { Typography } from '@mui/material';
 
 function getTxsDisplay(blockDetail: Block | null, pathname: string) {
   const txCount = blockDetail ? blockDetail.txs.length : 0;
@@ -46,7 +47,7 @@ export default function BlockDetailPage() {
       />
       <DetailItem
         label="Transactions"
-        value={`${txsDisplay} in this block`}
+        value={<Typography>{txsDisplay} in this block</Typography>}
         loading={loading}
       />
     </Grid>

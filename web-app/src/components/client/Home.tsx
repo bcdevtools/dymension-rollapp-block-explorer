@@ -56,7 +56,7 @@ export default function Home() {
       <Grid item xs={12}>
         <RollappSelect
           value={rollappPath}
-          label="Rollapp"
+          label="Rollapps"
           onValueChange={e => setRollappPath(e.target.value)}
           fullWidth
           error={error}
