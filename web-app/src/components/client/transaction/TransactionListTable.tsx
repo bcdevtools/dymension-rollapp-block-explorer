@@ -33,11 +33,9 @@ type TransactionListTableProps = Readonly<{
 
 const headers = [
   'Transaction Hash',
-  'Method',
-  'Msg Types',
+  'Messages',
   'Block',
   'Date Time',
-  'Action',
 ];
 
 export default function TransactionListTable({
@@ -57,28 +55,32 @@ export default function TransactionListTable({
   }, [transactions]);
 
   const body = transactions.map(
-    ({ hash, epoch, message_types, action, tx_type, height }) => [
-      <Link
+    ({ hash, epoch, message_types, action, tx_type, height }) => {
+      const cells = [];
+
+      // Transaction Hash
+
+      cells.push(<Link
         key={hash}
         href={getNewPathByRollapp(pathname, `/${Path.TRANSACTIONS}/${hash}`)}
         underline="hover">
         {hash.substring(0, 6)}...{hash.substring(hash.length - 6)}
-      </Link>,
-      <Chip key={hash} label={tx_type} variant="outlined" />,
-      message_types.map((i, idx) => (
-        <React.Fragment key={idx}>
-          {getMessageName(i)}
-          {idx + 1 !== message_types.length && <br />}
-        </React.Fragment>
-      )),
-      <LinkToBlockNo key={hash} blockNo={height.toString()} />,
-      formatUnixTime(Number(epoch)),
-      action &&
-        (function () {
-          const splitted = action.split(':');
-          return splitted[1] || splitted[0];
-        })(),
-    ]
+      </Link>);
+
+      // Messages
+
+      cells.push(getMessageLabel(hash, message_types, action, tx_type));
+
+      // Block height
+
+      cells.push(<LinkToBlockNo key={hash} blockNo={height.toString()} />);
+
+      // Date Time
+
+      cells.push(formatUnixTime(Number(epoch)));
+
+      return cells;
+    }
   );
 
   return (
@@ -109,4 +111,25 @@ export default function TransactionListTable({
       }}
     />
   );
+}
+
+const getMessageLabel = function(hash:string, message_types:string[], action:string|null, tx_type:string) {
+  if (action) {
+    const splitted = action.split(':');
+    const label = splitted[1] || splitted[0];
+    if (label) {
+      if (tx_type === 'evm') {
+        return <Chip key={hash} label={label} color="info" variant="outlined" />;
+      } else if (tx_type === 'wasm') {
+        return <Chip key={hash} label={label} color="secondary" variant="outlined" />;
+      }
+    }
+  }
+
+  return message_types.map((i, idx) => (
+    <React.Fragment key={idx}>
+      <Chip label={getMessageName(i)} color="default" variant="outlined" />
+      {idx + 1 !== message_types.length && <br />}
+    </React.Fragment>
+  ));
 }
