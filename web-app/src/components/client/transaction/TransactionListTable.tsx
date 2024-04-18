@@ -93,7 +93,7 @@ export default function TransactionListTable({
       if (!messages) {
         messages = message_types.map((i, idx) => (
           <React.Fragment key={idx}>
-            {getMessageName(i)}
+            <Chip label={getMessageName(i)} color="default" variant="outlined" />
             {idx + 1 !== message_types.length && <br />}
           </React.Fragment>
         ));
