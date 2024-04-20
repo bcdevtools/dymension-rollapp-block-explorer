@@ -17,6 +17,7 @@ type RecordTransaction struct {
 	MessageTypes []string
 	TxType       string
 	Action       string
+	Value        []string
 }
 
 // NewRecordTransactionForInsert procedures a new RecordTransaction for insertion into database

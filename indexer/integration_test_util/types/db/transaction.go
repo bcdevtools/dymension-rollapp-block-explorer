@@ -12,4 +12,5 @@ type TransactionRecord struct {
 	MessageTypes []string
 	TxType       string
 	Action       sql.NullString
+	Value        []string
 }

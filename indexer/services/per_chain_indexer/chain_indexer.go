@@ -654,6 +654,7 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 	mapInvolvedAccounts := make(map[string]dbtypes.RecordAccount)
 	var recentAccountTxs dbtypes.RecordsRecentAccountTransaction
 	var refAccountToRecentTxs dbtypes.RecordsRefAccountToRecentTx
+	var err error
 
 	for _, transaction := range block.Transactions {
 		// build transaction record
@@ -670,6 +671,10 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 			recordTx.Action = transaction.EvmTxInfo.Action
 		} else if transaction.WasmTxInfo != nil {
 			recordTx.Action = transaction.WasmTxInfo.Action
+		}
+		recordTx.Value, err = getTxValueFromTx(transaction)
+		if err != nil {
+			return errors.Wrapf(err, "failed to parse coins from value %s", transaction.Value)
 		}
 
 		recordsTxs = append(recordsTxs, recordTx)
@@ -811,11 +816,12 @@ func (d *defaultIndexer) insertBlockInformation(height int64, block querytypes.B
 			} else if transaction.WasmTxInfo != nil {
 				recentAccountTx.Action = transaction.WasmTxInfo.Action
 			}
+			recentAccountTx.Value = recordTx.Value
 			recentAccountTxs = append(recentAccountTxs, recentAccountTx)
 		}
 	}
 
-	err := dbTx.InsertRecordTransactionsIfNotExists(recordsTxs)
+	err = dbTx.InsertRecordTransactionsIfNotExists(recordsTxs)
 	if err != nil {
 		return errors.Wrap(err, "failed to insert transactions")
 	}
@@ -954,5 +960,28 @@ func unsafeAnyAddressToBech32Address(involver string, bech32Cfg dbtypes.Bech32Pr
 	}
 
 	absolutelyInvalid = true
+	return
+}
+
+func getTxValueFromTx(transaction querytypes.TransactionInBlockInResponseBeTransactionsInBlockRange) (value []string, err error) {
+	if transaction.Value == "" {
+		return
+	}
+
+	coins, err := sdk.ParseCoinsNormalized(transaction.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(coins) == 0 {
+		return
+	}
+
+	if !coins.IsZero() {
+		for _, coin := range coins {
+			value = append(value, fmt.Sprintf("%s %s", coin.Amount.String(), coin.Denom))
+		}
+	}
+
 	return
 }

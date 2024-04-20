@@ -77,3 +77,67 @@ func Test_responseByJsonRpcUrlSlice(t *testing.T) {
 	_, found = records.GetTop()
 	require.False(t, found)
 }
+
+func Test_getTxValueFromTx(t *testing.T) {
+	tests := []struct {
+		name       string
+		inputValue string
+		wantValue  []string
+		wantErr    bool
+	}{
+		{
+			name:       "normal, single",
+			inputValue: "1uatom",
+			wantValue:  []string{"1 uatom"},
+			wantErr:    false,
+		},
+		{
+			name:       "normal, multiple",
+			inputValue: "1uatom,1uosmo",
+			wantValue:  []string{"1 uatom", "1 uosmo"},
+			wantErr:    false,
+		},
+		{
+			name:       "normal, empty",
+			inputValue: "",
+			wantValue:  nil,
+			wantErr:    false,
+		},
+		{
+			name:       "normal, but abnormal",
+			inputValue: "1 uatom",
+			wantValue:  []string{"1 uatom"},
+			wantErr:    false,
+		},
+		{
+			name:       "invalid",
+			inputValue: "abc",
+			wantErr:    true,
+		},
+		{
+			name:       "invalid",
+			inputValue: "uatom1",
+			wantErr:    true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotValue, err := getTxValueFromTx(querytypes.TransactionInBlockInResponseBeTransactionsInBlockRange{
+				Value: tt.inputValue,
+			})
+			if tt.wantErr {
+				require.Error(t, err)
+				require.Nil(t, gotValue)
+				return
+			}
+
+			require.NoError(t, err)
+			if len(tt.wantValue) == 0 {
+				require.Nil(t, gotValue)
+				return
+			}
+
+			require.Equal(t, tt.wantValue, gotValue)
+		})
+	}
+}

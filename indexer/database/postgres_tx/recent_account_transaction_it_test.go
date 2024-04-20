@@ -30,6 +30,7 @@ func (suite *IntegrationTestSuite) Test_InsertRecordsRecentAccountTransactionIfN
 		[]string{"type-1"},
 	)
 	originalRecord1.Action = "action-1"
+	originalRecord1.Value = []string{"value-1", "value-2"}
 
 	//goland:noinspection SpellCheckingInspection
 	originalRecord2 := dbtypes.NewRecordRecentAccountTransactionForInsert(
@@ -54,6 +55,7 @@ func (suite *IntegrationTestSuite) Test_InsertRecordsRecentAccountTransactionIfN
 		suite.Equal(originalRecord1.Epoch, record1.Epoch)
 		suite.Equal(originalRecord1.MessageTypes, record1.MessageTypes)
 		suite.Equal(originalRecord1.Action, record1.Action.String)
+		suite.Equal(originalRecord1.Value, record1.Value)
 
 		record2 := suite.DBITS.ReadRecentAccountTransactionRecord(originalRecord2.Hash, originalRecord2.Height, originalRecord2.ChainId, tx.Tx)
 		suite.Equal(originalRecord2.ChainId, record2.ChainId)
@@ -63,6 +65,7 @@ func (suite *IntegrationTestSuite) Test_InsertRecordsRecentAccountTransactionIfN
 		suite.Equal(originalRecord2.Epoch, record2.Epoch)
 		suite.Equal(originalRecord2.MessageTypes, record2.MessageTypes)
 		suite.False(record2.Action.Valid)
+		suite.Nil(record2.Value)
 
 		suite.Equal(originalRowsCount+2, suite.CountRows(tx.Tx, "recent_account_transaction"))
 		suite.Equal(2, suite.CountRows(tx.Tx, "reduced_ref_count_recent_account_transaction"), "inserted record should be inserted into reduced_ref_count_recent_account_transaction via trigger")
@@ -71,6 +74,8 @@ func (suite *IntegrationTestSuite) Test_InsertRecordsRecentAccountTransactionIfN
 	suite.Run("duplicated insert should not update", func() {
 		alteredRecord1 := originalRecord1
 		alteredRecord1.MessageTypes = append(alteredRecord1.MessageTypes, "type-new")
+		alteredRecord1.Action = "action-new"
+		alteredRecord1.Value = []string{"value-new"}
 
 		err := tx.InsertRecordsRecentAccountTransactionIfNotExists(dbtypes.RecordsRecentAccountTransaction{alteredRecord1})
 		suite.Require().NoError(err)
@@ -82,6 +87,8 @@ func (suite *IntegrationTestSuite) Test_InsertRecordsRecentAccountTransactionIfN
 		suite.Equal(int16(0), record1.RefCount)
 		suite.Equal(originalRecord1.Epoch, record1.Epoch)
 		suite.Equal(originalRecord1.MessageTypes, record1.MessageTypes)
+		suite.Equal(originalRecord1.Action, record1.Action.String)
+		suite.Equal(originalRecord1.Value, record1.Value)
 
 		suite.Equal(originalRowsCount+2, suite.CountRows(tx.Tx, "recent_account_transaction"))
 		suite.Equal(2, suite.CountRows(tx.Tx, "reduced_ref_count_recent_account_transaction"))
