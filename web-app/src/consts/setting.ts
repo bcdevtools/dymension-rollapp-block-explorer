@@ -19,7 +19,8 @@ export const MAX_PAGINATION_SIZE: number = !isNaN(maxPaginationSize)
 export const PAGE_SIZE_PARAM_NAME = 'ps';
 export const PAGE_PARAM_NAME = 'p';
 
-export const SEARCH_PLACEHOLDER = 'Address, Block, Transaction hash, etc.';
+export const SEARCH_PLACEHOLDER =
+  'Rollapp, Address, Block, Transaction hash, etc.';
 
 export const enum ChainType {
   EVM = 'evm',
