@@ -31,12 +31,7 @@ type TransactionListTableProps = Readonly<{
   enablePagination?: boolean;
 }>;
 
-const headers = [
-  'Transaction Hash',
-  'Messages',
-  'Block',
-  'Date Time',
-];
+const headers = ['Transaction Hash', 'Messages', 'Block', 'Date Time'];
 
 export default function TransactionListTable({
   transactions,
@@ -60,12 +55,14 @@ export default function TransactionListTable({
 
       // Transaction Hash
 
-      cells.push(<Link
-        key={hash}
-        href={getNewPathByRollapp(pathname, `/${Path.TRANSACTIONS}/${hash}`)}
-        underline="hover">
-        {hash.substring(0, 6)}...{hash.substring(hash.length - 6)}
-      </Link>);
+      cells.push(
+        <Link
+          key={hash}
+          href={getNewPathByRollapp(pathname, `/${Path.TRANSACTIONS}/${hash}`)}
+          underline="hover">
+          {hash.substring(0, 6)}...{hash.substring(hash.length - 6)}
+        </Link>
+      );
 
       // Messages
 
@@ -113,15 +110,24 @@ export default function TransactionListTable({
   );
 }
 
-const getMessageLabel = function(hash:string, message_types:string[], action:string|null, tx_type:string) {
+const getMessageLabel = function (
+  hash: string,
+  message_types: string[],
+  action: string | null,
+  tx_type: string
+) {
   if (action) {
     const splitted = action.split(':');
     const label = splitted[1] || splitted[0];
     if (label) {
       if (tx_type === 'evm') {
-        return <Chip key={hash} label={label} color="info" variant="outlined" />;
+        return (
+          <Chip key={hash} label={label} color="info" variant="outlined" />
+        );
       } else if (tx_type === 'wasm') {
-        return <Chip key={hash} label={label} color="secondary" variant="outlined" />;
+        return (
+          <Chip key={hash} label={label} color="secondary" variant="outlined" />
+        );
       }
     }
   }
@@ -132,4 +138,4 @@ const getMessageLabel = function(hash:string, message_types:string[], action:str
       {idx + 1 !== message_types.length && <br />}
     </React.Fragment>
   ));
-}
+};

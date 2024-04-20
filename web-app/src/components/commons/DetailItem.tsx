@@ -5,7 +5,7 @@ import Skeleton from '@mui/material/Skeleton';
 type DetailItemProps = Readonly<{
   loading?: boolean;
   label: string;
-  value: React.ReactNode | string | null | undefined;
+  value: React.ReactNode | null | undefined;
 }>;
 
 export function DetailItem({ label, value, loading = false }: DetailItemProps) {

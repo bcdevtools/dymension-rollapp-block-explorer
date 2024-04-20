@@ -32,14 +32,14 @@ export default React.memo(function RollappSelect({
         <InputLabel
           id="select-rollapp-label"
           size={size === 'medium' ? 'normal' : 'small'}>
-          Rollapp
+          Rollapps
         </InputLabel>
       )}
       <Select
         value={value}
         onChange={onValueChange}
         labelId="select-rollapp-label"
-        label={label && 'Rollapp'}
+        label={label && 'Rollapps'}
         size={size}>
         {rollappInfos.map(rollapp => (
           <MenuItem key={rollapp.chain_id} value={rollapp.path}>
