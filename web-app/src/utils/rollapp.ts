@@ -4,6 +4,10 @@ export type RollappInfo = {
   path: string;
 } & chain_info;
 
+export interface RollappInfoMap {
+  [chainId: string]: RollappInfo;
+}
+
 export function normalizeRollappsInfo(chainInfos: chain_info[]): RollappInfo[] {
   return chainInfos.map(chainInfo => ({
     ...chainInfo,
@@ -21,5 +25,15 @@ export function getRollappInfoByPath(
 ): RollappInfo | undefined {
   return normalizeRollappsInfo(chainInfos).find(
     rollappInfo => rollappInfo.path === path
+  );
+}
+
+export function rollappInfosToObject(rollappInfos: RollappInfo[]) {
+  return rollappInfos.reduce<RollappInfoMap>(
+    (finalObj, rollappInfo) => ({
+      ...finalObj,
+      [rollappInfo.chain_id]: rollappInfo,
+    }),
+    {}
   );
 }

@@ -50,8 +50,9 @@ export default function Messages({
             label="Content"
             value={
               <Typography sx={{ fontStyle: 'italic' }}>
-                {translateCts(msg.content.ctm, address => (
+                {translateCts(msg.content.ctm, (address, idx) => (
                   <Link
+                    key={idx}
                     href={getNewPathByRollapp(
                       pathname,
                       `${Path.ADDRESS}/${address}`

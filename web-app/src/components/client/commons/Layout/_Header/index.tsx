@@ -4,18 +4,15 @@ import { styled, alpha } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import ThemeToggleButton from './_ThemeToggleButton';
 import Logo from './_Logo';
-import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
-import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import Toolbar from '@mui/material/Toolbar';
-import React, { FormEventHandler, useState } from 'react';
+import React from 'react';
 import { TOOLBAR_MOBILE_HEIGHT } from '@/consts/theme';
 import { SEARCH_PLACEHOLDER } from '@/consts/setting';
-import { usePathname, useRouter } from 'next/navigation';
-import { useRollappStore } from '@/stores/rollappStore';
-import { handleSearch } from '@/utils/common';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
@@ -24,13 +21,13 @@ const StyledAppBar = styled(AppBar)(({ theme }) => ({
 }));
 
 export const CustomToolbar = styled(Toolbar)(({ theme }) => ({
-  [theme.breakpoints.down('sm')]: {
+  [theme.breakpoints.down('md')]: {
     minHeight: TOOLBAR_MOBILE_HEIGHT,
   },
 }));
 
 const StyledToolbar = styled(CustomToolbar)(({ theme }) => ({
-  [theme.breakpoints.down('sm')]: {
+  [theme.breakpoints.down('md')]: {
     justifyContent: 'space-between',
     flexWrap: 'wrap',
     paddingTop: theme.spacing(1),
@@ -38,76 +35,28 @@ const StyledToolbar = styled(CustomToolbar)(({ theme }) => ({
   },
 }));
 
-const Search = styled(Box)(({ theme }) => ({
+const StyledTextField = styled(TextField)(({ theme }) => ({
   position: 'relative',
-  borderRadius: theme.shape.borderRadius,
   backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginLeft: 0,
   width: '100%',
-  [theme.breakpoints.up('sm')]: {
+  [theme.breakpoints.up('md')]: {
     marginLeft: theme.spacing(1),
-    width: 'auto',
+    width: '66ch',
   },
-  [theme.breakpoints.down('sm')]: {
+  [theme.breakpoints.down('md')]: {
     order: 1,
-  },
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  width: '100%',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    [theme.breakpoints.up('sm')]: {
-      width: '32ch',
-    },
-    [theme.breakpoints.up('md')]: {
-      '&:focus': {
-        width: '53ch',
-      },
-    },
   },
 }));
 
 type HeaderProps = Readonly<{
   handleMenuToggle: () => void;
+  openSearch: () => void;
 }>;
 
-export default React.memo(function Header({ handleMenuToggle }: HeaderProps) {
-  const [{ selectedRollappInfo }] = useRollappStore(true);
-  const [searchValue, setSearchValue] = useState('');
-  const router = useRouter();
-  const pathname = usePathname();
-
-  const handleSubmit: FormEventHandler = e => {
-    e.preventDefault();
-
-    if (!searchValue) {
-      return;
-    }
-
-    handleSearch(selectedRollappInfo!, searchValue, newPath => {
-      if (pathname !== newPath) router.push(newPath);
-      setSearchValue('');
-    });
-  };
-
+export default React.memo(function Header({
+  handleMenuToggle,
+  openSearch,
+}: HeaderProps) {
   return (
     <StyledAppBar>
       <StyledToolbar>
@@ -121,17 +70,20 @@ export default React.memo(function Header({ handleMenuToggle }: HeaderProps) {
           <MenuIcon />
         </IconButton>
         <Logo />
-        <Search component="form" onSubmit={handleSubmit}>
-          <SearchIconWrapper>
-            <SearchIcon />
-          </SearchIconWrapper>
-          <StyledInputBase
-            placeholder={SEARCH_PLACEHOLDER}
-            inputProps={{ 'aria-label': 'search' }}
-            value={searchValue}
-            onChange={e => void setSearchValue(e.target.value)}
-          />
-        </Search>
+        <StyledTextField
+          placeholder={SEARCH_PLACEHOLDER}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+          size="small"
+          onClick={openSearch}
+          inputRef={(e: HTMLInputElement) => e && e.blur()}
+          sx={{ input: { cursor: 'pointer' } }}
+        />
         <ThemeToggleButton />
       </StyledToolbar>
     </StyledAppBar>

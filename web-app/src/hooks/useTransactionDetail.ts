@@ -1,6 +1,7 @@
 import { Transaction } from '@/consts/rpcResTypes';
 import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
+import { useMountedState } from './useMountedState';
 
 export default function useTransactionDetail(
   txHash: string
@@ -8,10 +9,10 @@ export default function useTransactionDetail(
   const [loading, setLoading] = useState(true);
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [{ rpcService }] = useRollappStore();
+  const mounted = useMountedState();
 
   useEffect(() => {
     const ac = new AbortController();
-    let ignore = false;
     if (rpcService && txHash) {
       (async function () {
         try {
@@ -21,15 +22,14 @@ export default function useTransactionDetail(
         } catch (e) {
           console.log(e);
         } finally {
-          if (!ignore) setLoading(false);
+          if (mounted) setLoading(false);
         }
       })();
     } else setTransaction(null);
     return () => {
       ac.abort();
-      ignore = true;
     };
-  }, [txHash, rpcService]);
+  }, [txHash, rpcService, mounted]);
 
   return [transaction, loading];
 }
