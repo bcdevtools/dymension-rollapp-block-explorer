@@ -86,6 +86,7 @@ Templates for Unreleased:
 - (indexing) [#34](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/34) Mark failed blocks when failed to index new blocks range
 - (indexing) [#35](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/35) Index EVM/Wasm `action` into 2 transaction tables
 - (txs) [#45](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/45) Re-style transaction table
+- (indexing) [#49](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/49) Add more basic validation for `be_getTransactionsInBlockRange`
 
 ### Bug Fixes
 
