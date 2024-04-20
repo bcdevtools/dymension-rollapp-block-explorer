@@ -113,7 +113,8 @@ SELECT
 	epoch, -- 5
 	message_types, -- 6
 	tx_type, -- 7
-	"action" -- 8
+	"action", -- 8
+	"value" -- 9
 FROM "transaction" WHERE hash = $1 AND height = $2 AND chain_id = $3
 `
 
@@ -142,6 +143,7 @@ FROM "transaction" WHERE hash = $1 AND height = $2 AND chain_id = $3
 		pq.Array(&res.MessageTypes), // 6
 		&res.TxType,                 // 7
 		&res.Action,                 // 8
+		pq.Array(&res.Value),        // 9
 	)
 	suite.Require().NoError(err, "failed to scan transaction")
 	suite.Require().Falsef(rows.Next(), "more than one record found for transaction %s at %d", hash, height)

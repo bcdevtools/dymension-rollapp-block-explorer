@@ -26,18 +26,19 @@ INSERT INTO transaction (
 	epoch,
 	message_types,
 	tx_type,
-	"action"
+	"action",
+	"value"
 ) VALUES `
 
 	var params []interface{}
 
 	for i, account := range txs {
-		pi := i * 8
+		pi := i * 9
 
 		if i > 0 {
 			stmt += ","
 		}
-		stmt += fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d)", pi+1, pi+2, pi+3, pi+4, pi+5, pi+6, pi+7, pi+8)
+		stmt += fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d)", pi+1, pi+2, pi+3, pi+4, pi+5, pi+6, pi+7, pi+8, pi+9)
 		params = append(
 			params,
 			account.ChainId,                // 1
@@ -51,6 +52,7 @@ INSERT INTO transaction (
 				String: account.Action,
 				Valid:  account.Action != "",
 			},
+			pq.Array(account.Value), // 9
 		)
 	}
 

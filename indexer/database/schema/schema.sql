@@ -269,6 +269,7 @@ CREATE TABLE transaction (
     message_types       TEXT[]  NOT NULL, -- proto message types of inner messages
     tx_type             TEXT    NOT NULL, -- tx type, eg: cosmos or evm or wasm
     "action"            TEXT, -- action, probably available on evm/wasm txs. Generic values are "create", "transfer", "call:0x..."
+    "value"             TEXT[], -- value of the transaction, eg: transfer amount, delegation amount, etc
 
     CONSTRAINT transaction_pkey PRIMARY KEY (chain_id, height, hash, partition_id)
 ) PARTITION BY LIST(partition_id);
