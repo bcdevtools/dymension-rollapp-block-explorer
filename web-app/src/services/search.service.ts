@@ -105,7 +105,7 @@ export async function handleGlobalSearch(
   allRollappInfos: RollappInfo[],
   selectedRollappInfo?: RollappInfo | null
 ): Promise<SearchResult> {
-  allRollappInfos = allRollappInfos.sort((a, b) => {
+  allRollappInfos = [...allRollappInfos].sort((a, b) => {
     if (a.chain_id === selectedRollappInfo?.chain_id) return -1;
     else if (b.chain_id === selectedRollappInfo?.chain_id) return 1;
     return a.name.localeCompare(b.name);

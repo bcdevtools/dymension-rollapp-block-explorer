@@ -1,4 +1,5 @@
 import { AccountBalances } from '@/consts/rpcResTypes';
+import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
 
@@ -10,24 +11,25 @@ export default function useAccountBalances(
   const [{ rpcService }] = useRollappStore();
 
   useEffect(() => {
-    const ac = new AbortController();
-    let ignore = false;
+    let ac: AbortController | null;
     if (rpcService && address) {
       (async function () {
         try {
           setLoading(true);
-          const accountBalances = await rpcService.getAccountBalances(address);
+          const result = rpcService.getAccountBalances(address);
+          ac = result[1];
+          const accountBalances = await getResponseResult(result[0]);
           setBalances(accountBalances);
+          setLoading(false);
         } catch (e) {
           console.log(e);
         } finally {
-          if (!ignore) setLoading(false);
+          ac = null;
         }
       })();
     } else setBalances(null);
     return () => {
-      ac.abort();
-      ignore = true;
+      if (ac) ac.abort();
     };
   }, [address, rpcService]);
 

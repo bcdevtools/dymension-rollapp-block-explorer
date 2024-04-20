@@ -84,12 +84,13 @@ export class RpcService {
     );
   }
 
-  async getAccountBalances(address: string, fetchOptions?: FetchOptions) {
-    const response: RpcResponse<AccountBalances> =
-      await this._rpcClient.callRpc(
-        getAccountBalancesParam(address),
-        fetchOptions
-      );
-    return getResponseResult(response);
+  getAccountBalances(
+    address: string,
+    fetchOptions?: CallRpcOptions
+  ): RpcResult<AccountBalances> {
+    return this._rpcClient.callRpc(
+      getAccountBalancesParam(address),
+      fetchOptions
+    );
   }
 }

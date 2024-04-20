@@ -29,9 +29,7 @@ export default function Search({
   const [searchValue, setSearchValue] = useState<string>('');
   const [{ rollappInfos, selectedRollappInfo }] = useRollappStore();
   const [loading, setLoading] = useState(false);
-  const [searchResult, setSearchResult] = useState<SearchResult>({
-    rollapps: rollappInfos,
-  });
+  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const mounted = useMountedState();
 
   const handleClear = () => {
