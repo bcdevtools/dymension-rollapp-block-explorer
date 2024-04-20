@@ -2,7 +2,11 @@ package types
 
 import (
 	"fmt"
+	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/constants"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/utils"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pkg/errors"
+	"time"
 )
 
 type BeJsonRpcResponse interface {
@@ -128,13 +132,24 @@ func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
 			return fmt.Errorf("error blocks information contains invalid number %d", height)
 		}
 	}
+
+	nowUTC := time.Now().UTC().Unix()
+	malformedTimeEpochUTCIsGreaterThan := nowUTC + constants.RpcTxAheadBlockTimeAllowed
+
 	for heightStr, block := range r.Blocks {
 		if block.TimeEpochUTC < 1 {
-			return fmt.Errorf("missing block time information for %s", heightStr)
+			return fmt.Errorf("missing block time information [%s]", heightStr)
+		}
+		if block.TimeEpochUTC > malformedTimeEpochUTCIsGreaterThan {
+			// this condition is used to prevent spamming
+			return errors.Wrapf(ErrBlackListDueToMalformedResponse, "bad block time %d, now %d [%s]", block.TimeEpochUTC, nowUTC, heightStr)
+		}
+		if countTxs := len(block.Transactions); countTxs > constants.RpcTxMaximumTxsPerBlockAllowed {
+			return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many txs %d, maximum allowed %d [%s]", countTxs, constants.RpcTxMaximumTxsPerBlockAllowed, heightStr)
 		}
 		for i, tx := range block.Transactions {
 			if len(tx.TransactionHash) < 1 {
-				return fmt.Errorf("missing transaction hash for tx at %d of block %s", i, heightStr)
+				return fmt.Errorf("missing transaction hash for tx at %d [%s]", i, heightStr)
 			}
 
 			var possibleEvmTxInfo, possibleWasmTxInfo bool
@@ -142,32 +157,142 @@ func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
 			case "cosmos":
 				// ok
 				if !utils.IsValidCosmosTransactionHash(tx.TransactionHash) {
-					return fmt.Errorf("invalid cosmos transaction hash %s for tx at %d of block %s", tx.TransactionHash, i, heightStr)
+					return fmt.Errorf("invalid cosmos transaction hash %s for tx at %d [%s]", tx.TransactionHash, i, heightStr)
 				}
 			case "evm":
 				// ok
 				if !utils.IsValidEvmTransactionHash(tx.TransactionHash) {
-					return fmt.Errorf("invalid evm transaction hash %s for tx at %d of block %s", tx.TransactionHash, i, heightStr)
+					return fmt.Errorf("invalid evm transaction hash %s for tx at %d [%s]", tx.TransactionHash, i, heightStr)
 				}
 				possibleEvmTxInfo = true
 			case "wasm":
 				// ok
 				if !utils.IsValidCosmosTransactionHash(tx.TransactionHash) {
-					return fmt.Errorf("invalid wasm transaction hash %s for tx at %d of block %s", tx.TransactionHash, i, heightStr)
+					return fmt.Errorf("invalid wasm transaction hash %s for tx at %d [%s]", tx.TransactionHash, i, heightStr)
 				}
 				possibleWasmTxInfo = true
 			default:
-				return fmt.Errorf("unrecognised transaction type %s for tx at %d of block %s", tx.TransactionType, i, heightStr)
+				return fmt.Errorf("unrecognised transaction type %s for tx at %d [%s]", tx.TransactionType, i, heightStr)
 			}
+
+			ivs := tx.Involvers
+			if countSigners := len(ivs.Signers); countSigners > constants.RpcTxMaximumSignersPerTx {
+				return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many signers per tx %d, maximum allowed %d [%s]", countSigners, constants.RpcTxMaximumSignersPerTx, heightStr)
+			}
+			for _, signer := range ivs.Signers {
+				if lenSignerAddr := len(signer); lenSignerAddr > constants.RpcTxMaximumLengthAddressAllowed {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "signer address too big %d, maximum allowed %d [%s]", lenSignerAddr, constants.RpcTxMaximumLengthAddressAllowed, heightStr)
+				}
+			}
+			if countInvolvers := len(ivs.Others); countInvolvers > constants.RpcTxMaximumInvolversPerTxAllowed {
+				return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many involvers Others per tx %d, maximum allowed %d [%s]", countInvolvers, constants.RpcTxMaximumInvolversPerTxAllowed, heightStr)
+			}
+			for _, signer := range ivs.Signers {
+				if lenSignerAddr := len(signer); lenSignerAddr > constants.RpcTxMaximumLengthAddressAllowed {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "signer address too big %d, maximum allowed %d [%s]", lenSignerAddr, constants.RpcTxMaximumLengthAddressAllowed, heightStr)
+				}
+			}
+			if countInvolvers := len(ivs.Erc20); countInvolvers > constants.RpcTxMaximumInvolversPerTxAllowed {
+				return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many involvers ERC-20 per tx %d, maximum allowed %d [%s]", countInvolvers, constants.RpcTxMaximumInvolversPerTxAllowed, heightStr)
+			}
+			for _, erc20 := range ivs.Erc20 {
+				if lenErc20Addr := len(erc20); lenErc20Addr > constants.RpcTxMaximumLengthAddressAllowed {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "ERC-20 address too big %d, maximum allowed %d [%s]", lenErc20Addr, constants.RpcTxMaximumLengthAddressAllowed, heightStr)
+				}
+			}
+			if countInvolvers := len(ivs.NFT); countInvolvers > constants.RpcTxMaximumInvolversPerTxAllowed {
+				return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many involvers NFT per tx %d, maximum allowed %d [%s]", countInvolvers, constants.RpcTxMaximumInvolversPerTxAllowed, heightStr)
+			}
+			for _, nft := range ivs.NFT {
+				if lenNftAddr := len(nft); lenNftAddr > constants.RpcTxMaximumLengthAddressAllowed {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "NFT address too big %d, maximum allowed %d [%s]", lenNftAddr, constants.RpcTxMaximumLengthAddressAllowed, heightStr)
+				}
+			}
+
+			ivsTC := ivs.TokenContracts
+			if lenTcErc20 := len(ivsTC.Erc20); lenTcErc20 > constants.RpcTxMaximumTokenContractsInvolvesPerTxAllowed {
+				return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many involvers ERC-20 token contract per tx %d, maximum allowed %d [%s]", lenTcErc20, constants.RpcTxMaximumTokenContractsInvolvesPerTxAllowed, heightStr)
+			}
+			for erc20Contract, involvers := range ivsTC.Erc20 {
+				if lenErc20Addr := len(erc20Contract); lenErc20Addr > constants.RpcTxMaximumLengthAddressAllowed {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "ERC-20 contract address too big %d, maximum allowed %d [%s]", lenErc20Addr, constants.RpcTxMaximumLengthAddressAllowed, heightStr)
+				}
+				if countInvolvers := len(involvers); countInvolvers > constants.RpcTxMaximumInvolversPerTxAllowed {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many involvers ERC-20 token contract addresses per tx %d, maximum allowed %d [%s]", countInvolvers, constants.RpcTxMaximumInvolversPerTxAllowed, heightStr)
+				}
+				for _, addr := range involvers {
+					if lenAddr := len(addr); lenAddr > constants.RpcTxMaximumLengthAddressAllowed {
+						return errors.Wrapf(ErrBlackListDueToMalformedResponse, "ERC-20 token contract involver address too big %d, maximum allowed %d [%s]", lenAddr, constants.RpcTxMaximumLengthAddressAllowed, heightStr)
+					}
+				}
+			}
+			if lenTcNft := len(ivsTC.NFT); lenTcNft > constants.RpcTxMaximumTokenContractsInvolvesPerTxAllowed {
+				return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many involvers NFT token contract per tx %d, maximum allowed %d [%s]", lenTcNft, constants.RpcTxMaximumTokenContractsInvolvesPerTxAllowed, heightStr)
+			}
+			for nftContract, involvers := range ivsTC.NFT {
+				if lenNftAddr := len(nftContract); lenNftAddr > constants.RpcTxMaximumLengthAddressAllowed {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "NFT contract address too big %d, maximum allowed %d [%s]", lenNftAddr, constants.RpcTxMaximumLengthAddressAllowed, heightStr)
+				}
+				if countInvolvers := len(involvers); countInvolvers > constants.RpcTxMaximumInvolversPerTxAllowed {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many involvers NFT token contract addresses per tx %d, maximum allowed %d [%s]", countInvolvers, constants.RpcTxMaximumInvolversPerTxAllowed, heightStr)
+				}
+				for _, addr := range involvers {
+					if lenAddr := len(addr); lenAddr > constants.RpcTxMaximumLengthAddressAllowed {
+						return errors.Wrapf(ErrBlackListDueToMalformedResponse, "NFT token contract involver address too big %d, maximum allowed %d [%s]", lenAddr, constants.RpcTxMaximumLengthAddressAllowed, heightStr)
+					}
+				}
+			}
+
 			if len(tx.MessagesType) < 1 {
-				return fmt.Errorf("missing messages type for tx at %d of block %s", i, heightStr)
+				return fmt.Errorf("missing messages type for tx at %d [%s]", i, heightStr)
+			}
+			if countMsgs := len(tx.MessagesType); countMsgs > constants.RpcTxMaximumMessagesPerTxAllowed {
+				return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many messages per tx %d, maximum allowed %d [%s]", countMsgs, constants.RpcTxMaximumMessagesPerTxAllowed, heightStr)
+			}
+			for _, msgType := range tx.MessagesType {
+				if msgType == "" {
+					return fmt.Errorf("message type can not be empty")
+				}
+				if lenMsgType := len(msgType); lenMsgType > constants.RpcTxMaximumStringSizeAllowed {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "message type is too long %d, maximum allowed %d [%s]", lenMsgType, constants.RpcTxMaximumStringSizeAllowed, heightStr)
+				}
 			}
 
 			if !possibleEvmTxInfo && tx.EvmTxInfo != nil {
-				return fmt.Errorf("unexpected evm tx info for tx at %d of block %s", i, heightStr)
+				return fmt.Errorf("unexpected evm tx info for tx at %d [%s]", i, heightStr)
 			}
 			if !possibleWasmTxInfo && tx.WasmTxInfo != nil {
-				return fmt.Errorf("unexpected wasm tx info for tx at %d of block %s", i, heightStr)
+				return fmt.Errorf("unexpected wasm tx info for tx at %d [%s]", i, heightStr)
+			}
+
+			if tx.EvmTxInfo != nil {
+				const evmTxActionMaxSize = 66
+				const evmTxMethodSigMaxSize = 10
+				if lenActionEvmTxInfo := len(tx.EvmTxInfo.Action); lenActionEvmTxInfo > evmTxActionMaxSize {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "evm tx action size is too long %d, maximum allowed %d [%s]", lenActionEvmTxInfo, evmTxActionMaxSize, heightStr)
+				}
+				if lenSigEvmTxInfo := len(tx.EvmTxInfo.MethodSignature); lenSigEvmTxInfo > evmTxMethodSigMaxSize {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "evm tx method signature size is too long %d, maximum allowed %d [%s]", lenSigEvmTxInfo, evmTxMethodSigMaxSize, heightStr)
+				}
+			}
+			if tx.WasmTxInfo != nil {
+				const wasmTxActionMaxSize = 200
+				const wasmTxMethodSigMaxSize = 200
+				if lenActionWasmTxInfo := len(tx.WasmTxInfo.Action); lenActionWasmTxInfo > wasmTxActionMaxSize {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "wasm tx action size is too long %d, maximum allowed %d [%s]", lenActionWasmTxInfo, wasmTxActionMaxSize, heightStr)
+				}
+				if lenSigWasmTxInfo := len(tx.WasmTxInfo.MethodSignature); lenSigWasmTxInfo > wasmTxMethodSigMaxSize {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "wasm tx method signature size is too long %d, maximum allowed %d [%s]", lenSigWasmTxInfo, wasmTxMethodSigMaxSize, heightStr)
+				}
+			}
+
+			if valueLen := len(tx.Value); valueLen > 0 {
+				if valueLen > constants.RpcTxMaximumStringSizeAllowed {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "value size is too long %d, maximum allowed %d [%s]", valueLen, constants.RpcTxMaximumStringSizeAllowed, heightStr)
+				}
+				if _, parseErr := sdk.ParseCoinsNormalized(tx.Value); parseErr != nil {
+					return errors.Wrap(parseErr, "failed to parse tx value")
+				}
 			}
 		}
 	}
