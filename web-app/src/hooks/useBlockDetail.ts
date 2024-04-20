@@ -24,7 +24,7 @@ export default function useBlockDetail(
         } catch (e) {
           console.log(e);
         } finally {
-          if (mounted) setLoading(false);
+          if (mounted.current) setLoading(false);
         }
       })();
     } else setBlock(null);

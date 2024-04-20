@@ -25,7 +25,7 @@ export function useLatestBlock(
       } catch (e) {
         console.log(e);
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted.current) setLoading(false);
       }
     },
     [rpcService, mounted]

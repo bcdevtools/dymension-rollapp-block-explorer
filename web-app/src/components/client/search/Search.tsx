@@ -52,11 +52,11 @@ export default function Search({ open, handleClose }: SearchProps) {
           rollappInfos,
           selectedRollappInfo
         );
-        if (mounted) {
+        if (mounted.current) {
           setSearchResult(result);
         }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted.current) setLoading(false);
       }
     },
     [rollappInfos, selectedRollappInfo, mounted]
@@ -64,7 +64,7 @@ export default function Search({ open, handleClose }: SearchProps) {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (mounted) handleSearch(searchValue);
+      if (mounted.current) handleSearch(searchValue);
     }, 500);
     return () => clearTimeout(timeout);
   }, [searchValue, handleSearch, mounted]);

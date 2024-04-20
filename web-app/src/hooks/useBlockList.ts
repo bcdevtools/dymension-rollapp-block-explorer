@@ -12,7 +12,6 @@ export function useBlockList(
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [{ rpcService }] = useRollappStore();
   const mounted = useMountedState();
-
   useEffect(() => {
     const ac = new AbortController();
     if (rpcService && latestBlockNo) {
@@ -30,7 +29,7 @@ export function useBlockList(
         } catch (e) {
           console.log(e);
         } finally {
-          if (mounted) setLoading(false);
+          if (mounted.current) setLoading(false);
         }
       })();
     } else setBlocks([]);
