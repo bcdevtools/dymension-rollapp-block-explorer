@@ -113,7 +113,8 @@ SELECT
 	epoch, -- 5
 	message_types, -- 6
 	tx_type, -- 7
-	"action" -- 8
+	"action", -- 8
+	"value" -- 9
 FROM "transaction" WHERE hash = $1 AND height = $2 AND chain_id = $3
 `
 
@@ -142,6 +143,7 @@ FROM "transaction" WHERE hash = $1 AND height = $2 AND chain_id = $3
 		pq.Array(&res.MessageTypes), // 6
 		&res.TxType,                 // 7
 		&res.Action,                 // 8
+		pq.Array(&res.Value),        // 9
 	)
 	suite.Require().NoError(err, "failed to scan transaction")
 	suite.Require().Falsef(rows.Next(), "more than one record found for transaction %s at %d", hash, height)
@@ -161,7 +163,8 @@ SELECT
 	ref_count, -- 4
 	epoch, -- 5
 	message_types, -- 6
-	"action" -- 7
+	"action", -- 7
+	"value" -- 8
 FROM recent_account_transaction WHERE hash = $1 AND height = $2 AND chain_id = $3
 `
 
@@ -189,6 +192,7 @@ FROM recent_account_transaction WHERE hash = $1 AND height = $2 AND chain_id = $
 		&res.Epoch,                  // 5
 		pq.Array(&res.MessageTypes), // 6
 		&res.Action,                 // 7
+		pq.Array(&res.Value),        // 8
 	)
 	suite.Require().NoError(err, "failed to scan recent account transaction")
 	suite.Require().Falsef(rows.Next(), "more than one record found for recent account transaction %s at %d", hash, height)
