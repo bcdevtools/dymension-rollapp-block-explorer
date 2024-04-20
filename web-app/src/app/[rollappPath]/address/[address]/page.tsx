@@ -110,7 +110,7 @@ export default async function Address({ params, searchParams }: AddressProps) {
           </>
         }
       />
-      <AddressSummary />
+      <AddressSummary address={bech32Address} />
       <AddressTransactionsSection
         txType={searchParams.txType as AddressTransactionType}>
         <TransactionListTable

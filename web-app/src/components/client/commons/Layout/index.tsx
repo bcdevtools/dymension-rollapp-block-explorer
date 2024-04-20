@@ -8,6 +8,7 @@ import { SIDER_WIDTH } from '@/consts/theme';
 import { usePathname } from 'next/navigation';
 import { useRollappStore } from '@/stores/rollappStore';
 import { RollappActionTypes } from '@/consts/actionTypes';
+import SearchModal from '../../search/SearchModal';
 
 type LayoutProps = Readonly<{
   children: React.ReactNode;
@@ -15,6 +16,7 @@ type LayoutProps = Readonly<{
 
 export default function Layout({ children }: LayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isSearchOpen, setSearchOpen] = useState(false);
   const isClosing = useRef(false);
   const pathname = usePathname();
   const [, dispatch] = useRollappStore(false);
@@ -40,12 +42,19 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <Box display="flex">
-      <Header handleMenuToggle={handleMenuToggle} />
+      <Header
+        handleMenuToggle={handleMenuToggle}
+        openSearch={() => setSearchOpen(true)}
+      />
       <Sider
         width={SIDER_WIDTH}
         menuOpen={menuOpen}
         handleMenuClose={handleMenuClose}
         handleDrawerTransitionEnd={handleDrawerTransitionEnd}
+      />
+      <SearchModal
+        open={isSearchOpen}
+        handleClose={() => setSearchOpen(false)}
       />
       {children}
     </Box>

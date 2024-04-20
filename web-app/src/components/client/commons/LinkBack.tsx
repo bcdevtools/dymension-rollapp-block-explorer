@@ -8,10 +8,7 @@ export default function LinkBack({
 }: Readonly<{ title?: string }>): JSX.Element {
   const router = useRouter();
   return (
-    <Link
-      component="button"
-      underline="hover"
-      onClick={() => void router.back()}>
+    <Link component="button" underline="hover" onClick={() => router.back()}>
       {title}
     </Link>
   );

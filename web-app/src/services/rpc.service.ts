@@ -1,4 +1,5 @@
 import {
+  AccountBalances,
   Block,
   ChainInfo,
   LatestBlockNumber,
@@ -6,21 +7,31 @@ import {
   Transaction,
 } from '@/consts/rpcResTypes';
 import {
-  FetchOptions,
+  CallRpcOptions,
   RpcClient,
+  getAccountBalancesParam,
   getBlockByNumberParam,
   getChainInfoParam,
   getLatestBlockNumber,
   getTransactionByHashParam,
 } from '@/utils/rpc';
 
-function getResponseResult<T>(response: RpcResponse<T>): T;
-function getResponseResult<T>(response: RpcResponse<any>[]): any[];
-function getResponseResult<T>(response: RpcResponse<T> | RpcResponse<any>[]) {
+export function getResponseResult<T>(
+  rpcPromise: Promise<RpcResponse<T>>
+): Promise<T>;
+export function getResponseResult<T>(
+  rpcPromise: Promise<RpcResponse<any>[]>
+): Promise<any[]>;
+export async function getResponseResult<T>(
+  rpcPromise: Promise<RpcResponse<T> | RpcResponse<any>[]>
+) {
+  const response = await rpcPromise;
   return Array.isArray(response)
     ? response.map(res => res.result)
     : response.result;
 }
+
+type RpcResult<T> = [Promise<RpcResponse<T>>, AbortController];
 
 export class RpcService {
   private _rpcClient: RpcClient;
@@ -29,54 +40,57 @@ export class RpcService {
     this._rpcClient = new RpcClient(rpcUrl);
   }
 
-  async getChainInfo(fetchOptions?: FetchOptions): Promise<ChainInfo> {
-    const response: RpcResponse<ChainInfo> = await this._rpcClient.callRpc(
-      getChainInfoParam(),
-      fetchOptions
-    );
-    return getResponseResult(response);
+  getChainInfo(callRpcOptions?: CallRpcOptions): RpcResult<ChainInfo> {
+    return this._rpcClient.callRpc(getChainInfoParam(), callRpcOptions);
   }
 
-  async getLatestBlockNumber(
-    fetchOptions?: FetchOptions
-  ): Promise<LatestBlockNumber> {
-    const response: RpcResponse<LatestBlockNumber> =
-      await this._rpcClient.callRpc(getLatestBlockNumber(), fetchOptions);
-    return getResponseResult(response);
+  getLatestBlockNumber(
+    callRpcOptions?: CallRpcOptions
+  ): RpcResult<LatestBlockNumber> {
+    return this._rpcClient.callRpc(getLatestBlockNumber(), callRpcOptions);
   }
 
   getBlockByNumber(
     blockNumber: number,
-    fetchOptions?: FetchOptions
-  ): Promise<Block>;
+    callRpcOptions?: CallRpcOptions
+  ): RpcResult<Block>;
   getBlockByNumber(
     blockNumber: number[],
-    fetchOptions?: FetchOptions
-  ): Promise<Block[]>;
-  async getBlockByNumber(
+    callRpcOptions?: CallRpcOptions
+  ): RpcResult<Block[]>;
+  getBlockByNumber(
     blockNumbers: number | number[],
-    fetchOptions?: FetchOptions
+    callRpcOptions?: CallRpcOptions
   ) {
-    if (Array.isArray(blockNumbers)) {
-      const response: RpcResponse<Block>[] = await this._rpcClient.callRpc(
+    if (Array.isArray(blockNumbers))
+      return this._rpcClient.callRpc(
         blockNumbers.map(blockNo => getBlockByNumberParam(blockNo)),
-        fetchOptions
+        callRpcOptions
       );
-      return getResponseResult(response);
-    } else {
-      const response: RpcResponse<Block> = await this._rpcClient.callRpc(
+    else
+      return this._rpcClient.callRpc(
         getBlockByNumberParam(blockNumbers),
-        fetchOptions
+        callRpcOptions
       );
-      return getResponseResult(response);
-    }
   }
 
-  async getTransactionByHash(txHash: string, fetchOptions?: FetchOptions) {
-    const response: RpcResponse<Transaction> = await this._rpcClient.callRpc(
+  getTransactionByHash(
+    txHash: string,
+    callRpcOptions?: CallRpcOptions
+  ): RpcResult<Transaction> {
+    return this._rpcClient.callRpc(
       getTransactionByHashParam(txHash),
+      callRpcOptions
+    );
+  }
+
+  getAccountBalances(
+    address: string,
+    fetchOptions?: CallRpcOptions
+  ): RpcResult<AccountBalances> {
+    return this._rpcClient.callRpc(
+      getAccountBalancesParam(address),
       fetchOptions
     );
-    return getResponseResult(response);
   }
 }

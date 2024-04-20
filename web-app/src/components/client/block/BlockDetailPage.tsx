@@ -31,7 +31,6 @@ export default function BlockDetailPage() {
   const [blockDetail, loading] = useBlockDetail(blockNo);
   const pathname = usePathname();
   const router = useRouter();
-
   if (!blockDetail && !loading)
     return void router.push(getNewPathByRollapp(pathname, Path.NOT_FOUND));
 
@@ -46,7 +45,7 @@ export default function BlockDetailPage() {
       />
       <DetailItem
         label="Transactions"
-        value={`${txsDisplay} in this block`}
+        value={<>{txsDisplay} in this block</>}
         loading={loading}
       />
     </Grid>

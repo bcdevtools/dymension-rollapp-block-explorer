@@ -8,14 +8,14 @@ export default function Logo() {
         variant="h6"
         noWrap
         component="div"
-        sx={{ flexGrow: 1, display: { xs: 'none', sm: 'flex' } }}>
+        sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
         {APP_NAME}
       </Typography>
       <Typography
         variant="h5"
         noWrap
         component="div"
-        sx={{ display: { xs: 'flex', sm: 'none' } }}>
+        sx={{ display: { xs: 'flex', md: 'none' } }}>
         {APP_NAME}
       </Typography>
     </>

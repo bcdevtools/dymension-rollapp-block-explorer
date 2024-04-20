@@ -2,7 +2,7 @@ import { QueryPaginationOption } from '@/utils/db';
 import prisma from '../../utils/prisma';
 import { Prisma } from '@prisma/client';
 
-function getTransactionsWhereCondition(
+function getTransactionsByHeightWhereCondition(
   chain_id: string,
   height: number | null
 ) {
@@ -18,7 +18,7 @@ export const getTransactionsByHeight = async function (
   height: number | null,
   paginationOptions: QueryPaginationOption = {}
 ) {
-  const where = getTransactionsWhereCondition(chain_id, height);
+  const where = getTransactionsByHeightWhereCondition(chain_id, height);
 
   return prisma.transaction.findMany({
     where,
@@ -31,6 +31,15 @@ export const countTransactionsByHeight = async function (
   chain_id: string,
   height: number | null
 ) {
-  const where = getTransactionsWhereCondition(chain_id, height);
+  const where = getTransactionsByHeightWhereCondition(chain_id, height);
   return prisma.transaction.count({ where });
+};
+
+export const getChainIdAndTxHashByTxHashes = async function (
+  txHashes: string[]
+) {
+  return prisma.transaction.findMany({
+    select: { chain_id: true, hash: true },
+    where: { hash: { in: txHashes } },
+  });
 };

@@ -7,6 +7,9 @@ export const APP_NAME =
 const defaultPaginationSize = Number(
   process.env.NEXT_PUBLIC_DEFAULT_PAGINATION_SIZE
 );
+
+export const ADDRESS_SUMMARY_COINS_PAGE_SIZE: number = 10;
+
 export const DEFAULT_PAGINATION_SIZE: number = !isNaN(defaultPaginationSize)
   ? defaultPaginationSize
   : 25;
@@ -19,7 +22,8 @@ export const MAX_PAGINATION_SIZE: number = !isNaN(maxPaginationSize)
 export const PAGE_SIZE_PARAM_NAME = 'ps';
 export const PAGE_PARAM_NAME = 'p';
 
-export const SEARCH_PLACEHOLDER = 'Address, Block, Transaction hash, etc.';
+export const SEARCH_PLACEHOLDER =
+  'Rollapp, Address, Block, Transaction hash, etc.';
 
 export const enum ChainType {
   EVM = 'evm',

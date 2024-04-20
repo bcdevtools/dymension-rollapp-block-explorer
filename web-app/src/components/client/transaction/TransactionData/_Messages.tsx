@@ -20,10 +20,10 @@ function MessageItem({
 }: Readonly<{ label: string; value: React.ReactNode | string }>) {
   return (
     <Grid container item>
-      <Grid xs={12} lg={3}>
+      <Grid item xs={12} lg={3}>
         <Typography color="grey">{label}</Typography>
       </Grid>
-      <Grid xs={12} lg={9}>
+      <Grid item xs={12} lg={9}>
         {typeof value === 'string' ? <Typography>{value}</Typography> : value}
       </Grid>
     </Grid>
@@ -50,8 +50,9 @@ export default function Messages({
             label="Content"
             value={
               <Typography sx={{ fontStyle: 'italic' }}>
-                {translateCts(msg.content.ctm, address => (
+                {translateCts(msg.content.ctm, (address, idx) => (
                   <Link
+                    key={idx}
                     href={getNewPathByRollapp(
                       pathname,
                       `${Path.ADDRESS}/${address}`

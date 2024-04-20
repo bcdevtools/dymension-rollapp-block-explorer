@@ -1,26 +1,25 @@
-import { Block } from '@/consts/rpcResTypes';
+import { AccountBalances } from '@/consts/rpcResTypes';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
 
-export default function useBlockDetail(
-  blockNo: number
-): [Block | null, boolean] {
+export default function useAccountBalances(
+  address: string
+): [AccountBalances | null, boolean] {
   const [loading, setLoading] = useState(true);
-  const [block, setBlock] = useState<Block | null>(null);
+  const [balances, setBalances] = useState<AccountBalances | null>(null);
   const [{ rpcService }] = useRollappStore();
 
   useEffect(() => {
     let ac: AbortController | null;
-    if (rpcService && blockNo) {
+    if (rpcService && address) {
       (async function () {
         try {
           setLoading(true);
-
-          const result = rpcService.getBlockByNumber(blockNo);
+          const result = rpcService.getAccountBalances(address);
           ac = result[1];
-          const _block = await getResponseResult(result[0]);
-          setBlock(_block);
+          const accountBalances = await getResponseResult(result[0]);
+          setBalances(accountBalances);
           setLoading(false);
         } catch (e) {
           console.log(e);
@@ -28,11 +27,11 @@ export default function useBlockDetail(
           ac = null;
         }
       })();
-    } else setBlock(null);
+    } else setBalances(null);
     return () => {
-      if (ac) ac.abort('useBlockDetail cleanup');
+      if (ac) ac.abort();
     };
-  }, [blockNo, rpcService]);
+  }, [address, rpcService]);
 
-  return [block, loading];
+  return [balances, loading];
 }

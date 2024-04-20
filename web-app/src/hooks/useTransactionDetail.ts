@@ -1,4 +1,5 @@
 import { Transaction } from '@/consts/rpcResTypes';
+import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
 
@@ -10,24 +11,27 @@ export default function useTransactionDetail(
   const [{ rpcService }] = useRollappStore();
 
   useEffect(() => {
-    const ac = new AbortController();
-    let ignore = false;
+    let ac: AbortController | null;
     if (rpcService && txHash) {
       (async function () {
         try {
           setLoading(true);
-          const _transaction = await rpcService.getTransactionByHash(txHash);
+          const result = rpcService.getTransactionByHash(txHash);
+          ac = result[1];
+
+          const _transaction = await getResponseResult(result[0]);
+
           setTransaction(_transaction);
+          setLoading(false);
         } catch (e) {
           console.log(e);
         } finally {
-          if (!ignore) setLoading(false);
+          ac = null;
         }
       })();
     } else setTransaction(null);
     return () => {
-      ac.abort();
-      ignore = true;
+      if (ac) ac.abort('useTransactionDetail cleanup');
     };
   }, [txHash, rpcService]);
 

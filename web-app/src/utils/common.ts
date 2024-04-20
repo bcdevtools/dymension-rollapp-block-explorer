@@ -67,10 +67,6 @@ export function getOffsetFromPageAndPageSize(page: number, pageSize: number) {
   return page * pageSize;
 }
 
-export function formatNumberString(value: number) {
-  return value.toLocaleString();
-}
-
 export function handleSearch(
   rollappInfo: RollappInfo,
   searchText: string,

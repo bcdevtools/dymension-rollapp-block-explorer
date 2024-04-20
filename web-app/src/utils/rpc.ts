@@ -6,9 +6,12 @@ type RpcCallParam = {
 
 type RpcCallParamFull = RpcCallParam & { id: number };
 
-export type FetchOptions = {
-  cache?: RequestCache;
+type FetchOptions = {
   signal?: AbortSignal;
+} & CallRpcOptions;
+
+export type CallRpcOptions = {
+  cache?: RequestCache;
 };
 
 export class RpcClient {
@@ -29,14 +32,27 @@ export class RpcClient {
     return res.json();
   }
 
-  callRpc(param: RpcCallParam, fetchOptions?: FetchOptions): Promise<any>;
-  callRpc(params: RpcCallParam[], fetchOptions?: FetchOptions): Promise<any[]>;
-  callRpc(params: RpcCallParam | RpcCallParam[], fetchOptions?: FetchOptions) {
+  callRpc(
+    param: RpcCallParam,
+    callRpcOptions?: CallRpcOptions
+  ): [Promise<any>, AbortController];
+  callRpc(
+    params: RpcCallParam[],
+    callRpcOptions?: CallRpcOptions
+  ): [Promise<any[]>, AbortController];
+  callRpc(
+    params: RpcCallParam | RpcCallParam[],
+    callRpcOptions?: CallRpcOptions
+  ) {
+    const ac = new AbortController();
     const paramFulls = !Array.isArray(params)
       ? { ...params, id: 1 }
       : params.map((param, i) => ({ ...param, id: i + 1 }));
 
-    return this._callRpc(fetchOptions, paramFulls);
+    return [
+      this._callRpc({ ...callRpcOptions, signal: ac.signal }, paramFulls),
+      ac,
+    ];
   }
 }
 
@@ -68,6 +84,14 @@ export function getTransactionByHashParam(txHash: string): RpcCallParam {
   return {
     method: 'be_getTransactionByHash',
     params: [txHash],
+    jsonrpc: '2.0',
+  };
+}
+
+export function getAccountBalancesParam(address: string): RpcCallParam {
+  return {
+    method: 'be_getAccountBalances',
+    params: [address],
     jsonrpc: '2.0',
   };
 }
