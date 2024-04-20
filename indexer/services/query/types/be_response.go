@@ -93,6 +93,7 @@ type TransactionInBlockInResponseBeTransactionsInBlockRange struct {
 	TransactionType string                                                            `json:"type"`
 	EvmTxInfo       *InfoInTransactionInBlockInResponseBeTransactionsInBlockRange     `json:"evmTx,omitempty"`
 	WasmTxInfo      *InfoInTransactionInBlockInResponseBeTransactionsInBlockRange     `json:"wasmTx,omitempty"`
+	Value           string                                                            `json:"value,omitempty"`
 }
 
 type InvolversInTransactionInBlockInResponseBeTransactionsInBlockRange struct {
