@@ -1,6 +1,6 @@
 'use client';
 
-import { styled, alpha } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import ThemeToggleButton from './_ThemeToggleButton';
 import Logo from './_Logo';
@@ -37,7 +37,6 @@ const StyledToolbar = styled(CustomToolbar)(({ theme }) => ({
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   position: 'relative',
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
   width: '100%',
   [theme.breakpoints.up('md')]: {
     marginLeft: theme.spacing(1),
