@@ -78,3 +78,7 @@ export interface Transaction {
     success: boolean;
   };
 }
+
+export interface AccountBalances {
+  [denom: string]: string;
+}

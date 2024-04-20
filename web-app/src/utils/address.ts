@@ -1,10 +1,12 @@
 import {
   COSMOS_ADDRESS_REGEX,
   EVM_ADDRESS_REGEX,
+  IBC_COIN_PREFIX,
   TX_HASH_ADDRESS_REGEX,
 } from '@/consts/address';
 import { bech32 } from 'bech32';
 import { getAddress } from '@ethersproject/address';
+import { AccountBalances } from '@/consts/rpcResTypes';
 
 export function isEvmAddress(value: string) {
   return EVM_ADDRESS_REGEX.test(value);
@@ -100,4 +102,13 @@ export function getDefaultBech32Config(
     bech32PrefixConsPub:
       mainPrefix + validatorPrefix + consensusPrefix + publicPrefix,
   };
+}
+
+export function toSortedDenoms(accountBalances: AccountBalances) {
+  return Object.keys(accountBalances).sort((a, b) => {
+    const isIbcA = a.startsWith(IBC_COIN_PREFIX);
+    const isIbcB = b.startsWith(IBC_COIN_PREFIX);
+    if ((isIbcA && isIbcB) || (!isIbcA && !isIbcB)) return a.localeCompare(b);
+    return isIbcA ? 1 : -1;
+  });
 }
