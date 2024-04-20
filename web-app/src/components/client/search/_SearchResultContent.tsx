@@ -10,6 +10,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useRouter } from 'next/navigation';
 import { Path } from '@/consts/path';
+import SearchResultDisplayContext from '@/contexts/SearchResultDisplayContext';
 
 function SearchResultItem({
   rollappName,
@@ -23,43 +24,47 @@ function SearchResultItem({
   handleClick: () => void;
 }>) {
   return (
-    <Grid item xs={12}>
-      <Card variant="outlined">
-        <CardActionArea onClick={handleClick}>
-          <CardHeader
-            title={
-              <>
-                <Typography component="span">
-                  <strong>{rollappName}</strong>
-                </Typography>{' '}
-                {value && (
+    <SearchResultDisplayContext.Consumer>
+      {({ displayColumns }) => (
+        <Grid item xs={12} md={12 / displayColumns}>
+          <Card variant="outlined">
+            <CardActionArea onClick={handleClick}>
+              <CardHeader
+                title={
+                  <>
+                    <Typography component="span">
+                      <strong>{rollappName}</strong>
+                    </Typography>{' '}
+                    {value && (
+                      <Typography
+                        width="100%"
+                        component="span"
+                        color="grey"
+                        variant="subtitle2">
+                        {chainId}
+                      </Typography>
+                    )}
+                  </>
+                }
+                subheader={
                   <Typography
-                    width="100%"
-                    component="span"
-                    color="grey"
-                    variant="subtitle2">
-                    {chainId}
+                    variant="subtitle1"
+                    color="text.secondary"
+                    sx={{ wordBreak: 'break-word' }}>
+                    {value || chainId}
                   </Typography>
-                )}
-              </>
-            }
-            subheader={
-              <Typography
-                variant="subtitle1"
-                color="text.secondary"
-                sx={{ wordBreak: 'break-word' }}>
-                {value || chainId}
-              </Typography>
-            }
-            avatar={
-              <Avatar aria-label="recipe">
-                {rollappName[0].toUpperCase()}{' '}
-              </Avatar>
-            }
-          />
-        </CardActionArea>
-      </Card>
-    </Grid>
+                }
+                avatar={
+                  <Avatar aria-label="recipe">
+                    {rollappName[0].toUpperCase()}{' '}
+                  </Avatar>
+                }
+              />
+            </CardActionArea>
+          </Card>
+        </Grid>
+      )}
+    </SearchResultDisplayContext.Consumer>
   );
 }
 
@@ -79,11 +84,9 @@ function SearchResultSection({
 
 export default function SearchResultContent({
   searchResult,
-  searchText,
   handleClickSearchItem,
 }: Readonly<{
   searchResult: SearchResult;
-  searchText: string;
   handleClickSearchItem: () => void;
 }>) {
   const router = useRouter();
@@ -129,7 +132,7 @@ export default function SearchResultContent({
                 chainId={rollapp.chain_id}
                 value={`#${blocks.block}`}
                 handleClick={() => {
-                  router.push(`${rollapp.path}${Path.BLOCKS}/${searchText}`);
+                  router.push(`${rollapp.path}${Path.BLOCKS}/${blocks.block}`);
                   handleClickSearchItem();
                 }}
               />

@@ -33,7 +33,7 @@ export default function TransactionDetailPage() {
   const [transactionDetail, loading] = useTransactionDetail(params.txHash);
 
   if (!transactionDetail && !loading) {
-    return router.push(getNewPathByRollapp(pathname, Path.NOT_FOUND));
+    return void router.push(getNewPathByRollapp(pathname, Path.NOT_FOUND));
   }
 
   const used: number = get(transactionDetail, 'result.gas.used', 0);

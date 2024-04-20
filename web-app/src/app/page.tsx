@@ -9,14 +9,15 @@ export default async function Home() {
     <Box
       display="flex"
       alignItems="center"
-      justifyContent="space-between"
       flexDirection="column"
       marginTop={5}
-      minHeight={320}
-      height="40vh"
       width="100vw">
-      <Typography variant="h4" display="flex" alignItems="center">
-        <Box display="flex" marginRight={2}>
+      <Typography
+        variant="h4"
+        display="flex"
+        alignItems="center"
+        sx={{ mb: 10 }}>
+        <Box display="flex" marginRight={1}>
           <Image src="/logo.svg" alt="logo" width={45} height={45} />
         </Box>
         {APP_NAME}

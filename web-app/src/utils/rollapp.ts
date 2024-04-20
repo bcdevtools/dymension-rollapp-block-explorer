@@ -9,14 +9,16 @@ export interface RollappInfoMap {
 }
 
 export function normalizeRollappsInfo(chainInfos: chain_info[]): RollappInfo[] {
-  return chainInfos.map(chainInfo => ({
-    ...chainInfo,
-    path: `/${chainInfo.name
-      .toLowerCase()
-      .replace(/[^a-z0-9-\s]/g, '')
-      .trim()
-      .replace(/\s/g, '-')}`,
-  }));
+  return chainInfos
+    .map(chainInfo => ({
+      ...chainInfo,
+      path: `/${chainInfo.name
+        .toLowerCase()
+        .replace(/[^a-z0-9-\s]/g, '')
+        .trim()
+        .replace(/\s/g, '-')}`,
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function getRollappInfoByPath(

@@ -8,7 +8,7 @@ import { SIDER_WIDTH } from '@/consts/theme';
 import { usePathname } from 'next/navigation';
 import { useRollappStore } from '@/stores/rollappStore';
 import { RollappActionTypes } from '@/consts/actionTypes';
-import Search from '../../search/Search';
+import SearchModal from '../../search/SearchModal';
 
 type LayoutProps = Readonly<{
   children: React.ReactNode;
@@ -52,7 +52,10 @@ export default function Layout({ children }: LayoutProps) {
         handleMenuClose={handleMenuClose}
         handleDrawerTransitionEnd={handleDrawerTransitionEnd}
       />
-      <Search open={isSearchOpen} handleClose={() => setSearchOpen(false)} />
+      <SearchModal
+        open={isSearchOpen}
+        handleClose={() => setSearchOpen(false)}
+      />
       {children}
     </Box>
   );

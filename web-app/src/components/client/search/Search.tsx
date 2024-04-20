@@ -1,13 +1,11 @@
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
+'use client';
+
 import TextField from '@mui/material/TextField';
-import Modal from '@mui/material/Modal';
 import InputAdornment from '@mui/material/InputAdornment';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import { SEARCH_PLACEHOLDER } from '@/consts/setting';
 import IconButton from '@mui/material/IconButton';
-import { styled } from '@mui/material/styles';
 import { useCallback, useEffect, useState } from 'react';
 import { SearchResult, handleGlobalSearch } from '@/services/search.service';
 import { useRollappStore } from '@/stores/rollappStore';
@@ -15,111 +13,99 @@ import { useMountedState } from '@/hooks/useMountedState';
 import Box from '@mui/material/Box';
 import SearchResultContent from './_SearchResultContent';
 import CircularProgress from '@mui/material/CircularProgress';
+import SearchResultDisplayContext, {
+  Columns,
+} from '@/contexts/SearchResultDisplayContext';
 
 type SearchProps = Readonly<{
-  open: boolean;
-  handleClose: () => void;
+  onClear?: () => void;
+  columns?: Columns;
 }>;
 
-const StyledCard = styled(Card)(({ theme }) => ({
-  width: '100vw',
-  height: '100vh',
-  maxHeight: '100vh',
-  [theme.breakpoints.up('sm')]: {
-    width: 600,
-    height: 650,
-  },
-}));
-
-export default function Search({ open, handleClose }: SearchProps) {
+export default function Search({
+  onClear = () => {},
+  columns = 1,
+}: SearchProps) {
   const [searchValue, setSearchValue] = useState<string>('');
   const [{ rollappInfos, selectedRollappInfo }] = useRollappStore();
   const [loading, setLoading] = useState(false);
-  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
+  const [searchResult, setSearchResult] = useState<SearchResult>({
+    rollapps: rollappInfos,
+  });
   const mounted = useMountedState();
 
-  const reset = () => {
-    setSearchValue('');
-    setLoading(false);
+  const handleClear = () => {
+    if (mounted.current) setSearchValue('');
+    onClear();
   };
 
   const handleSearch = useCallback(
     async (_searchValue: string) => {
-      try {
-        setLoading(true);
-        const result = await handleGlobalSearch(
-          _searchValue,
-          rollappInfos,
-          selectedRollappInfo
-        );
-        if (mounted.current) {
-          setSearchResult(result);
-        }
-      } finally {
-        if (mounted.current) setLoading(false);
+      setLoading(true);
+      const result = await handleGlobalSearch(
+        _searchValue,
+        rollappInfos,
+        selectedRollappInfo
+      );
+      if (mounted.current) {
+        setSearchResult(result);
+        setLoading(false);
       }
     },
     [rollappInfos, selectedRollappInfo, mounted]
   );
 
   useEffect(() => {
+    if (!searchValue && !selectedRollappInfo) {
+      setSearchResult({ rollapps: rollappInfos });
+      return;
+    }
     const timeout = setTimeout(() => {
       if (mounted.current) handleSearch(searchValue);
     }, 500);
     return () => clearTimeout(timeout);
-  }, [searchValue, handleSearch, mounted]);
+  }, [searchValue, handleSearch, mounted, selectedRollappInfo, rollappInfos]);
 
   return (
-    <Modal
-      open={open}
-      onClose={() => {
-        reset();
-        handleClose();
-      }}
-      sx={{ justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
-      <StyledCard>
-        <CardContent sx={{ p: 0, height: '100%' }}>
-          <TextField
-            value={searchValue}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setSearchValue(e.target.value)
-            }
-            fullWidth
-            placeholder={SEARCH_PLACEHOLDER}
-            inputRef={e => e && setTimeout(() => e.focus(), 0)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={handleClose}>
-                    <CloseIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          {loading || !searchResult ? (
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              height="100%"
-              p={2}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <SearchResultContent
-              searchResult={searchResult}
-              searchText={searchValue}
-              handleClickSearchItem={handleClose}
-            />
-          )}
-        </CardContent>
-      </StyledCard>
-    </Modal>
+    <SearchResultDisplayContext.Provider value={{ displayColumns: columns }}>
+      <TextField
+        value={searchValue}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          setSearchValue(e.target.value)
+        }
+        fullWidth
+        placeholder={SEARCH_PLACEHOLDER}
+        inputRef={e => e && setTimeout(() => e.focus(), 0)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          ),
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton onClick={handleClear}>
+                <CloseIcon />
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
+      />
+      {loading || !searchResult ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="100%"
+          p={2}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <SearchResultContent
+          searchResult={searchResult}
+          handleClickSearchItem={handleClear}
+        />
+      )}
+    </SearchResultDisplayContext.Provider>
   );
 }
