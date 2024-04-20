@@ -11,4 +11,5 @@ type RecentAccountTransactionRecord struct {
 	Epoch        int64
 	MessageTypes []string
 	Action       sql.NullString
+	Value        []string
 }
