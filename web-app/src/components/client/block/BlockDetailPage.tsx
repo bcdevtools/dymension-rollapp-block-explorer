@@ -45,7 +45,7 @@ export default function BlockDetailPage() {
       />
       <DetailItem
         label="Transactions"
-        value={`${txsDisplay} in this block`}
+        value={<>{txsDisplay} in this block</>}
         loading={loading}
       />
     </Grid>

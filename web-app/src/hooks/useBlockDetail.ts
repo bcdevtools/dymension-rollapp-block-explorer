@@ -1,7 +1,7 @@
 import { Block } from '@/consts/rpcResTypes';
+import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
-import { useMountedState } from './useMountedState';
 
 export default function useBlockDetail(
   blockNo: number
@@ -11,23 +11,26 @@ export default function useBlockDetail(
   const [{ rpcService }] = useRollappStore();
 
   useEffect(() => {
-    const ac = new AbortController();
+    let ac: AbortController | null;
     if (rpcService && blockNo) {
       (async function () {
         try {
           setLoading(true);
-          const _block = await rpcService.getBlockByNumber(blockNo, {
-            signal: ac.signal,
-          });
+
+          const result = rpcService.getBlockByNumber(blockNo);
+          ac = result[1];
+          const _block = await getResponseResult(result[0]);
           setBlock(_block);
           setLoading(false);
         } catch (e) {
           console.log(e);
+        } finally {
+          ac = null;
         }
       })();
     } else setBlock(null);
     return () => {
-      ac.abort();
+      if (ac) ac.abort('useBlockDetail cleanup');
     };
   }, [blockNo, rpcService]);
 

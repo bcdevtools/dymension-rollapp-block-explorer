@@ -20,10 +20,10 @@ function MessageItem({
 }: Readonly<{ label: string; value: React.ReactNode | string }>) {
   return (
     <Grid container item>
-      <Grid xs={12} lg={3}>
+      <Grid item xs={12} lg={3}>
         <Typography color="grey">{label}</Typography>
       </Grid>
-      <Grid xs={12} lg={9}>
+      <Grid item xs={12} lg={9}>
         {typeof value === 'string' ? <Typography>{value}</Typography> : value}
       </Grid>
     </Grid>

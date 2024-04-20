@@ -1,7 +1,7 @@
 import { Block } from '@/consts/rpcResTypes';
+import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
-import { useMountedState } from './useMountedState';
 
 export function useBlockList(
   latestBlockNo: number,
@@ -12,27 +12,31 @@ export function useBlockList(
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [{ rpcService }] = useRollappStore();
   useEffect(() => {
-    const ac = new AbortController();
+    let ac: AbortController | null;
     if (rpcService && latestBlockNo) {
       (async function () {
         try {
           setLoading(true);
           const topBlockNoInPage = latestBlockNo - page * pageSize;
-          const _blocks = await rpcService.getBlockByNumber(
+
+          const result = rpcService.getBlockByNumber(
             Array.from(Array(Math.min(topBlockNoInPage, pageSize))).map(
               (i, idx) => topBlockNoInPage - idx
-            ),
-            { signal: ac.signal }
+            )
           );
+          ac = result[1];
+          const _blocks = await getResponseResult(result[0]);
           setBlocks(_blocks);
           setLoading(false);
         } catch (e) {
           console.log(e);
+        } finally {
+          ac = null;
         }
       })();
     } else setBlocks([]);
     return () => {
-      ac.abort();
+      if (ac) ac.abort('useBlockList cleanup');
     };
   }, [latestBlockNo, rpcService, page, pageSize]);
 

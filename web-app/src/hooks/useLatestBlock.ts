@@ -1,6 +1,6 @@
 import { useRollappStore } from '@/stores/rollappStore';
-import { useCallback, useEffect, useState } from 'react';
-import { useMountedState } from './useMountedState';
+import { useEffect, useState } from 'react';
+import { getResponseResult } from '@/services/rpc.service';
 
 export function useLatestBlock(
   autoRefresh: boolean = false
@@ -9,40 +9,38 @@ export function useLatestBlock(
   const [loading, setLoading] = useState(true);
   const [{ rpcService }] = useRollappStore(true);
 
-  const fetchBlocks = useCallback(
-    async (ac: AbortController) => {
+  useEffect(() => {
+    let ac: AbortController | null;
+
+    async function fetchLatestBlock() {
       if (!rpcService) {
         setLatestBlockNo(0);
-        return;
+        return null;
       }
-
+      const result = rpcService.getLatestBlockNumber();
       try {
-        const chainInfo = await rpcService.getLatestBlockNumber({
-          signal: ac.signal,
-        });
-        setLatestBlockNo(chainInfo.latestBlock);
+        ac = result[1];
+        const latestBlockResult = await getResponseResult(result[0]);
+        setLatestBlockNo(latestBlockResult.latestBlock);
         setLoading(false);
       } catch (e) {
         console.log(e);
+      } finally {
+        ac = null;
       }
-    },
-    [rpcService]
-  );
 
-  useEffect(() => {
-    const ac = new AbortController();
+      return result[1];
+    }
 
     let intervalId: NodeJS.Timeout | null = null;
-    if (autoRefresh) intervalId = setInterval(() => fetchBlocks(ac), 1000);
-    else fetchBlocks(ac);
+    if (autoRefresh) intervalId = setInterval(() => fetchLatestBlock(), 1000);
+    else fetchLatestBlock();
 
     return () => {
-      ac.abort();
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      if (ac) ac.abort('useLatestBlock cleanup');
+      if (intervalId) clearInterval(intervalId);
     };
-  }, [fetchBlocks, autoRefresh]);
+  }, [autoRefresh, rpcService]);
 
   return [latestBlockNo, loading];
 }
