@@ -31,9 +31,8 @@ export default function BlockDetailPage() {
   const [blockDetail, loading] = useBlockDetail(blockNo);
   const pathname = usePathname();
   const router = useRouter();
-
   if (!blockDetail && !loading)
-    return void router.push(getNewPathByRollapp(pathname, Path.NOT_FOUND));
+    return router.push(getNewPathByRollapp(pathname, Path.NOT_FOUND));
 
   const txsDisplay = getTxsDisplay(blockDetail, pathname);
   return (

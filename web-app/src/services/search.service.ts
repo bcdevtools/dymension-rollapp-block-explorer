@@ -12,7 +12,7 @@ import { getAddress } from '@ethersproject/address';
 import { JsonObject } from '@prisma/client/runtime/library';
 
 type TxSearchResult = {
-  txHash: string;
+  txHash: string; //Tx Hash can be displayed different on different rollapp
   rollappInfo: RollappInfo;
 };
 
@@ -21,25 +21,40 @@ type AccountSearchResult = {
   rollappInfos: RollappInfo[];
 };
 
+type BlockSearchResult = {
+  block: number;
+  rollappInfos: RollappInfo[];
+};
+
 export type SearchResult = Partial<{
   rollapps: RollappInfo[];
-  blocks: RollappInfo[];
+  blocks: BlockSearchResult;
   txs: TxSearchResult[];
   accounts: AccountSearchResult;
 }>;
 
-function getBlockSearchResult(searchText: string, rollappInfos: RollappInfo[]) {
-  return /^\d+$/.test(searchText)
-    ? rollappInfos.filter(i => i.latest_indexed_block >= +searchText)
+function getBlockSearchResult(
+  searchText: string,
+  allRollappInfos: RollappInfo[]
+): BlockSearchResult | null {
+  if (!/^\d+$/.test(searchText)) return null;
+  const rollappInfos = allRollappInfos.filter(
+    i => i.latest_indexed_block >= +searchText
+  );
+  return rollappInfos.length
+    ? {
+        block: +searchText,
+        rollappInfos,
+      }
     : null;
 }
 
 function getRollappSearchResult(
   searchText: string,
-  rollappInfos: RollappInfo[]
+  allRollappInfos: RollappInfo[]
 ) {
   searchText = searchText.toLowerCase();
-  const result = rollappInfos.filter(
+  const result = allRollappInfos.filter(
     i =>
       i.name.toLowerCase().includes(searchText) ||
       i.chain_id.toLowerCase().includes(searchText)
@@ -49,19 +64,19 @@ function getRollappSearchResult(
 
 function getAccountSearchResult(
   searchText: string,
-  rollappInfos: RollappInfo[]
+  allRollappInfos: RollappInfo[]
 ): AccountSearchResult | null {
   if (isEvmAddress(searchText)) {
     return {
       account: getAddress(searchText),
-      rollappInfos: rollappInfos.filter(i => i.chain_type === ChainType.EVM),
+      rollappInfos: allRollappInfos.filter(i => i.chain_type === ChainType.EVM),
     };
   } else if (isCosmosAddress(searchText)) {
     const rollappAddress = RollappAddress.fromBech32(searchText);
     return rollappAddress
       ? {
           account: searchText.toLowerCase(),
-          rollappInfos: rollappInfos.filter(
+          rollappInfos: allRollappInfos.filter(
             i =>
               ((i.bech32! as JsonObject).addr as string) ===
               rollappAddress.prefix
@@ -87,10 +102,10 @@ async function getTransactionSearchResult(
 
 export async function handleGlobalSearch(
   searchText: string,
-  rollappInfos: RollappInfo[],
+  allRollappInfos: RollappInfo[],
   selectedRollappInfo?: RollappInfo | null
 ): Promise<SearchResult> {
-  rollappInfos = rollappInfos.sort((a, b) => {
+  allRollappInfos = allRollappInfos.sort((a, b) => {
     if (a.chain_id === selectedRollappInfo?.chain_id) return -1;
     else if (b.chain_id === selectedRollappInfo?.chain_id) return 1;
     return a.name.localeCompare(b.name);
@@ -98,7 +113,7 @@ export async function handleGlobalSearch(
 
   const result: SearchResult = {};
 
-  const rollappInfoMap = rollappInfosToObject(rollappInfos);
+  const rollappInfoMap = rollappInfosToObject(allRollappInfos);
 
   searchText = searchText.trim();
 
@@ -109,10 +124,10 @@ export async function handleGlobalSearch(
       searchByAccountResult,
       searchByRollappResult,
     ] = await Promise.all([
-      getBlockSearchResult(searchText, rollappInfos),
+      getBlockSearchResult(searchText, allRollappInfos),
       getTransactionSearchResult(searchText, rollappInfoMap),
-      getAccountSearchResult(searchText, rollappInfos),
-      getRollappSearchResult(searchText, rollappInfos),
+      getAccountSearchResult(searchText, allRollappInfos),
+      getRollappSearchResult(searchText, allRollappInfos),
     ]);
 
     if (searchByBlockResult) {
@@ -128,7 +143,7 @@ export async function handleGlobalSearch(
       result.rollapps = searchByRollappResult;
     }
   } else {
-    result.rollapps = rollappInfos;
+    result.rollapps = allRollappInfos;
   }
   return result;
 }

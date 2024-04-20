@@ -29,7 +29,7 @@ export default async function Overview({ params }: RollappOverviewProps) {
     <>
       <PageTitle title={rollappInfo.name} subtitle={rollappInfo.chain_id} />
 
-      <Card sx={{ mb: 1 }}>
+      <Card sx={{ mb: 1, width: '100%' }}>
         <Box display="flex" justifyContent="space-between" mb={3}>
           <Typography variant="h6">Blocks</Typography>
           <Button
@@ -43,7 +43,7 @@ export default async function Overview({ params }: RollappOverviewProps) {
 
         <BlockOverview />
       </Card>
-      <Card>
+      <Card sx={{ width: '100%' }}>
         <Box display="flex" justifyContent="space-between" mb={3}>
           <Typography variant="h6">Transactions</Typography>
           <Button

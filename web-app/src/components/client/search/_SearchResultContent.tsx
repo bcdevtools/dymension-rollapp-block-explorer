@@ -6,7 +6,8 @@ import { SearchResult } from '@/services/search.service';
 import Grid from '@mui/material/Grid';
 import CardActionArea from '@mui/material/CardActionArea';
 import Avatar from '@mui/material/Avatar';
-import { Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import { useRouter } from 'next/navigation';
 import { Path } from '@/consts/path';
 
@@ -85,77 +86,93 @@ export default function SearchResultContent({
   searchText: string;
   handleClickSearchItem: () => void;
 }>) {
-  const { blocks, txs, accounts, rollapps } = searchResult;
   const router = useRouter();
+
+  if (!Object.keys(searchResult).length) {
+    return (
+      <Box
+        height="100%"
+        width="100%"
+        display="flex"
+        justifyContent="center"
+        alignItems="center">
+        No result found.
+      </Box>
+    );
+  }
+  const { blocks, txs, accounts, rollapps } = searchResult;
+
   return (
-    <Grid container spacing={2}>
-      {rollapps && (
-        <SearchResultSection title={`Rollapps (${rollapps.length})`}>
-          {rollapps.map(rollapp => (
-            <SearchResultItem
-              key={rollapp.chain_id}
-              rollappName={rollapp.name}
-              chainId={rollapp.chain_id}
-              handleClick={() => {
-                router.push(rollapp.path);
-                handleClickSearchItem();
-              }}
-            />
-          ))}
-        </SearchResultSection>
-      )}
-      {blocks && (
-        <SearchResultSection title={`Block (${blocks.length})`}>
-          {blocks.map(rollapp => (
-            <SearchResultItem
-              key={rollapp.chain_id}
-              rollappName={rollapp.name}
-              chainId={rollapp.chain_id}
-              value={`#${searchText}`}
-              handleClick={() => {
-                router.push(`${rollapp.path}${Path.BLOCKS}/${searchText}`);
-                handleClickSearchItem();
-              }}
-            />
-          ))}
-        </SearchResultSection>
-      )}
-      {txs && (
-        <SearchResultSection title={`Transaction (${txs.length})`}>
-          {txs.map(({ rollappInfo, txHash }) => (
-            <SearchResultItem
-              key={rollappInfo.chain_id}
-              rollappName={rollappInfo.name}
-              chainId={rollappInfo.chain_id}
-              value={txHash}
-              handleClick={() => {
-                router.push(
-                  `${rollappInfo.path}${Path.TRANSACTIONS}/${txHash}`
-                );
-                handleClickSearchItem();
-              }}
-            />
-          ))}
-        </SearchResultSection>
-      )}
-      {accounts && (
-        <SearchResultSection title={`Address`}>
-          {accounts.rollappInfos.map(rollappInfo => (
-            <SearchResultItem
-              key={rollappInfo.chain_id}
-              rollappName={rollappInfo.name}
-              chainId={rollappInfo.chain_id}
-              value={accounts.account}
-              handleClick={() => {
-                router.push(
-                  `${rollappInfo.path}${Path.ADDRESS}/${accounts.account}`
-                );
-                handleClickSearchItem();
-              }}
-            />
-          ))}
-        </SearchResultSection>
-      )}
-    </Grid>
+    <Box p={2}>
+      <Grid container spacing={2}>
+        {rollapps && (
+          <SearchResultSection title={`Rollapps (${rollapps.length})`}>
+            {rollapps.map(rollapp => (
+              <SearchResultItem
+                key={rollapp.chain_id}
+                rollappName={rollapp.name}
+                chainId={rollapp.chain_id}
+                handleClick={() => {
+                  router.push(rollapp.path);
+                  handleClickSearchItem();
+                }}
+              />
+            ))}
+          </SearchResultSection>
+        )}
+        {blocks && (
+          <SearchResultSection title={`Block (${blocks.rollappInfos.length})`}>
+            {blocks.rollappInfos.map(rollapp => (
+              <SearchResultItem
+                key={rollapp.chain_id}
+                rollappName={rollapp.name}
+                chainId={rollapp.chain_id}
+                value={`#${blocks.block}`}
+                handleClick={() => {
+                  router.push(`${rollapp.path}${Path.BLOCKS}/${searchText}`);
+                  handleClickSearchItem();
+                }}
+              />
+            ))}
+          </SearchResultSection>
+        )}
+        {txs && (
+          <SearchResultSection title={`Transaction (${txs.length})`}>
+            {txs.map(({ rollappInfo, txHash }) => (
+              <SearchResultItem
+                key={rollappInfo.chain_id}
+                rollappName={rollappInfo.name}
+                chainId={rollappInfo.chain_id}
+                value={txHash}
+                handleClick={() => {
+                  router.push(
+                    `${rollappInfo.path}${Path.TRANSACTIONS}/${txHash}`
+                  );
+                  handleClickSearchItem();
+                }}
+              />
+            ))}
+          </SearchResultSection>
+        )}
+        {accounts && (
+          <SearchResultSection title={`Address`}>
+            {accounts.rollappInfos.map(rollappInfo => (
+              <SearchResultItem
+                key={rollappInfo.chain_id}
+                rollappName={rollappInfo.name}
+                chainId={rollappInfo.chain_id}
+                value={accounts.account}
+                handleClick={() => {
+                  router.push(
+                    `${rollappInfo.path}${Path.ADDRESS}/${accounts.account}`
+                  );
+                  handleClickSearchItem();
+                }}
+              />
+            ))}
+          </SearchResultSection>
+        )}
+      </Grid>
+    </Box>
   );
 }

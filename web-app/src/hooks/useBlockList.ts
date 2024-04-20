@@ -11,7 +11,6 @@ export function useBlockList(
   const [loading, setLoading] = useState(true);
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [{ rpcService }] = useRollappStore();
-  const mounted = useMountedState();
   useEffect(() => {
     const ac = new AbortController();
     if (rpcService && latestBlockNo) {
@@ -26,17 +25,16 @@ export function useBlockList(
             { signal: ac.signal }
           );
           setBlocks(_blocks);
+          setLoading(false);
         } catch (e) {
           console.log(e);
-        } finally {
-          if (mounted.current) setLoading(false);
         }
       })();
     } else setBlocks([]);
     return () => {
       ac.abort();
     };
-  }, [latestBlockNo, rpcService, page, pageSize, mounted]);
+  }, [latestBlockNo, rpcService, page, pageSize]);
 
   return [blocks, loading];
 }

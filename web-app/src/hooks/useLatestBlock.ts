@@ -8,7 +8,6 @@ export function useLatestBlock(
   const [latestBlockNo, setLatestBlockNo] = useState(0);
   const [loading, setLoading] = useState(true);
   const [{ rpcService }] = useRollappStore(true);
-  const mounted = useMountedState();
 
   const fetchBlocks = useCallback(
     async (ac: AbortController) => {
@@ -22,13 +21,12 @@ export function useLatestBlock(
           signal: ac.signal,
         });
         setLatestBlockNo(chainInfo.latestBlock);
+        setLoading(false);
       } catch (e) {
         console.log(e);
-      } finally {
-        if (mounted.current) setLoading(false);
       }
     },
-    [rpcService, mounted]
+    [rpcService]
   );
 
   useEffect(() => {

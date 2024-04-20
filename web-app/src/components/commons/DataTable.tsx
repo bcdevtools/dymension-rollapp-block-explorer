@@ -163,8 +163,8 @@ export default function DataTable({
               native: true,
             },
           }}
-          onPageChange={(e, newPage: number) => void onPageChange(newPage)}
-          onRowsPerPageChange={e => void onRowsPerPageChange(e.target.value)}
+          onPageChange={(e, newPage: number) => onPageChange(newPage)}
+          onRowsPerPageChange={e => onRowsPerPageChange(e.target.value)}
           ActionsComponent={TablePaginationActions}
         />
       )}

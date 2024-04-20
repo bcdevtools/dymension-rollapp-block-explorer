@@ -64,7 +64,7 @@ export default React.memo(function Sider({
             size="small"
             value={selectedRollappInfo!.path}
             onValueChange={e => {
-              void router.push(
+              router.push(
                 isNotFoundPath(pathname)
                   ? e.target.value
                   : pathname.replace(/^\/[^\/]*/, e.target.value!)

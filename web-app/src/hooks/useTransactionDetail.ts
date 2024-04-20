@@ -9,7 +9,6 @@ export default function useTransactionDetail(
   const [loading, setLoading] = useState(true);
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [{ rpcService }] = useRollappStore();
-  const mounted = useMountedState();
 
   useEffect(() => {
     const ac = new AbortController();
@@ -19,17 +18,16 @@ export default function useTransactionDetail(
           setLoading(true);
           const _transaction = await rpcService.getTransactionByHash(txHash);
           setTransaction(_transaction);
+          setLoading(false);
         } catch (e) {
           console.log(e);
-        } finally {
-          if (mounted.current) setLoading(false);
         }
       })();
     } else setTransaction(null);
     return () => {
       ac.abort();
     };
-  }, [txHash, rpcService, mounted]);
+  }, [txHash, rpcService]);
 
   return [transaction, loading];
 }

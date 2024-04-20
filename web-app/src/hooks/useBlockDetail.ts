@@ -9,7 +9,6 @@ export default function useBlockDetail(
   const [loading, setLoading] = useState(true);
   const [block, setBlock] = useState<Block | null>(null);
   const [{ rpcService }] = useRollappStore();
-  const mounted = useMountedState();
 
   useEffect(() => {
     const ac = new AbortController();
@@ -21,17 +20,16 @@ export default function useBlockDetail(
             signal: ac.signal,
           });
           setBlock(_block);
+          setLoading(false);
         } catch (e) {
           console.log(e);
-        } finally {
-          if (mounted.current) setLoading(false);
         }
       })();
     } else setBlock(null);
     return () => {
       ac.abort();
     };
-  }, [blockNo, rpcService, mounted]);
+  }, [blockNo, rpcService]);
 
   return [block, loading];
 }

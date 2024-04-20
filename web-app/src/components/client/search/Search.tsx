@@ -102,7 +102,7 @@ export default function Search({ open, handleClose }: SearchProps) {
               ),
             }}
           />
-          {loading && (
+          {loading || !searchResult ? (
             <Box
               display="flex"
               justifyContent="center"
@@ -111,17 +111,12 @@ export default function Search({ open, handleClose }: SearchProps) {
               p={2}>
               <CircularProgress />
             </Box>
-          )}
-          {!loading && (
-            <Box p={2}>
-              {searchResult && (
-                <SearchResultContent
-                  searchResult={searchResult}
-                  searchText={searchValue}
-                  handleClickSearchItem={handleClose}
-                />
-              )}
-            </Box>
+          ) : (
+            <SearchResultContent
+              searchResult={searchResult}
+              searchText={searchValue}
+              handleClickSearchItem={handleClose}
+            />
           )}
         </CardContent>
       </StyledCard>
