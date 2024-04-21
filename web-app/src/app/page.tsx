@@ -16,7 +16,12 @@ export default async function Home() {
         variant="h4"
         display="flex"
         alignItems="center"
-        sx={{ mb: 10 }}>
+        sx={{
+          mb: 10,
+          fontFamily: 'monospace',
+          fontWeight: 700,
+          letterSpacing: '.3rem',
+        }}>
         <Box display="flex" marginRight={1}>
           <Image src="/logo.svg" alt="logo" width={45} height={45} />
         </Box>
