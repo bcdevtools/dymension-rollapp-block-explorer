@@ -9,6 +9,7 @@ import { usePathname } from 'next/navigation';
 import { useRollappStore } from '@/stores/rollappStore';
 import { RollappActionTypes } from '@/consts/actionTypes';
 import SearchModal from '../../search/SearchModal';
+import { getRollappPathFromPathname } from '@/utils/common';
 
 type LayoutProps = Readonly<{
   children: React.ReactNode;
@@ -22,7 +23,8 @@ export default function Layout({ children }: LayoutProps) {
   const [, dispatch] = useRollappStore(false);
 
   useEffect(() => {
-    dispatch(RollappActionTypes.POPULATE_CHAIN_DATA_BY_PATHNAME, pathname);
+    const rollappPath = getRollappPathFromPathname(pathname);
+    dispatch(RollappActionTypes.POPULATE_CHAIN_DATA_BY_PATHNAME, rollappPath);
   }, [pathname, dispatch]);
 
   const handleMenuToggle = () => {

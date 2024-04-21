@@ -22,11 +22,12 @@ export const defaultRollappState: RollappState = {
 const actions = {
   [RollappActionTypes.POPULATE_CHAIN_DATA_BY_PATHNAME]: (
     currentState: RollappState,
-    pathname: string
+    rollappPath: string
   ) => {
+    if (rollappPath === currentState.selectedRollappInfo?.path) return {};
     const selectedRollappInfo = getSelectedRollappInfoByPathname(
       currentState.rollappInfos,
-      pathname
+      rollappPath
     );
     const rpcService =
       getRpcServiceFromSelectedRollappInfo(selectedRollappInfo);

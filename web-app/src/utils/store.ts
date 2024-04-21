@@ -5,9 +5,8 @@ import { RpcService } from '@/services/rpc.service';
 
 export function getSelectedRollappInfoByPathname(
   rollappInfos: RollappInfo[],
-  pathname: string
+  rollappPath: string
 ) {
-  const rollappPath = getRollappPathFromPathname(pathname);
   return (
     rollappInfos.find(rollappInfo => rollappInfo.path === rollappPath) || null
   );
@@ -25,9 +24,10 @@ export function getInitialRollappState(
   rollappInfos: RollappInfo[],
   pathname: string
 ): RollappState {
+  const rollappPath = getRollappPathFromPathname(pathname);
   const selectedRollappInfo = getSelectedRollappInfoByPathname(
     rollappInfos,
-    pathname
+    rollappPath
   );
   const rpcService = getRpcServiceFromSelectedRollappInfo(selectedRollappInfo);
   return {
