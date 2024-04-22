@@ -37,11 +37,6 @@ export const countAccountTransactions = async function (
   return prisma.ref_account_to_recent_tx.count({ where });
 };
 
-export type RefAccountToRecentTxWithRecentAccountTransaction =
-  Prisma.ref_account_to_recent_txGetPayload<{
-    include: { recent_accounts_transaction: true };
-  }>;
-
 export const getAccountTransactions = function (
   chain_id: string,
   bech32_address: string,

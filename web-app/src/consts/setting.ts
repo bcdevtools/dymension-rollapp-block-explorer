@@ -29,3 +29,5 @@ export const enum ChainType {
   EVM = 'evm',
   WASM = 'wasm',
 }
+
+export const DEFAULT_CACHE_DURATION = 10;
