@@ -1,12 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-
-// type CacheArgs = {
-//   cacheOptions?: {
-//     key: string;
-//     revalidate?: number | false;
-//     tags?: string[];
-//   };
-// };
+import { withCache } from './prismaCache';
 
 (BigInt.prototype as any).toJSON = function () {
   const int = Number.parseInt(this.toString());
@@ -33,27 +26,7 @@ const prismaClientSingleton = () => {
       console.log('Duration: ' + e.duration + 'ms');
     });
   }
-  return prisma;
-  // return prisma.$extends({
-  //   model: {
-  //     $allModels: {
-  //       async findManyAndCache<T>(
-  //         this: T,
-  //         { cacheOptions, ...args }: Prisma.Args<T, 'findMany'> & CacheArgs
-  //       ) {
-  //         const context = Prisma.getExtensionContext(this);
-  //         const { revalidate, tags } = cacheOptions;
-  //         if (!cacheOptions) (context as any).findMany(args);
-  //         const result = await unstable_cache(
-  //           () => (context as any).findMany(args),
-  //           [cacheOptions.key],
-  //           { revalidate, tags }
-  //         )();
-  //         return result;
-  //       },
-  //     },
-  //   },
-  // });
+  return prisma.$extends(withCache());
 };
 
 declare global {

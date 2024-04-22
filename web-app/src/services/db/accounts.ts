@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import prisma from '../../utils/prisma';
 import { QueryPaginationOption } from '@/utils/db';
+import { DEFAULT_CACHE_DURATION } from '@/consts/setting';
 
 export type AccountTransactionFilterOption = Partial<{
   signer: boolean;
@@ -34,7 +35,13 @@ export const countAccountTransactions = async function (
     options
   );
 
-  return prisma.ref_account_to_recent_tx.count({ where });
+  return prisma.ref_account_to_recent_tx.countWithCache({
+    where,
+    cacheStrategy: {
+      key: `countAccountTransactions-${chain_id}-${bech32_address}-${options.signer}-${options.erc20}-${options.nft}`,
+      revalidate: DEFAULT_CACHE_DURATION,
+    },
+  });
 };
 
 export const getAccountTransactions = function (
@@ -49,10 +56,14 @@ export const getAccountTransactions = function (
     options
   );
 
-  return prisma.ref_account_to_recent_tx.findMany({
+  return prisma.ref_account_to_recent_tx.findManyWithCache({
     where,
     include: { recent_accounts_transaction: true },
     orderBy: { height: 'desc' },
     ...paginationOptions,
+    cacheStrategy: {
+      key: `getAccountTransactions-${chain_id}-${bech32_address}-${options.signer}-${options.erc20}-${options.nft}-${paginationOptions.take}-${paginationOptions.skip}`,
+      revalidate: DEFAULT_CACHE_DURATION,
+    },
   });
 };
