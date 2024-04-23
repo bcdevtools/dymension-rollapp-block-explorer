@@ -5,6 +5,13 @@ export function formatNumber(value: number | Big | string) {
   return formatNumberString(value.toString());
 }
 
+export function hexToDec(hexStr: string) {
+  if (hexStr.length % 2 !== 0) {
+    hexStr = '0x0' + hexStr.substring(2);
+  }
+  return BigInt(hexStr).toString();
+}
+
 export function formatNumberString(value: string) {
   return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }

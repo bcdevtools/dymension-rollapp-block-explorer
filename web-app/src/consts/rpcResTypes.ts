@@ -112,12 +112,21 @@ export interface EvmLog {
   logIndex: string;
 }
 
+export const enum TxMode {
+  COSMOS = 0,
+  EVM_GENERAL_TRANSFER = 1,
+  EVM_CONTRACT_CALL = 2,
+  EVM_CONTRACT_DEPLOY = 3,
+}
+
 export interface Transaction {
   hash: string;
   height: number;
-  msgs: Msg[];
+  msgs?: Msg[];
   evmTx?: EvmTx;
   evmReceipt?: EvmReceipt;
+  mode: TxMode;
+  evmContractAddressToErc20ContractInfo?: Map<string, Erc20ContractInfo>;
 
   result: {
     code: number;
@@ -129,4 +138,10 @@ export interface Transaction {
 
 export interface AccountBalances {
   [denom: string]: string;
+}
+
+export interface Erc20ContractInfo {
+  name: string;
+  symbol: string;
+  decimals: number;
 }

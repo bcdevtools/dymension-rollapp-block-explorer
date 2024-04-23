@@ -6,21 +6,13 @@ import Accordion from '@mui/material/Accordion';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import { getMessageName, translateCts } from '@/utils/transaction';
-import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
 import Link from '@mui/material/Link';
-import { RowItem } from './_Common';
-
-function MessageItem({
-  label,
-  value,
-}: Readonly<{ label: string; value: React.ReactNode | string }>) {
-  return RowItem({ label, value });
-}
+import { ItemContainer, RowItem } from './_Common';
 
 export default function Messages({
   transaction,
@@ -28,7 +20,7 @@ export default function Messages({
   transaction: Transaction;
 }>) {
   const pathname = usePathname();
-  return transaction.msgs.map((msg, idx) => (
+  return transaction.msgs?.map((msg, idx) => (
     <Accordion key={msg.idx}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <b>
@@ -36,9 +28,9 @@ export default function Messages({
         </b>
       </AccordionSummary>
       <AccordionDetails>
-        <Grid container spacing={1}>
-          <MessageItem label="Type" value={msg.type} />
-          <MessageItem
+        <ItemContainer>
+          <RowItem label="Type" value={msg.type} />
+          <RowItem
             label="Content"
             value={
               <Typography sx={{ fontStyle: 'italic' }}>
@@ -57,7 +49,7 @@ export default function Messages({
               </Typography>
             }
           />
-          <MessageItem
+          <RowItem
             label="Proto Content"
             value={
               <TextField
@@ -70,7 +62,7 @@ export default function Messages({
               />
             }
           />
-        </Grid>
+        </ItemContainer>
       </AccordionDetails>
     </Accordion>
   ));

@@ -1,28 +1,31 @@
 import Grid from '@mui/material/Grid';
 import React from 'react';
 import Typography from '@mui/material/Typography';
-import { divideAmountByDecimals } from '@/utils/number';
+import { Erc20ContractInfo } from '@/consts/rpcResTypes';
+import { divideAmountByDecimals, hexToDec } from '@/utils/number';
+
+export function ItemContainer({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <Grid container spacing={1}>
+      {children}
+    </Grid>
+  );
+}
 
 export function RowItem({
-    label,
-    value,
+  label,
+  value,
 }: Readonly<{ label: string; value: React.ReactNode | string }>) {
-    return (
-        <Grid container item>
-        <Grid item xs={12} lg={3}>
-            <Typography color="grey">{label}</Typography>
-        </Grid>
-        <Grid item xs={12} lg={9}>
-            {typeof value === 'string' ? <Typography>{value}</Typography> : value}
-        </Grid>
-        </Grid>
-    );
-}
-
-export function fromHexStringToEthereumValue(hexStr: string) {
-    return divideAmountByDecimals(`${Number(hexStr)}`, 18).toString()
-}
-
-export function fromHexStringToEthereumGasPriceValue(hexStr: string) {
-    return divideAmountByDecimals(`${Number(hexStr)}`, 9).toString()
+  return (
+    <Grid container item>
+      <Grid item xs={12} lg={3}>
+        <Typography color="grey">{label}</Typography>
+      </Grid>
+      <Grid item xs={12} lg={9}>
+        {typeof value === 'string' ? <Typography>{value}</Typography> : value}
+      </Grid>
+    </Grid>
+  );
 }

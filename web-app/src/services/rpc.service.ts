@@ -2,6 +2,7 @@ import {
   AccountBalances,
   Block,
   ChainInfo,
+  Erc20ContractInfo,
   LatestBlockNumber,
   RpcResponse,
   Transaction,
@@ -12,6 +13,7 @@ import {
   getAccountBalancesParam,
   getBlockByNumberParam,
   getChainInfoParam,
+  getErc20ContractInfo,
   getLatestBlockNumber,
   getTransactionByHashParam,
 } from '@/utils/rpc';
@@ -70,6 +72,30 @@ export class RpcService {
     else
       return this._rpcClient.callRpc(
         getBlockByNumberParam(blockNumbers),
+        callRpcOptions
+      );
+  }
+
+  getErc20ContractInfo(
+    contractAddress: string,
+    callRpcOptions?: CallRpcOptions
+  ): RpcResult<Erc20ContractInfo>;
+  getErc20ContractInfo(
+    contractAddress: string[],
+    callRpcOptions?: CallRpcOptions
+  ): RpcResult<Erc20ContractInfo[]>;
+  getErc20ContractInfo(
+    contractsAddress: string | string[],
+    callRpcOptions?: CallRpcOptions
+  ) {
+    if (Array.isArray(contractsAddress))
+      return this._rpcClient.callRpc(
+        contractsAddress.map(contractAddress => getErc20ContractInfo(contractAddress)),
+        callRpcOptions
+      );
+    else
+      return this._rpcClient.callRpc(
+        getErc20ContractInfo(contractsAddress),
         callRpcOptions
       );
   }
