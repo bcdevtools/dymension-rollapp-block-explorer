@@ -10,15 +10,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 const prismaClientSingleton = () => {
   const prisma = new PrismaClient({
-    log: !isProduction
-      ? [
-          {
-            emit: 'event',
-            level: 'query',
-          },
-          'info',
-        ]
-      : [],
+    log: !isProduction ? [{ emit: 'event', level: 'query' }, 'info'] : [],
   });
   if (!isProduction) {
     prisma.$on('query', e => {

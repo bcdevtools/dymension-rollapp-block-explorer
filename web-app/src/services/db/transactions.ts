@@ -26,7 +26,7 @@ export const getTransactionsByHeight = async function (
     orderBy: [{ epoch: 'desc' }, { height: 'desc' }],
     ...paginationOptions,
     cacheStrategy: {
-      key: `getTransactionsByHeight-${chain_id}-${height}-${paginationOptions.take}-${paginationOptions.skip}`,
+      enabled: true,
       revalidate: DEFAULT_CACHE_DURATION,
     },
   });
@@ -40,7 +40,7 @@ export const countTransactionsByHeight = async function (
   return prisma.transaction.countWithCache({
     where,
     cacheStrategy: {
-      key: `countTransactionsByHeight-${chain_id}-${height}`,
+      enabled: true,
       revalidate: DEFAULT_CACHE_DURATION,
     },
   });
@@ -51,9 +51,9 @@ export const getChainIdAndTxHashByTxHashes = async function (
 ) {
   return prisma.transaction.findManyWithCache({
     select: { chain_id: true, hash: true },
-    where: { hash: { in: txHashes } },
+    where: { hash: { in: txHashes.sort() } }, // sort txHahses to make sure cache key is consistent
     cacheStrategy: {
-      key: `getChainIdAndTxHashByTxHashes-${txHashes.sort()}`,
+      enabled: true,
       revalidate: DEFAULT_CACHE_DURATION,
     },
   });
