@@ -122,7 +122,7 @@ export const enum TxMode {
 export interface Transaction {
   hash: string;
   height: number;
-  msgs: Msg[];
+  msgs?: Msg[];
   evmTx?: EvmTx;
   evmReceipt?: EvmReceipt;
   mode: TxMode;

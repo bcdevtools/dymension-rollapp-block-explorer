@@ -6,12 +6,14 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Grid from '@mui/material/Grid';
 import React from 'react';
 import Typography from '@mui/material/Typography';
-import { TextField } from '@mui/material';
-import { RowItem, translateEvmLogIfPossible } from './_Common';
+import TextField from '@mui/material/TextField';
+import { ItemContainer, RowItem } from './_Common';
 import { usePathname } from 'next/navigation';
 import { getNewPathByRollapp } from '@/utils/common';
 import { Path } from '@/consts/path';
 import Link from '@mui/material/Link';
+import { translateEvmLogIfPossible } from '@/utils/transaction';
+import { getAddress } from '@ethersproject/address';
 
 export default function EvmEventLogs({
   transaction,
@@ -20,33 +22,51 @@ export default function EvmEventLogs({
 }>) {
   const pathname = usePathname();
   return transaction.evmReceipt?.logs.map((event, idx) => {
-    const contractNameOrAddress = transaction.evmContractAddressToErc20ContractInfo?.get(event.address)?.name || event.address;
+    const contractNameOrAddress =
+      transaction.evmContractAddressToErc20ContractInfo?.get(event.address)
+        ?.name || getAddress(event.address);
     const logIndex = Number(event.logIndex);
-    return (<Accordion key={idx}>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <b>[{logIndex}] {contractNameOrAddress} emits {getShortenedTopic(event.topics[0])}</b>
-      </AccordionSummary>
-      <AccordionDetails>
-        <Grid container spacing={1}>
-          <RowItem label="Contract" value={<Link
-                href={getNewPathByRollapp(
+    return (
+      <Accordion key={idx}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <b>
+            [{logIndex}] {contractNameOrAddress} emits{' '}
+            {getShortenedTopic(event.topics[0])}
+          </b>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ItemContainer>
+            <RowItem
+              label="Contract"
+              value={
+                <Link
+                  href={getNewPathByRollapp(
                     pathname,
                     `${Path.ADDRESS}/${event.address}`
-                )}
-                underline="hover"
-                sx={{ fontStyle: 'normal' }}>
-                {contractNameOrAddress}
-                </Link>} />
-          {renderTopicsAndData(event.topics, event.data, event.address, transaction.evmContractAddressToErc20ContractInfo, pathname)}
-          <RowItem label="Log Index" value={logIndex} />
-        </Grid>
-      </AccordionDetails>
-    </Accordion>
-  )});
+                  )}
+                  underline="hover"
+                  sx={{ fontStyle: 'normal' }}>
+                  {contractNameOrAddress}
+                </Link>
+              }
+            />
+            {renderTopicsAndData(
+              event.topics,
+              event.data,
+              event.address,
+              transaction.evmContractAddressToErc20ContractInfo,
+              pathname
+            )}
+            <RowItem label="Log Index" value={logIndex} />
+          </ItemContainer>
+        </AccordionDetails>
+      </Accordion>
+    );
+  });
 }
 
 function getShortenedTopic(topic: string) {
-  switch(topic) {
+  switch (topic) {
     case '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef':
       return 'Transfer';
     case '0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925':
@@ -60,54 +80,94 @@ function getShortenedTopic(topic: string) {
   }
 }
 
-function renderTopicsAndData(topics: string[], data: string, emitter: string, contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined, pathname: string) {
-  const translatedOrNull = translateEvmLogIfPossible(topics, data, emitter, contractAddressToErc20ContractInfo);
+function renderTopicsAndData(
+  topics: string[],
+  data: string,
+  emitter: string,
+  contractAddressToErc20ContractInfo:
+    | Map<string, Erc20ContractInfo>
+    | undefined,
+  pathname: string
+) {
+  const translatedOrNull = translateEvmLogIfPossible(
+    topics,
+    data,
+    emitter,
+    contractAddressToErc20ContractInfo
+  );
   if (translatedOrNull && translatedOrNull?.type == 'Erc20TransferEvent') {
-    return <>
-      <RowItem label="Action" value="Transfer (ERC-20)" />
-      <RowItem label="From" value={<Link
-        href={getNewPathByRollapp(
-            pathname,
-            `${Path.ADDRESS}/${translatedOrNull.from}`
-        )}
-        underline="hover"
-        sx={{ fontStyle: 'normal' }}>
-        {translatedOrNull.from}
-      </Link>} />
-      <RowItem label="To" value={<Link
-        href={getNewPathByRollapp(
-            pathname,
-            `${Path.ADDRESS}/${translatedOrNull.to}`
-        )}
-        underline="hover"
-        sx={{ fontStyle: 'normal' }}>
-        {translatedOrNull.to}
-      </Link>} />
-      <RowItem label="Amount" value={
-        translatedOrNull.rawAmount
-        ? <>(Raw) {translatedOrNull.amount}</>
-        : <>{translatedOrNull.amount} {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''}</>
-      }/>
-    </>;
+    return (
+      <>
+        <RowItem label="Action" value="Transfer (ERC-20)" />
+        <RowItem
+          label="From"
+          value={
+            <Link
+              href={getNewPathByRollapp(
+                pathname,
+                `${Path.ADDRESS}/${translatedOrNull.from}`
+              )}
+              underline="hover"
+              sx={{ fontStyle: 'normal' }}>
+              {translatedOrNull.from}
+            </Link>
+          }
+        />
+        <RowItem
+          label="To"
+          value={
+            <Link
+              href={getNewPathByRollapp(
+                pathname,
+                `${Path.ADDRESS}/${translatedOrNull.to}`
+              )}
+              underline="hover"
+              sx={{ fontStyle: 'normal' }}>
+              {translatedOrNull.to}
+            </Link>
+          }
+        />
+        <RowItem
+          label="Amount"
+          value={
+            translatedOrNull.rawAmount ? (
+              <>(Raw) {translatedOrNull.amount}</>
+            ) : (
+              <>
+                {translatedOrNull.amount}{' '}
+                {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''}
+              </>
+            )
+          }
+        />
+      </>
+    );
   }
 
-  return <>
-    {topics.map((topic, idx) => (
-      <Grid key={idx} container item xs={12}>
-        <Grid item xs={12} lg={3}>
-          <Typography color="grey">{`topic${idx}`}</Typography>
+  return (
+    <>
+      {topics.map((topic, idx) => (
+        <Grid key={idx} container item xs={12}>
+          <Grid item xs={12} lg={3}>
+            <Typography color="grey">{`topic${idx}`}</Typography>
+          </Grid>
+          <Grid item xs={12} lg={9}>
+            <Typography>{topic}</Typography>
+          </Grid>
         </Grid>
-        <Grid item xs={12} lg={9}>
-          <Typography>{topic}</Typography>
-        </Grid>
-      </Grid>
-    ))}
-    <RowItem label="Data" value={<TextField
-      value={data}
-      multiline
-      sx={{ width: '100%', fontStyle: 'italic' }}
-      size="small"
-      maxRows={12}
-    />} />
-  </>;
+      ))}
+      <RowItem
+        label="Data"
+        value={
+          <TextField
+            value={data}
+            multiline
+            sx={{ width: '100%', fontStyle: 'italic' }}
+            size="small"
+            maxRows={12}
+          />
+        }
+      />
+    </>
+  );
 }

@@ -1,3 +1,7 @@
+import { Erc20ContractInfo, Transaction, TxMode } from '@/consts/rpcResTypes';
+import { TransactionType } from '@/consts/transaction';
+import { divideAmountByDecimals, hexToDec } from './number';
+
 export function getMessageName(messageType: string) {
   switch (messageType) {
     case '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward':
@@ -113,3 +117,68 @@ export const translateCts = (
     return convertAddressToLink(part, idx);
   });
 };
+
+export function getTransactionType(transaction: Transaction): TransactionType {
+  switch (transaction.mode) {
+    case TxMode.EVM_GENERAL_TRANSFER:
+    case TxMode.EVM_CONTRACT_CALL:
+    case TxMode.EVM_CONTRACT_DEPLOY:
+      return 'evm';
+    default:
+      return 'cosmos';
+  }
+}
+
+export function fromHexStringToEthereumValue(hexStr: string) {
+  return divideAmountByDecimals(hexToDec(hexStr), 18).toString();
+}
+
+export function fromHexStringToEthereumGasPriceValue(hexStr: string) {
+  return divideAmountByDecimals(hexToDec(hexStr), 9).toString();
+}
+
+export interface Erc20TransferEvent {
+  type: 'Erc20TransferEvent';
+  emiter: 'Transfer (ERC-20)';
+  from: string;
+  to: string;
+  amount: string;
+  rawAmount: boolean;
+}
+
+export function translateEvmLogIfPossible(
+  topics: string[],
+  data: string,
+  emitter: string,
+  contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined
+) {
+  if (
+    topics.length === 3 &&
+    topics[0] ===
+      '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef' &&
+    isTopicEvmAddress(topics[1]) &&
+    isTopicEvmAddress(topics[2]) &&
+    data.length === 66
+  ) {
+    const from = '0x' + topics[1].substring(26);
+    const to = '0x' + topics[2].substring(26);
+    const erc20ContractInfo = contractAddressToErc20ContractInfo?.get(emitter);
+    const decimals = erc20ContractInfo?.decimals;
+    return {
+      type: 'Erc20TransferEvent',
+      action: 'Transfer (ERC-20)',
+      from: from,
+      to: to,
+      amount:
+        erc20ContractInfo && decimals
+          ? divideAmountByDecimals(hexToDec(data), decimals).toString()
+          : data,
+      rawAmount: !decimals,
+    };
+  }
+  return null;
+}
+
+function isTopicEvmAddress(topic: string) {
+  return topic.startsWith('0x000000000000000000000000');
+}
