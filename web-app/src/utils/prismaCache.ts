@@ -1,3 +1,4 @@
+import { DEFAULT_CACHE_DURATION } from '@/consts/setting';
 import { Prisma } from '@prisma/client';
 import stringify from 'fast-json-stable-stringify';
 import { unstable_cache } from 'next/cache';
@@ -34,15 +35,17 @@ function queryWithCache<T, A, F extends Operation>(
 
   if (!cacheStrategy || !cacheStrategy.enabled)
     return context[action](queryArgs);
-  else
+  else {
+    const { revalidate = DEFAULT_CACHE_DURATION, tags } = cacheStrategy;
     return unstable_cache(
       () => context[action](queryArgs),
       [
         cacheStrategy.key ||
           `${(this as any).name}-${action}-${stringify(queryArgs)}`,
       ],
-      { revalidate: cacheStrategy.revalidate, tags: cacheStrategy.tags }
+      { revalidate, tags }
     )();
+  }
 }
 
 export function withCache() {

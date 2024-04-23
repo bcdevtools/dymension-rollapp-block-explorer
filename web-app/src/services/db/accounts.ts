@@ -1,7 +1,6 @@
 import { Prisma } from '@prisma/client';
 import prisma from '../../utils/prisma';
 import { QueryPaginationOption } from '@/utils/db';
-import { DEFAULT_CACHE_DURATION } from '@/consts/setting';
 
 export type AccountTransactionFilterOption = Partial<{
   signer: boolean;
@@ -37,10 +36,7 @@ export const countAccountTransactions = async function (
 
   return prisma.ref_account_to_recent_tx.countWithCache({
     where,
-    cacheStrategy: {
-      enabled: true,
-      revalidate: DEFAULT_CACHE_DURATION,
-    },
+    cacheStrategy: { enabled: true },
   });
 };
 
@@ -61,9 +57,6 @@ export const getAccountTransactions = function (
     include: { recent_accounts_transaction: true },
     orderBy: { height: 'desc' },
     ...paginationOptions,
-    cacheStrategy: {
-      enabled: true,
-      revalidate: DEFAULT_CACHE_DURATION,
-    },
+    cacheStrategy: { enabled: true },
   });
 };

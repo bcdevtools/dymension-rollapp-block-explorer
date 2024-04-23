@@ -1,7 +1,6 @@
 import { QueryPaginationOption } from '@/utils/db';
 import prisma from '../../utils/prisma';
 import { Prisma } from '@prisma/client';
-import { DEFAULT_CACHE_DURATION } from '@/consts/setting';
 
 function getTransactionsByHeightWhereCondition(
   chain_id: string,
@@ -25,10 +24,7 @@ export const getTransactionsByHeight = async function (
     where,
     orderBy: [{ epoch: 'desc' }, { height: 'desc' }],
     ...paginationOptions,
-    cacheStrategy: {
-      enabled: true,
-      revalidate: DEFAULT_CACHE_DURATION,
-    },
+    cacheStrategy: { enabled: true },
   });
 };
 
@@ -39,10 +35,7 @@ export const countTransactionsByHeight = async function (
   const where = getTransactionsByHeightWhereCondition(chain_id, height);
   return prisma.transaction.countWithCache({
     where,
-    cacheStrategy: {
-      enabled: true,
-      revalidate: DEFAULT_CACHE_DURATION,
-    },
+    cacheStrategy: { enabled: true },
   });
 };
 
@@ -52,9 +45,6 @@ export const getChainIdAndTxHashByTxHashes = async function (
   return prisma.transaction.findManyWithCache({
     select: { chain_id: true, hash: true },
     where: { hash: { in: txHashes.sort() } }, // sort txHahses to make sure cache key is consistent
-    cacheStrategy: {
-      enabled: true,
-      revalidate: DEFAULT_CACHE_DURATION,
-    },
+    cacheStrategy: { enabled: true },
   });
 };
