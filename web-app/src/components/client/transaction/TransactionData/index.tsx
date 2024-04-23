@@ -3,11 +3,12 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { Transaction } from '@/consts/rpcResTypes';
 import { useState } from 'react';
-import EventLogs from './_EventLogs';
+import CosmosEventLogs from './_CosmosEventLogs';
 import Messages from './_Messages';
 import DefaultLoading from '@/components/commons/DefaultLoading';
 import EvmDetails from './_EvmDetails';
 import EvmReceiptDetails from './_EvmReceiptDetails';
+import EvmEventLogs from './_EvmEventLogs';
 
 type TransactionDataProps = Readonly<{
   transaction: Transaction | null;
@@ -15,9 +16,10 @@ type TransactionDataProps = Readonly<{
 
 const enum TabValue {
   MESSAGES = 0,
-  EVENT_LOGS = 1,
+  COSMOS_EVENT_LOGS = 1,
   EVM_DETAILS = 2,
   EVM_RECEIPT = 3,
+  EVM_EVENT_LOGS = 4,
 }
 
 export default function TransactionData({ transaction }: TransactionDataProps) {
@@ -39,7 +41,7 @@ function CosmosTransactionData({ transaction }: TransactionDataProps) {
           }
           value={TabValue.MESSAGES}
         />
-        <Tab label="Event Logs" value={TabValue.EVENT_LOGS} />
+        <Tab label="Event Logs" value={TabValue.COSMOS_EVENT_LOGS} />
       </Tabs>
       {(function () {
         if (!transaction) return <DefaultLoading />;
@@ -47,8 +49,8 @@ function CosmosTransactionData({ transaction }: TransactionDataProps) {
           case TabValue.MESSAGES:
           default:
             return <Messages transaction={transaction} />;
-          case TabValue.EVENT_LOGS:
-            return <EventLogs transaction={transaction} />;
+          case TabValue.COSMOS_EVENT_LOGS:
+            return <CosmosEventLogs transaction={transaction} />;
         }
       })()}
     </Card>
@@ -62,7 +64,7 @@ function EvmTransactionData({ transaction }: TransactionDataProps) {
       <Tabs
         value={currentTab}
         sx={{ mb: 2 }}
-        onChange={(e, newValue) => setCurrentTab(newValue)}>
+        onChange={(_, newValue) => setCurrentTab(newValue)}>
         <Tab
           label="Details"
           value={TabValue.EVM_DETAILS}
@@ -71,7 +73,11 @@ function EvmTransactionData({ transaction }: TransactionDataProps) {
           label="Receipt"
           value={TabValue.EVM_RECEIPT}
         />
-        <Tab label="Event Logs" value={TabValue.EVENT_LOGS} />
+        {
+          (transaction?.evmReceipt?.logs?.length || 0) > 0 &&
+          <Tab label="EVM Event Logs" value={TabValue.EVM_EVENT_LOGS} />
+        }
+        <Tab label="Cosmos Event Logs" value={TabValue.COSMOS_EVENT_LOGS} />
       </Tabs>
       {(function () {
         if (!transaction) return <DefaultLoading />;
@@ -81,8 +87,10 @@ function EvmTransactionData({ transaction }: TransactionDataProps) {
             return <EvmDetails transaction={transaction} />;
           case TabValue.EVM_RECEIPT:
             return <EvmReceiptDetails transaction={transaction} />;
-          case TabValue.EVENT_LOGS:
-            return <EventLogs transaction={transaction} />;
+          case TabValue.EVM_EVENT_LOGS:
+            return <EvmEventLogs transaction={transaction} />;
+          case TabValue.COSMOS_EVENT_LOGS:
+            return <CosmosEventLogs transaction={transaction} />;
         }
       })()}
     </Card>

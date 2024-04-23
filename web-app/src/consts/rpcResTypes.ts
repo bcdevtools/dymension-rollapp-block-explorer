@@ -96,12 +96,20 @@ export interface EvmReceipt {
   effectiveGasPrice: string;
   from: string;
   gasUsed: string;
+  logs: EvmLog[];
   logsBloom: string;
   status: string;
   to?: string;
   transactionHash: string;
   transactionIndex: string;
   type: string;
+}
+
+export interface EvmLog {
+  address: string;
+  topics: string[];
+  data: string;
+  logIndex: string;
 }
 
 export interface Transaction {
