@@ -91,6 +91,7 @@ Templates for Unreleased:
 - (txs) [#53](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/53) Implement display EVM tx details
 - (txs) [#55](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/55) Implement display EVM event logs
 - (txs) [#56](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/56) Simple translate EVM event logs
+- (txs) [#59](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/59) Mapping contracts name and translate events
 
 ### Bug Fixes
 

@@ -95,3 +95,11 @@ export function getAccountBalancesParam(address: string): RpcCallParam {
     jsonrpc: '2.0',
   };
 }
+
+export function getErc20ContractInfo(contractAddress: string): RpcCallParam {
+  return {
+    method: 'evm_getErc20ContractInfo',
+    params: [contractAddress],
+    jsonrpc: '2.0',
+  };
+}
