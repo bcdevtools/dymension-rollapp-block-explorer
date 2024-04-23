@@ -66,10 +66,50 @@ export interface Msg {
   protoContent: any;
 }
 
+export interface EvmTx {
+  blockHash: string;
+  blockNumber: string;
+  from: string;
+  gas: string;
+  gasPrice: string;
+  maxFeePerGas: string;
+  maxPriorityFeePerGas: string;
+  hash: string;
+  input?: string;
+  nonce: string;
+  to?: string;
+  transactionIndex: string;
+  value?: string;
+  type: string;
+  accessList?: string[];
+  chainId: string;
+  v: string;
+  r: string;
+  s: string;
+}
+
+export interface EvmReceipt {
+  blockHash: string;
+  blockNumber: string;
+  contractAddress?: string;
+  cumulativeGasUsed: string;
+  effectiveGasPrice: string;
+  from: string;
+  gasUsed: string;
+  logsBloom: string;
+  status: string;
+  to?: string;
+  transactionHash: string;
+  transactionIndex: string;
+  type: string;
+}
+
 export interface Transaction {
   hash: string;
   height: number;
   msgs: Msg[];
+  evmTx?: EvmTx;
+  evmReceipt?: EvmReceipt;
 
   result: {
     code: number;
