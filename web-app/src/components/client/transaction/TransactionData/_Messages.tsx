@@ -13,21 +13,13 @@ import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
 import Link from '@mui/material/Link';
+import { RowItem } from './_Common';
 
 function MessageItem({
   label,
   value,
 }: Readonly<{ label: string; value: React.ReactNode | string }>) {
-  return (
-    <Grid container item>
-      <Grid item xs={12} lg={3}>
-        <Typography color="grey">{label}</Typography>
-      </Grid>
-      <Grid item xs={12} lg={9}>
-        {typeof value === 'string' ? <Typography>{value}</Typography> : value}
-      </Grid>
-    </Grid>
-  );
+  return RowItem({ label, value });
 }
 
 export default function Messages({

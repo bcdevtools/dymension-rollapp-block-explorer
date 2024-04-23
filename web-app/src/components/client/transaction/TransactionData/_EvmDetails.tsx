@@ -1,30 +1,13 @@
 'use client';
 
 import { Transaction, EvmTx, EvmReceipt } from '@/consts/rpcResTypes';
-import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
 import Link from '@mui/material/Link';
-import { divideAmountByDecimals } from '@/utils/number';
-
-function RowItem({
-  label,
-  value,
-}: Readonly<{ label: string; value: React.ReactNode | string }>) {
-  return (
-    <Grid container item>
-      <Grid item xs={12} lg={3}>
-        <Typography color="grey">{label}</Typography>
-      </Grid>
-      <Grid item xs={12} lg={9}>
-        {typeof value === 'string' ? <Typography>{value}</Typography> : value}
-      </Grid>
-    </Grid>
-  );
-}
+import { RowItem, fromHexStringToEthereumGasPriceValue, fromHexStringToEthereumValue } from './_Common';
 
 export default function EvmDetails({
   transaction,
@@ -47,10 +30,6 @@ export default function EvmDetails({
 
   if (evmTxInfo.to && evmTxInfo.value && !hasInput && !hasEvmLogs) {
     return EvmDetailsGeneralTransfer(evmTxInfo, pathname);
-  }
-
-  if (!evmTxInfo.to) {
-    return EvmDetailsDeployContract(evmTxInfo, evmTxReceipt, pathname);
   }
 
   if (evmTxInfo.to) {
@@ -122,7 +101,7 @@ function EvmDetailsGeneralTransfer(evmTx: EvmTx, pathname: string) {
                     </Typography>
                 }
             />
-            <RowItem label="To" 
+            <RowItem label="To"
                 value={
                     <Typography sx={{ fontStyle: 'italic' }}>
                         {<Link
@@ -194,12 +173,4 @@ function EvmDetailsContractCall(evmTx: EvmTx, pathname: string) {
             <RowItem label="Gas Price" value={fromHexStringToEthereumGasPriceValue(evmTx.gasPrice)} />
         </>
     );
-}
-
-function fromHexStringToEthereumValue(hexStr: string) {
-    return divideAmountByDecimals(`${Number(hexStr)}`, 18).toString()
-}
-
-function fromHexStringToEthereumGasPriceValue(hexStr: string) {
-    return divideAmountByDecimals(`${Number(hexStr)}`, 9).toString()
 }
