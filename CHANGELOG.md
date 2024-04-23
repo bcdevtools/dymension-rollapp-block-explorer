@@ -89,6 +89,7 @@ Templates for Unreleased:
 - (txs) [#45](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/45) Re-style transaction table
 - (indexing) [#49](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/49) Add more basic validation for `be_getTransactionsInBlockRange`
 - (txs) [#53](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/53) Implement display EVM tx details
+- (txs) [#55](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/55) Implement display EVM event logs
 
 ### Bug Fixes
 

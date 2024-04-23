@@ -7,7 +7,7 @@ import Grid from '@mui/material/Grid';
 import React from 'react';
 import Typography from '@mui/material/Typography';
 
-export default function EventLogs({
+export default function CosmosEventLogs({
   transaction,
 }: Readonly<{
   transaction: Transaction;
