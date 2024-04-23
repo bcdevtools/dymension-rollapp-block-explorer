@@ -43,13 +43,13 @@ export default function BlockListPage() {
           <Typography variant="h6">{latestBlockNo}</Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Block Count (Last 24H)" loading={loading}>
-          <Typography variant="h6">test</Typography>
+          <Typography variant="h6">?</Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Tx Count (Last 24H)" loading={loading}>
-          <Typography variant="h6">test</Typography>
+          <Typography variant="h6">?</Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Block Time" loading={loading}>
-          <Typography variant="h6">test</Typography>
+          <Typography variant="h6">?</Typography>
         </BlockSummaryCard>
       </Grid>
       <Card>
