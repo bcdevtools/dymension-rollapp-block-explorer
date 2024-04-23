@@ -90,8 +90,14 @@ export default function EvmReceiptDetails({
       />
     }
     <RowItem label="Status" value={evmReceiptInfo.status} />
-    <RowItem label="Cummulative Gas Used" value={Number(evmReceiptInfo.cumulativeGasUsed)} />
-    <RowItem label="Effective Gas Price" value={fromHexStringToEthereumGasPriceValue(evmReceiptInfo.effectiveGasPrice)} />
+    {
+      evmReceiptInfo.cumulativeGasUsed &&
+      <RowItem label="Cummulative Gas Used" value={Number(evmReceiptInfo.cumulativeGasUsed)} />
+    }
+    {
+      evmReceiptInfo.effectiveGasPrice &&
+      <RowItem label="Effective Gas Price" value={fromHexStringToEthereumGasPriceValue(evmReceiptInfo.effectiveGasPrice)} />
+    }
     <RowItem label="Gas Used" value={Number(evmReceiptInfo.gasUsed)} />
     <RowItem label="Type" value={evmReceiptInfo.type} />
     </>
