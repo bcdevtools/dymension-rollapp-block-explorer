@@ -1,13 +1,13 @@
 'use client';
 
-import { Transaction, EvmTx, EvmReceipt } from '@/consts/rpcResTypes';
+import { Transaction, EvmTx, EvmReceipt, TxMode, Erc20ContractInfo, EvmLog } from '@/consts/rpcResTypes';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
 import Link from '@mui/material/Link';
-import { RowItem, fromHexStringToEthereumGasPriceValue, fromHexStringToEthereumValue } from './_Common';
+import { RowItem, fromHexStringToEthereumGasPriceValue, fromHexStringToEthereumValue, translateEvmLogIfPossible } from './_Common';
 
 export default function EvmDetails({
   transaction,
@@ -25,21 +25,18 @@ export default function EvmDetails({
     return <>Error: no EVM receipt details</>;
   }
 
-  const hasInput = evmTxInfo.input && evmTxInfo.input.length >= 10;
-  const hasEvmLogs = evmTxReceipt.logs && evmTxReceipt.logs.length > 0;
-
-  if (evmTxInfo.to && evmTxInfo.value && !hasInput && !hasEvmLogs) {
-    return EvmDetailsGeneralTransfer(evmTxInfo, pathname);
-  }
-
-  if (evmTxInfo.to) {
-    return EvmDetailsContractCall(evmTxInfo, pathname)
+  if (transaction.mode === TxMode.EVM_GENERAL_TRANSFER) {
+    return EvmDetailsGeneralTransfer(evmTxInfo, pathname, transaction.evmContractAddressToErc20ContractInfo);
+  } else if (transaction.mode === TxMode.EVM_CONTRACT_CALL) {
+    return EvmDetailsContractCall(evmTxInfo, evmTxReceipt, pathname, transaction.evmContractAddressToErc20ContractInfo)
+  } else if (transaction.mode === TxMode.EVM_CONTRACT_DEPLOY) {
+    return EvmDetailsDeployContract(evmTxInfo, evmTxReceipt, pathname, transaction.evmContractAddressToErc20ContractInfo);
   } else {
-    return EvmDetailsDeployContract(evmTxInfo, evmTxReceipt, pathname);
+    return <>Unknown EVM Tx mode {transaction.mode}</>
   }
 }
 
-function EvmDetailsDeployContract(evmTx: EvmTx, evmTxReceipt: EvmReceipt, pathname: string) {
+function EvmDetailsDeployContract(evmTx: EvmTx, evmTxReceipt: EvmReceipt, pathname: string, contractAddressToErc20ContractInfo?: Map<string, Erc20ContractInfo>) {
     return (
         <>
             <RowItem label="Deployer" 
@@ -69,7 +66,7 @@ function EvmDetailsDeployContract(evmTx: EvmTx, evmTxReceipt: EvmReceipt, pathna
                             )}
                             underline="hover"
                             sx={{ fontStyle: 'normal' }}>
-                            {evmTxReceipt.contractAddress}
+                            {contractAddressToErc20ContractInfo?.get(evmTxReceipt.contractAddress)?.name || evmTxReceipt.contractAddress}
                             </Link>}
                         </Typography>
                     }
@@ -82,7 +79,7 @@ function EvmDetailsDeployContract(evmTx: EvmTx, evmTxReceipt: EvmReceipt, pathna
     );
 }
 
-function EvmDetailsGeneralTransfer(evmTx: EvmTx, pathname: string) {
+function EvmDetailsGeneralTransfer(evmTx: EvmTx, pathname: string, contractAddressToErc20ContractInfo?: Map<string, Erc20ContractInfo>) {
     return (
         <>
             <RowItem label="Transfer" value={fromHexStringToEthereumValue(evmTx.value!)} />
@@ -122,7 +119,7 @@ function EvmDetailsGeneralTransfer(evmTx: EvmTx, pathname: string) {
     );
 }
 
-function EvmDetailsContractCall(evmTx: EvmTx, pathname: string) {
+function EvmDetailsContractCall(evmTx: EvmTx, evmTxReceipt: EvmReceipt, pathname: string, contractAddressToErc20ContractInfo?: Map<string, Erc20ContractInfo>) {
     return (
         <>
             <RowItem label="Caller" 
@@ -150,7 +147,7 @@ function EvmDetailsContractCall(evmTx: EvmTx, pathname: string) {
                         )}
                         underline="hover"
                         sx={{ fontStyle: 'normal' }}>
-                        {evmTx.to}
+                        {contractAddressToErc20ContractInfo?.get(evmTx.to!)?.name || evmTx.to}
                         </Link>}
                     </Typography>
                 }
@@ -171,6 +168,44 @@ function EvmDetailsContractCall(evmTx: EvmTx, pathname: string) {
             <RowItem label="Tx Value" value={fromHexStringToEthereumValue(evmTx.value!)} />
             <RowItem label="Gas" value={Number(evmTx.gas)} />
             <RowItem label="Gas Price" value={fromHexStringToEthereumGasPriceValue(evmTx.gasPrice)} />
+            {
+                evmTxReceipt.logs.length > 0 &&
+                renderEvmTxActions(evmTxReceipt.logs, contractAddressToErc20ContractInfo, pathname)
+            }
         </>
     );
+}
+
+function renderEvmTxActions(evmTxLogs: EvmLog[], contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined, pathname: string) {
+    return evmTxLogs.map((log, idx) => {
+        return renderEvmTxAction(log.topics, log.data, log.address, contractAddressToErc20ContractInfo, pathname);
+    })
+}
+
+function renderEvmTxAction(topics: string[], data: string, emitter: string, contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined, pathname: string) {
+  const translatedOrNull = translateEvmLogIfPossible(topics, data, emitter, contractAddressToErc20ContractInfo);
+  if (translatedOrNull && translatedOrNull?.type == 'Erc20TransferEvent') {
+    return <RowItem label="Action" value={
+        <>Transfer {translatedOrNull.rawAmount && `(Raw) `} {translatedOrNull.amount} {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''} from <Link
+        href={getNewPathByRollapp(
+            pathname,
+            `${Path.ADDRESS}/${translatedOrNull.from}`
+        )}
+        underline="hover"
+        sx={{ fontStyle: 'normal' }}>
+        {translatedOrNull.from}
+    </Link> to <Link
+        href={getNewPathByRollapp(
+            pathname,
+            `${Path.ADDRESS}/${translatedOrNull.to}`
+        )}
+        underline="hover"
+        sx={{ fontStyle: 'normal' }}>
+        {translatedOrNull.to}
+    </Link>
+        </>
+    } />
+  } else {
+    return <></>
+  }
 }
