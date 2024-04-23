@@ -71,6 +71,7 @@ Templates for Unreleased:
 - (chain) [#42](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/42) Chain based config expiry
 - (chain) [#42](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/42) Chain based config expiry
 - (search) [#48](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/48) Interchain search & refactor code
+- (other) [#54](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/54) Add new flat mode in snapshot helper
 
 ### Improvements
 
@@ -87,6 +88,7 @@ Templates for Unreleased:
 - (indexing) [#35](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/35) Index EVM/Wasm `action` into 2 transaction tables
 - (txs) [#45](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/45) Re-style transaction table
 - (indexing) [#49](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/49) Add more basic validation for `be_getTransactionsInBlockRange`
+- (txs) [#53](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/53) Implement display EVM tx details
 
 ### Bug Fixes
 

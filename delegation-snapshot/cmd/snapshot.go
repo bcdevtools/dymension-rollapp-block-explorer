@@ -33,6 +33,7 @@ const (
 	flagBondDenomExponent        = "bond-exponent"
 	flagMemo                     = "memo"
 	flagTokenDistributor         = "from"
+	flagFlatMode                 = "flat"
 )
 
 var snapshotCmd = &cobra.Command{
@@ -120,9 +121,10 @@ var snapshotCmd = &cobra.Command{
 		if len(tokenDistributor) == 0 {
 			panic("token distributor cannot be empty")
 		}
+		flatMode := cmd.Flags().Changed(flagFlatMode)
 		var height int64
 		if len(args) > 0 {
-			height, err := strconv.ParseInt(args[0], 10, 64)
+			height, err = strconv.ParseInt(args[0], 10, 64)
 			if err != nil {
 				panic(err)
 			}
@@ -142,7 +144,7 @@ var snapshotCmd = &cobra.Command{
 
 		gasPrice := sdkmath.NewInt(1)
 		if bondDenomExponent == 18 {
-			gasPrice = sdkmath.NewInt(20_000_000_000)
+			gasPrice = sdkmath.NewInt(7_000_000_000)
 		}
 
 		queryDelegationUrl := fmt.Sprintf("%s/cosmos/staking/v1beta1/validators/%s/delegations", restApi, validatorOperationAddress)
@@ -151,11 +153,15 @@ var snapshotCmd = &cobra.Command{
 		fmt.Println("Context height:", height)
 		fmt.Println("Rest API:", restApi, "=>", queryDelegationUrl)
 		fmt.Println("Bond Denom:", bondDenom)
-		fmt.Println("Cap Delegation:", displayNumber(amountTransformMaxDelegation, bondDenomExponent), "exponent", bondDenomExponent)
+		if !flatMode {
+			fmt.Println("Cap Delegation:", displayNumber(amountTransformMaxDelegation, bondDenomExponent), "exponent", bondDenomExponent)
+		}
 		fmt.Println("Min Delegation:", displayNumber(amountMinDelegation, bondDenomExponent), "exponent", bondDenomExponent)
 		fmt.Println("Token Denom:", tokenDenom)
 		fmt.Println("Allocate Gift Token:", displayNumber(amountAllocateGiftToken, giftTokenExponent), "exponent", giftTokenExponent)
-		fmt.Println("Cap Allocate Gift Token to individual:", displayNumber(amountCapAllocateGiftToken, giftTokenExponent), "exponent", giftTokenExponent)
+		if !flatMode {
+			fmt.Println("Cap Allocate Gift Token to individual:", displayNumber(amountCapAllocateGiftToken, giftTokenExponent), "exponent", giftTokenExponent)
+		}
 		fmt.Println("Distributor:", tokenDistributor)
 		fmt.Println("Memo:", memo)
 		fmt.Println("Gas Price:", gasPrice, bondDenom)
@@ -335,23 +341,37 @@ var snapshotCmd = &cobra.Command{
 		if giftTokenPerBondSatoshiFloat.Sign() == 0 || giftTokenPerBondSatoshiFloat.IsInf() {
 			panic("gift token per bond is zero or infinite")
 		}
+		giftTokenPerIndividualFlatMode := new(big.Float).Quo(
+			new(big.Float).SetInt(amountAllocateGiftToken.BigInt()),
+			new(big.Float).SetInt64(int64(len(records))),
+		)
 		for i, r := range records {
-			allocateTokenAmountFloat := new(big.Float).Mul(new(big.Float).SetInt(r.effectiveDelegationAmount.BigInt()), giftTokenPerBondSatoshiFloat)
-			allocateTokenAmountInt := new(big.Int)
-			allocateTokenAmountInt, _ = allocateTokenAmountFloat.Int(allocateTokenAmountInt)
-			r.allocateTokenAmount = sdkmath.NewIntFromBigInt(allocateTokenAmountInt)
-			if r.allocateTokenAmount.GT(amountCapAllocateGiftToken) {
-				r.allocateTokenAmount = amountCapAllocateGiftToken
+			if flatMode {
+				allocateTokenAmountInt := new(big.Int)
+				allocateTokenAmountInt, _ = giftTokenPerIndividualFlatMode.Int(allocateTokenAmountInt)
+				r.allocateTokenAmount = sdkmath.NewIntFromBigInt(allocateTokenAmountInt)
+			} else {
+				allocateTokenAmountFloat := new(big.Float).Mul(new(big.Float).SetInt(r.effectiveDelegationAmount.BigInt()), giftTokenPerBondSatoshiFloat)
+				allocateTokenAmountInt := new(big.Int)
+				allocateTokenAmountInt, _ = allocateTokenAmountFloat.Int(allocateTokenAmountInt)
+				r.allocateTokenAmount = sdkmath.NewIntFromBigInt(allocateTokenAmountInt)
+				if r.allocateTokenAmount.GT(amountCapAllocateGiftToken) {
+					r.allocateTokenAmount = amountCapAllocateGiftToken
+				}
 			}
+
 			sumAllocatedToken = sumAllocatedToken.Add(r.allocateTokenAmount)
 
 			records[i] = r
 		}
 
 		fmt.Println("Total Delegation:", displayNumber(sumDelegation, bondDenomExponent), "exponent", bondDenomExponent)
-		fmt.Println("Total Effective Delegation:", displayNumber(sumEffectiveDelegation, bondDenomExponent), "exponent", bondDenomExponent)
-		fmt.Println("Total Allocate Token:", displayNumber(sumAllocatedToken, giftTokenExponent), "exponent", giftTokenExponent)
-		fmt.Println("Allocate token per bond:", giftTokenPerBondSatoshiFloat)
+		if !flatMode {
+			fmt.Println("Total Effective Delegation:", displayNumber(sumEffectiveDelegation, bondDenomExponent), "exponent", bondDenomExponent)
+			fmt.Println("Total Allocate Token:", displayNumber(sumAllocatedToken, giftTokenExponent), "exponent", giftTokenExponent)
+			fmt.Println("Allocate token per bond:", giftTokenPerBondSatoshiFloat)
+		}
+		fmt.Println("Valid Delegators:", len(records))
 
 		sort.Slice(records, func(i, j int) bool {
 			return records[i].delegationAmount.LT(records[j].delegationAmount)
@@ -472,6 +492,7 @@ func init() {
 	snapshotCmd.Flags().String(flagTokenDenom, constants.DrBeIbcDenom, "token denom")
 	snapshotCmd.Flags().String(flagTokenDistributor, constants.DrBeTokenDistributor, "token distribution from address")
 	snapshotCmd.Flags().String(flagMemo, "", "custom memo to be included in the transaction")
+	snapshotCmd.Flags().Bool(flagFlatMode, false, "flat mode, every delegator will receive the same amount of token")
 
 	rootCmd.AddCommand(snapshotCmd)
 }

@@ -13,5 +13,6 @@ dessd snapshot [block number] \
   [--bond-denom adym] \
   [--bond-exponent 18] \
   [--from dym1s3fpgacm368dfyn4rmg2qv3h07cmdhr6jjg86v] \ -- account address to distribute gift-token
-  [--memo "Gift token distribution"] -- custom memo for the tx
+  [--memo "Gift token distribution"] \ -- custom memo for the tx
+  [--flat] -- every delegator shares the same amount of gift-token
 ```
