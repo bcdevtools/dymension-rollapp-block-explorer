@@ -1,11 +1,6 @@
 'use client';
 
 import { Transaction, EvmTx, EvmReceipt } from '@/consts/rpcResTypes';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import Accordion from '@mui/material/Accordion';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import { getMessageName, translateCts } from '@/utils/transaction';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
@@ -14,7 +9,6 @@ import { usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
 import Link from '@mui/material/Link';
 import { divideAmountByDecimals } from '@/utils/number';
-import Big from 'big.js';
 
 function RowItem({
   label,
