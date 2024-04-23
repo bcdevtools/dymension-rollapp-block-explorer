@@ -20,10 +20,11 @@ export const getTransactionsByHeight = async function (
 ) {
   const where = getTransactionsByHeightWhereCondition(chain_id, height);
 
-  return prisma.transaction.findMany({
+  return prisma.transaction.findManyWithCache({
     where,
     orderBy: [{ epoch: 'desc' }, { height: 'desc' }],
     ...paginationOptions,
+    cacheStrategy: { enabled: true },
   });
 };
 
@@ -32,14 +33,18 @@ export const countTransactionsByHeight = async function (
   height: number | null
 ) {
   const where = getTransactionsByHeightWhereCondition(chain_id, height);
-  return prisma.transaction.count({ where });
+  return prisma.transaction.countWithCache({
+    where,
+    cacheStrategy: { enabled: true },
+  });
 };
 
 export const getChainIdAndTxHashByTxHashes = async function (
   txHashes: string[]
 ) {
-  return prisma.transaction.findMany({
+  return prisma.transaction.findManyWithCache({
     select: { chain_id: true, hash: true },
-    where: { hash: { in: txHashes } },
+    where: { hash: { in: txHashes.sort() } }, // sort txHahses to make sure cache key is consistent
+    cacheStrategy: { enabled: true },
   });
 };
