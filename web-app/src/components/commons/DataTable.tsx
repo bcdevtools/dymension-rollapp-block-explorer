@@ -77,25 +77,25 @@ function TablePaginationActions({
         onClick={handleFirstPageButtonClick}
         disabled={page === 0}
         aria-label="first page">
-        <FirstPageIcon />
+        <FirstPageIcon color="secondary" />
       </IconButton>
       <IconButton
         onClick={handleBackButtonClick}
         disabled={page === 0}
         aria-label="previous page">
-        <KeyboardArrowLeft />
+        <KeyboardArrowLeft color="secondary" />
       </IconButton>
       <IconButton
         onClick={handleNextButtonClick}
         disabled={page >= maxPage}
         aria-label="next page">
-        <KeyboardArrowRight />
+        <KeyboardArrowRight color="secondary" />
       </IconButton>
       <IconButton
         onClick={handleLastPageButtonClick}
         disabled={page >= maxPage}
         aria-label="last page">
-        <LastPageIcon />
+        <LastPageIcon color="secondary" />
       </IconButton>
     </Box>
   );

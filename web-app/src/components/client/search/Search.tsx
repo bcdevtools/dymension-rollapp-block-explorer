@@ -77,13 +77,13 @@ export default function Search({
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <SearchIcon />
+              <SearchIcon color="primary" />
             </InputAdornment>
           ),
           endAdornment: (
             <InputAdornment position="end">
               <IconButton onClick={handleClear}>
-                <CloseIcon />
+                <CloseIcon color="primary" />
               </IconButton>
             </InputAdornment>
           ),

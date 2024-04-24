@@ -15,14 +15,13 @@ export default function ThemeToggleButton({
         <IconButton
           aria-label="theme toggle"
           size="large"
-          color={isDark ? 'primary' : 'inherit'}
           edge="end"
           sx={{ ml: 2 }}
           onClick={context.handleThemeToggle}>
           {theme.palette.mode === ThemeMode.LIGHT ? (
-            <DarkModeIcon />
+            <DarkModeIcon color="inherit" />
           ) : (
-            <LightModeIcon />
+            <LightModeIcon color="primary" />
           )}
         </IconButton>
       )}
