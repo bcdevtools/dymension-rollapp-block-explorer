@@ -25,9 +25,9 @@ export default function CopyButton({ textToCopy, size }: CopyButtonProps) {
     <Tooltip title={isCopied ? 'Copied' : 'Copy'} placement="top">
       <IconButton onClick={handleCopy} size={size}>
         {isCopied ? (
-          <DoneIcon fontSize="inherit" color="primary" />
+          <DoneIcon fontSize="inherit" color="secondary" />
         ) : (
-          <ContentCopyIcon fontSize="inherit" color="primary" />
+          <ContentCopyIcon fontSize="inherit" color="secondary" />
         )}
       </IconButton>
     </Tooltip>
