@@ -41,16 +41,22 @@ export default React.memo(function RollappSelect({
         labelId="select-rollapp-label"
         label={label && 'Rollapps'}
         size={size}>
-        {rollappInfos.map(rollapp => (
-          <MenuItem key={rollapp.chain_id} value={rollapp.path}>
-            <Typography variant="button" marginRight={1}>
-              {rollapp.name}
-            </Typography>
-            <Typography variant="subtitle2" color="grey">
-              {rollapp.chain_id}
-            </Typography>
-          </MenuItem>
-        ))}
+        {rollappInfos.map(rollapp => {
+          const isSelected = rollapp.path === value;
+          return (
+            <MenuItem key={rollapp.chain_id} value={rollapp.path}>
+              <Typography
+                variant="button"
+                color={isSelected ? 'primary' : 'inherit'}
+                marginRight={1}>
+                <strong>{rollapp.name}</strong>
+              </Typography>
+              <Typography variant="subtitle2" color="grey">
+                {rollapp.chain_id}
+              </Typography>
+            </MenuItem>
+          );
+        })}
       </Select>
       {props.error && <FormHelperText>Required</FormHelperText>}
     </FormControl>

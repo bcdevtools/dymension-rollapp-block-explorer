@@ -40,7 +40,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
   width: '100%',
   [theme.breakpoints.up('md')]: {
     marginLeft: theme.spacing(1),
-    width: '66ch',
+    width: '50ch',
   },
   [theme.breakpoints.down('md')]: {
     order: 1,

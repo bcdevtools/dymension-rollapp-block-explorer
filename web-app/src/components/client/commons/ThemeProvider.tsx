@@ -5,6 +5,7 @@ import {
   ThemeOptions,
   createTheme,
   ThemeProvider as _ThemeProvider,
+  PaletteColorOptions,
 } from '@mui/material/styles';
 import { THEME_COOKIE_NAME, ThemeMode } from '@/consts/theme';
 import { forwardRef, useState } from 'react';
@@ -35,16 +36,16 @@ const themes = {
     ...baseThemeOptions,
     palette: {
       mode: ThemeMode.LIGHT,
-      // background: { default: '#f8fafb' }
     },
   }),
   [ThemeMode.DARK]: createTheme({
     ...baseThemeOptions,
     palette: {
+      primary: { main: '#EEE2D6' },
       mode: ThemeMode.DARK,
-      // background: {
-      //   default: '#13171b',
-      // },
+      background: { paper: 'rgb(33, 30, 29)' },
+      divider: 'rgba(140, 129, 121, 0.12)',
+      text: { primary: 'rgb(140, 129, 121)' },
     },
   }),
 };

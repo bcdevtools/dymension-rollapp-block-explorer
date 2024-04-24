@@ -21,7 +21,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
-  padding: theme.spacing(1),
+  padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
   height: 112,
 }));
 
@@ -64,7 +64,7 @@ export default function BlockOverview() {
                       `${Path.BLOCKS}/${block.height}`
                     )}
                     underline="hover">
-                    {block.height}
+                    <b>{block.height}</b>
                   </Link>
                 </Typography>
                 <Box>

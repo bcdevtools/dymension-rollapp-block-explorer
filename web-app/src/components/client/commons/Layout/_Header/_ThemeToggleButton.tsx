@@ -12,8 +12,8 @@ export default function ThemeToggleButton() {
       {context => (
         <IconButton
           aria-label="theme toggle"
-          color="inherit"
           size="large"
+          color="primary"
           edge="end"
           sx={{ ml: 2 }}
           onClick={context.handleThemeToggle}>

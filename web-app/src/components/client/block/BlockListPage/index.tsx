@@ -40,16 +40,24 @@ export default function BlockListPage() {
     <>
       <Grid container spacing={2} sx={{ mb: 3, mt: 1 }}>
         <BlockSummaryCard label="Block Height" loading={loading}>
-          <Typography variant="h6">{latestBlockNo}</Typography>
+          <Typography variant="h6">
+            <strong>{latestBlockNo}</strong>
+          </Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Block Count (Last 24H)" loading={loading}>
-          <Typography variant="h6">?</Typography>
+          <Typography variant="h6">
+            <strong>?</strong>
+          </Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Tx Count (Last 24H)" loading={loading}>
-          <Typography variant="h6">?</Typography>
+          <Typography variant="h6">
+            <strong>?</strong>
+          </Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Block Time" loading={loading}>
-          <Typography variant="h6">?</Typography>
+          <Typography variant="h6">
+            <strong>?</strong>
+          </Typography>
         </BlockSummaryCard>
       </Grid>
       <Card>

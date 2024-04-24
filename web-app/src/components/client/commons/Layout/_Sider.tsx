@@ -17,6 +17,7 @@ import { Path } from '@/consts/path';
 import { useRollappStore } from '@/stores/rollappStore';
 import { getNewPathByRollapp, isNotFoundPath } from '@/utils/common';
 import RollappSelect from '../RollappSelect';
+import { Typography } from '@mui/material';
 
 type SiderProps = Readonly<{
   menuOpen: boolean;
@@ -26,9 +27,17 @@ type SiderProps = Readonly<{
 }>;
 
 const MENU_ITEMS = [
-  { name: 'Overview', path: Path.OVERVIEW, icon: <Summarize /> },
-  { name: 'Blocks', path: Path.BLOCKS, icon: <Widgets /> },
-  { name: 'Transactions', path: Path.TRANSACTIONS, icon: <Receipt /> },
+  {
+    name: 'Overview',
+    path: Path.OVERVIEW,
+    Icon: Summarize,
+  },
+  { name: 'Blocks', path: Path.BLOCKS, Icon: Widgets },
+  {
+    name: 'Transactions',
+    path: Path.TRANSACTIONS,
+    Icon: Receipt,
+  },
 ];
 
 export default React.memo(function Sider({
@@ -46,7 +55,7 @@ export default React.memo(function Sider({
     handleMenuClose();
   };
 
-  const isSelecting = (path: string) => {
+  const checkSelected = (path: string) => {
     const splittedPath = pathname.split('/');
     return (
       (path === '/' && splittedPath.length === 2) ||
@@ -58,7 +67,7 @@ export default React.memo(function Sider({
     <>
       <Toolbar sx={{ display: { xs: 'none', md: 'flex' } }} />
       <List>
-        <ListItem>
+        <ListItem sx={{ pb: 2 }}>
           <RollappSelect
             fullWidth
             size="small"
@@ -72,16 +81,32 @@ export default React.memo(function Sider({
             }}
           />
         </ListItem>
-        {MENU_ITEMS.map((menuItem, index) => (
-          <ListItem key={index} disablePadding>
-            <ListItemButton
-              onClick={() => handleMenuItemClick(menuItem.path)}
-              selected={isSelecting(menuItem.path)}>
-              <ListItemIcon>{menuItem.icon}</ListItemIcon>
-              <ListItemText primary={menuItem.name} />
-            </ListItemButton>
-          </ListItem>
-        ))}
+        {MENU_ITEMS.map((menuItem, index) => {
+          const isSelected = checkSelected(menuItem.path);
+          const { Icon } = menuItem;
+          return (
+            <ListItem key={index} disablePadding>
+              <ListItemButton
+                onClick={() => handleMenuItemClick(menuItem.path)}
+                selected={isSelected}>
+                <ListItemIcon>
+                  <Icon color={isSelected ? 'primary' : 'inherit'} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    isSelected ? (
+                      <Typography color="primary">
+                        <strong>{menuItem.name}</strong>
+                      </Typography>
+                    ) : (
+                      menuItem.name
+                    )
+                  }
+                />
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
       </List>
     </>
   );
