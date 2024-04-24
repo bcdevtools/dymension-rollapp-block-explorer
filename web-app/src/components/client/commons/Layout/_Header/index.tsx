@@ -65,11 +65,10 @@ export default React.memo(function Header({
         <IconButton
           size="large"
           edge="start"
-          color={isDark ? 'primary' : 'inherit'}
           aria-label="open drawer"
           onClick={handleMenuToggle}
           sx={{ mr: 2, display: { md: 'none' } }}>
-          <MenuIcon />
+          <MenuIcon color={isDark ? 'primary' : 'inherit'} />
         </IconButton>
         <Logo isDark={isDark} />
         <StyledTextField
@@ -77,7 +76,7 @@ export default React.memo(function Header({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon />
+                <SearchIcon color="primary" />
               </InputAdornment>
             ),
           }}
