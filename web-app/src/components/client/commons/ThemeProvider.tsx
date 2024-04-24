@@ -5,7 +5,6 @@ import {
   ThemeOptions,
   createTheme,
   ThemeProvider as _ThemeProvider,
-  PaletteColorOptions,
 } from '@mui/material/styles';
 import { THEME_COOKIE_NAME, ThemeMode } from '@/consts/theme';
 import { forwardRef, useState } from 'react';
@@ -41,11 +40,12 @@ const themes = {
   [ThemeMode.DARK]: createTheme({
     ...baseThemeOptions,
     palette: {
-      primary: { main: '#EEE2D6' },
+      primary: { main: 'rgb(241, 225, 212)' },
+      secondary: { main: 'rgb(220, 77, 37)' },
       mode: ThemeMode.DARK,
       background: { paper: 'rgb(33, 30, 29)' },
       divider: 'rgba(140, 129, 121, 0.12)',
-      text: { primary: 'rgb(140, 129, 121)' },
+      text: { primary: 'rgb(241, 225, 212)', secondary: 'rgb(140, 129, 121)' },
     },
   }),
 };

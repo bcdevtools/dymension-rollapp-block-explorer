@@ -11,7 +11,7 @@ const baseStyle = {
   letterSpacing: '.3rem',
 };
 
-export default function Logo() {
+export default function Logo({ isDark }: Readonly<{ isDark: boolean }>) {
   const [{ selectedRollappInfo }] = useRollappStore();
   const pathname = usePathname();
   const logoHref = getNewPathByRollapp(pathname, Path.OVERVIEW);
@@ -26,6 +26,7 @@ export default function Logo() {
       underline="none"
       maxWidth="calc(100vw - 160px)"
       flexGrow={{ md: 1 }}
+      color={isDark ? 'primary' : 'inherit'}
       sx={{ ...baseStyle }}>
       {appName}
     </Typography>

@@ -1,6 +1,6 @@
 'use client';
 
-import { styled } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import ThemeToggleButton from './_ThemeToggleButton';
 import Logo from './_Logo';
@@ -56,19 +56,22 @@ export default React.memo(function Header({
   handleMenuToggle,
   openSearch,
 }: HeaderProps) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   return (
     <StyledAppBar>
       <StyledToolbar>
         <IconButton
           size="large"
           edge="start"
-          color="inherit"
+          color={isDark ? 'primary' : 'inherit'}
           aria-label="open drawer"
           onClick={handleMenuToggle}
           sx={{ mr: 2, display: { md: 'none' } }}>
           <MenuIcon />
         </IconButton>
-        <Logo />
+        <Logo isDark={isDark} />
         <StyledTextField
           placeholder={SEARCH_PLACEHOLDER}
           InputProps={{
@@ -83,7 +86,7 @@ export default React.memo(function Header({
           inputRef={(e: HTMLInputElement) => e && e.blur()}
           sx={{ input: { cursor: 'pointer' } }}
         />
-        <ThemeToggleButton />
+        <ThemeToggleButton isDark={isDark} />
       </StyledToolbar>
     </StyledAppBar>
   );

@@ -13,7 +13,6 @@ import TextField from '@mui/material/TextField';
 import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
-import Link from '@mui/material/Link';
 import { ItemContainer, RowItem } from './_Common';
 import {
   fromHexStringToEthereumGasPriceValue,
@@ -22,6 +21,7 @@ import {
 } from '@/utils/transaction';
 import { getAddress } from '@ethersproject/address';
 import { formatNumber } from '@/utils/number';
+import Link from '@/components/commons/Link';
 
 export default function EvmDetails({
   transaction,
@@ -78,7 +78,6 @@ function EvmDetailsDeployContract(
                   pathname,
                   `${Path.ADDRESS}/${evmTx.from}`
                 )}
-                underline="hover"
                 sx={{ fontStyle: 'normal' }}>
                 {getAddress(evmTx.from)}
               </Link>
@@ -97,7 +96,6 @@ function EvmDetailsDeployContract(
                     pathname,
                     `${Path.ADDRESS}/${evmTxReceipt.contractAddress}`
                   )}
-                  underline="hover"
                   sx={{ fontStyle: 'normal' }}>
                   {contractAddressToErc20ContractInfo?.get(
                     evmTxReceipt.contractAddress
@@ -137,7 +135,6 @@ function EvmDetailsGeneralTransfer(evmTx: EvmTx, pathname: string) {
                   pathname,
                   `${Path.ADDRESS}/${evmTx.from}`
                 )}
-                underline="hover"
                 sx={{ fontStyle: 'normal' }}>
                 {evmTx.from}
               </Link>
@@ -155,7 +152,6 @@ function EvmDetailsGeneralTransfer(evmTx: EvmTx, pathname: string) {
                   pathname,
                   `${Path.ADDRESS}/${evmTx.to}`
                 )}
-                underline="hover"
                 sx={{ fontStyle: 'normal' }}>
                 {evmTx.to}
               </Link>
@@ -191,7 +187,6 @@ function EvmDetailsContractCall(
                   pathname,
                   `${Path.ADDRESS}/${evmTx.from}`
                 )}
-                underline="hover"
                 sx={{ fontStyle: 'normal' }}>
                 {getAddress(evmTx.from)}
               </Link>
@@ -209,7 +204,6 @@ function EvmDetailsContractCall(
                   pathname,
                   `${Path.ADDRESS}/${evmTx.to}`
                 )}
-                underline="hover"
                 sx={{ fontStyle: 'normal' }}>
                 {contractAddressToErc20ContractInfo?.get(evmTx.to!)?.name ||
                   getAddress(evmTx.to!)}
@@ -307,7 +301,6 @@ function renderEvmTxAction(
                 pathname,
                 `${Path.ADDRESS}/${translatedOrNull.from}`
               )}
-              underline="hover"
               sx={{ fontStyle: 'normal' }}>
               {getAddress(translatedOrNull.from)}
             </Link>{' '}
@@ -317,7 +310,6 @@ function renderEvmTxAction(
                 pathname,
                 `${Path.ADDRESS}/${translatedOrNull.to}`
               )}
-              underline="hover"
               sx={{ fontStyle: 'normal' }}>
               {getAddress(translatedOrNull.to)}
             </Link>

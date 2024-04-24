@@ -2,13 +2,13 @@
 
 import useBlockDetail from '@/hooks/useBlockDetail';
 import { getNewPathByRollapp } from '@/utils/common';
-import Link from '@mui/material/Link';
 import { Block } from '@/consts/rpcResTypes';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { Path } from '@/consts/path';
 import { formatUnixTime } from '@/utils/datetime';
 import { DetailItem } from '@/components/commons/DetailItem';
 import Grid from '@mui/material/Grid';
+import Link from '@/components/commons/Link';
 
 function getTxsDisplay(blockDetail: Block | null, pathname: string) {
   const txCount = blockDetail ? blockDetail.txs.length : 0;
@@ -16,9 +16,8 @@ function getTxsDisplay(blockDetail: Block | null, pathname: string) {
     <Link
       href={`${getNewPathByRollapp(pathname, Path.TRANSACTIONS)}?block=${
         blockDetail!.height
-      }`}
-      underline="hover">
-      {txCount} transacion{txCount > 1 && 's'}
+      }`}>
+      {txCount} transaction{txCount > 1 && 's'}
     </Link>
   ) : (
     '0 transaction'

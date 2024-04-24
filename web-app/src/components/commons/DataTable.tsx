@@ -14,6 +14,7 @@ import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import Skeleton from '@mui/material/Skeleton';
+import { Typography } from '@mui/material';
 
 type DataTableProps = Readonly<{
   headers: React.ReactNode[];
@@ -134,7 +135,9 @@ export default function DataTable({
           <TableHead>
             <TableRow>
               {headers.map((header, idx) => (
-                <TableCell key={idx}>{header}</TableCell>
+                <TableCell key={idx}>
+                  <Typography color="text.secondary">{header}</Typography>
+                </TableCell>
               ))}
             </TableRow>
           </TableHead>

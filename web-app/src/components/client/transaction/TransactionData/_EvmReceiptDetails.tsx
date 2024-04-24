@@ -5,11 +5,11 @@ import Typography from '@mui/material/Typography';
 import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
-import Link from '@mui/material/Link';
 import { ItemContainer, RowItem } from './_Common';
 import { fromHexStringToEthereumGasPriceValue } from '@/utils/transaction';
 import { formatNumber, hexToDec } from '@/utils/number';
 import { getAddress } from '@ethersproject/address';
+import Link from '@/components/commons/Link';
 
 export default function EvmReceiptDetails({
   transaction,
@@ -32,7 +32,6 @@ export default function EvmReceiptDetails({
                     pathname,
                     `${Path.ADDRESS}/${evmReceiptInfo.from}`
                   )}
-                  underline="hover"
                   sx={{ fontStyle: 'normal' }}>
                   {getAddress(evmReceiptInfo.from)}
                 </Link>
@@ -51,7 +50,6 @@ export default function EvmReceiptDetails({
                       pathname,
                       `${Path.ADDRESS}/${evmReceiptInfo.to}`
                     )}
-                    underline="hover"
                     sx={{ fontStyle: 'normal' }}>
                     {getAddress(evmReceiptInfo.to)}
                   </Link>
@@ -71,7 +69,6 @@ export default function EvmReceiptDetails({
                       pathname,
                       `${Path.ADDRESS}/${evmReceiptInfo.contractAddress}`
                     )}
-                    underline="hover"
                     sx={{ fontStyle: 'normal' }}>
                     {getAddress(evmReceiptInfo.contractAddress)}
                   </Link>

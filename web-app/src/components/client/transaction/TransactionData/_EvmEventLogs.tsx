@@ -11,9 +11,9 @@ import { ItemContainer, RowItem } from './_Common';
 import { usePathname } from 'next/navigation';
 import { getNewPathByRollapp } from '@/utils/common';
 import { Path } from '@/consts/path';
-import Link from '@mui/material/Link';
 import { translateEvmLogIfPossible } from '@/utils/transaction';
 import { getAddress } from '@ethersproject/address';
+import Link from '@/components/commons/Link';
 
 export default function EvmEventLogs({
   transaction,
@@ -44,7 +44,6 @@ export default function EvmEventLogs({
                     pathname,
                     `${Path.ADDRESS}/${event.address}`
                   )}
-                  underline="hover"
                   sx={{ fontStyle: 'normal' }}>
                   {contractNameOrAddress}
                 </Link>
@@ -107,7 +106,6 @@ function renderTopicsAndData(
                 pathname,
                 `${Path.ADDRESS}/${translatedOrNull.from}`
               )}
-              underline="hover"
               sx={{ fontStyle: 'normal' }}>
               {translatedOrNull.from}
             </Link>
@@ -121,7 +119,6 @@ function renderTopicsAndData(
                 pathname,
                 `${Path.ADDRESS}/${translatedOrNull.to}`
               )}
-              underline="hover"
               sx={{ fontStyle: 'normal' }}>
               {translatedOrNull.to}
             </Link>
@@ -149,7 +146,7 @@ function renderTopicsAndData(
       {topics.map((topic, idx) => (
         <Grid key={idx} container item xs={12}>
           <Grid item xs={12} lg={3}>
-            <Typography color="grey">{`topic${idx}`}</Typography>
+            <Typography color="text.secondary">{`topic${idx}`}</Typography>
           </Grid>
           <Grid item xs={12} lg={9}>
             <Typography>{topic}</Typography>

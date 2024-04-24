@@ -39,7 +39,7 @@ function SearchResultItem({
                       <Typography
                         width="100%"
                         component="span"
-                        color="grey"
+                        color="text.secondary"
                         variant="subtitle2">
                         {chainId}
                       </Typography>

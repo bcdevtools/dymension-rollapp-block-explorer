@@ -11,8 +11,8 @@ import TextField from '@mui/material/TextField';
 import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
-import Link from '@mui/material/Link';
 import { ItemContainer, RowItem } from './_Common';
+import Link from '@/components/commons/Link';
 
 export default function Messages({
   transaction,
@@ -41,7 +41,6 @@ export default function Messages({
                       pathname,
                       `${Path.ADDRESS}/${address}`
                     )}
-                    underline="hover"
                     sx={{ fontStyle: 'normal' }}>
                     {address}
                   </Link>

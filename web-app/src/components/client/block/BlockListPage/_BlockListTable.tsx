@@ -1,4 +1,5 @@
 import DataTable from '@/components/commons/DataTable';
+import Link from '@/components/commons/Link';
 import { Path } from '@/consts/path';
 import { Block } from '@/consts/rpcResTypes';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
@@ -8,7 +9,6 @@ import {
   getPageAndPageSizeFromStringParam,
 } from '@/utils/common';
 import { formatUnixTime } from '@/utils/datetime';
-import Link from '@mui/material/Link';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import React from 'react';
 
@@ -25,8 +25,7 @@ function getTxsDisplay(blockDetail: Block, pathname: string) {
     <Link
       href={`${getNewPathByRollapp(pathname, Path.TRANSACTIONS)}?block=${
         blockDetail.height
-      }`}
-      underline="hover">
+      }`}>
       {txCount}
     </Link>
   );
@@ -49,7 +48,7 @@ export default function BlockListTable({
   const [blocks, loading] = useBlockList(latestBlockNo, page, pageSize);
 
   const body = blocks.map(b => [
-    <Link key={b.height} href={`${pathname}/${b.height}`} underline="hover">
+    <Link key={b.height} href={`${pathname}/${b.height}`}>
       {b.height}
     </Link>,
     formatUnixTime(b.timeEpochUTC),

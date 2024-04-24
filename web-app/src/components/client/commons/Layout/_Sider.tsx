@@ -95,11 +95,13 @@ export default React.memo(function Sider({
                 <ListItemText
                   primary={
                     isSelected ? (
-                      <Typography color="primary">
+                      <Typography>
                         <strong>{menuItem.name}</strong>
                       </Typography>
                     ) : (
-                      menuItem.name
+                      <Typography color="text.secondary">
+                        {menuItem.name}
+                      </Typography>
                     )
                   }
                 />

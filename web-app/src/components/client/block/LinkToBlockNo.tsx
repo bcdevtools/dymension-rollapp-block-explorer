@@ -1,8 +1,8 @@
 'use client';
 
+import Link from '@/components/commons/Link';
 import { Path } from '@/consts/path';
 import { getNewPathByRollapp } from '@/utils/common';
-import Link from '@mui/material/Link';
 import { usePathname } from 'next/navigation';
 
 type LinkTopBlockNoProps = Readonly<{
@@ -12,9 +12,7 @@ type LinkTopBlockNoProps = Readonly<{
 export default function LinkToBlockNo({ blockNo }: LinkTopBlockNoProps) {
   const pathname = usePathname();
   return (
-    <Link
-      href={`${getNewPathByRollapp(pathname, Path.BLOCKS)}/${blockNo}`}
-      underline="hover">
+    <Link href={`${getNewPathByRollapp(pathname, Path.BLOCKS)}/${blockNo}`}>
       {blockNo}
     </Link>
   );

@@ -1,5 +1,5 @@
 import Error from '@/components/client/commons/Error';
-import Link from '@mui/material/Link';
+import Link from '@/components/commons/Link';
 
 export default function NotFound() {
   return (
@@ -8,10 +8,7 @@ export default function NotFound() {
       //@ts-ignore
       title={
         <>
-          Could not find requested resource.{' '}
-          <Link href="/" underline="hover">
-            Return Home
-          </Link>
+          Could not find requested resource. <Link href="/">Return Home</Link>
         </>
       }
     />

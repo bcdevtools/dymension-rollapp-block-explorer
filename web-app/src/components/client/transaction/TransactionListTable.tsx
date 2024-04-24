@@ -1,7 +1,6 @@
 'use client';
 
 import { getNewPathByRollapp } from '@/utils/common';
-import Link from '@mui/material/Link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import DataTable from '../../commons/DataTable';
 import {
@@ -15,6 +14,7 @@ import Chip from '@mui/material/Chip';
 import { Path } from '@/consts/path';
 import { formatUnixTime } from '@/utils/datetime';
 import { getMessageName } from '@/utils/transaction';
+import Link from '@/components/commons/Link';
 
 type TransactionListTableProps = Readonly<{
   transactions: Required<{
@@ -58,8 +58,7 @@ export default function TransactionListTable({
       cells.push(
         <Link
           key={hash}
-          href={getNewPathByRollapp(pathname, `/${Path.TRANSACTIONS}/${hash}`)}
-          underline="hover">
+          href={getNewPathByRollapp(pathname, `/${Path.TRANSACTIONS}/${hash}`)}>
           {hash.substring(0, 6)}...{hash.substring(hash.length - 6)}
         </Link>
       );

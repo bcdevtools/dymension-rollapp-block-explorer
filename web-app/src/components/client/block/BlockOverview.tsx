@@ -2,7 +2,6 @@
 
 import { useBlockList } from '@/hooks/useBlockList';
 import { useLatestBlock } from '@/hooks/useLatestBlock';
-import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import { getNewPathByRollapp } from '@/utils/common';
@@ -14,6 +13,7 @@ import { styled } from '@mui/material/styles';
 import { getTimeDurationDisplay } from '@/utils/datetime';
 import dayjs from 'dayjs';
 import Skeleton from '@mui/material/Skeleton';
+import Link from '@/components/commons/Link';
 
 const DEFAULT_BLOCK_OVERVIEW_SIZE = 4;
 
@@ -62,15 +62,14 @@ export default function BlockOverview() {
                     href={getNewPathByRollapp(
                       pathname,
                       `${Path.BLOCKS}/${block.height}`
-                    )}
-                    underline="hover">
-                    <b>{block.height}</b>
+                    )}>
+                    {block.height}
                   </Link>
                 </Typography>
-                <Box>
+                <Typography color="text.secondary">
                   {block.txs.length} Transactions{' • '}
                   {getTimeDurationDisplay(dayjs.unix(block.timeEpochUTC))}
-                </Box>
+                </Typography>
               </StyledPaper>
             </Grid>
           ))}

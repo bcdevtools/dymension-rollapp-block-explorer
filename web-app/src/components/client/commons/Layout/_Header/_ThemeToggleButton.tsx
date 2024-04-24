@@ -5,7 +5,9 @@ import ThemeContext from '@/contexts/ThemeContext';
 import { ThemeMode } from '@/consts/theme';
 import { useTheme } from '@mui/material/styles';
 
-export default function ThemeToggleButton() {
+export default function ThemeToggleButton({
+  isDark,
+}: Readonly<{ isDark: boolean }>) {
   const theme = useTheme();
   return (
     <ThemeContext.Consumer>
@@ -13,7 +15,7 @@ export default function ThemeToggleButton() {
         <IconButton
           aria-label="theme toggle"
           size="large"
-          color="primary"
+          color={isDark ? 'primary' : 'inherit'}
           edge="end"
           sx={{ ml: 2 }}
           onClick={context.handleThemeToggle}>

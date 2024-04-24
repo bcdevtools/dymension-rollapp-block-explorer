@@ -22,7 +22,7 @@ export default function CosmosEventLogs({
           {event.attributes.map((attr, idx) => (
             <Grid key={idx} container item xs={12}>
               <Grid item xs={12} lg={3}>
-                <Typography color="grey">{attr.key}</Typography>
+                <Typography color="text.secondary">{attr.key}</Typography>
               </Grid>
               <Grid item xs={12} lg={9}>
                 <Typography>{attr.value}</Typography>

@@ -23,7 +23,7 @@ function BlockSummaryCard({
           height="100%"
           width="100%"
           justifyContent="space-between">
-          <Typography variant="subtitle2" color="grey" gutterBottom>
+          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
             {label}
           </Typography>
           {loading ? <Skeleton /> : children}
@@ -38,7 +38,7 @@ export default function BlockListPage() {
 
   return (
     <>
-      <Grid container spacing={2} sx={{ mb: 3, mt: 1 }}>
+      <Grid container spacing={2} sx={{ mb: 3 }}>
         <BlockSummaryCard label="Block Height" loading={loading}>
           <Typography variant="h6">
             <strong>{latestBlockNo}</strong>

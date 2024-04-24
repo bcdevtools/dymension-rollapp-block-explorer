@@ -51,7 +51,7 @@ export default React.memo(function RollappSelect({
                 marginRight={1}>
                 <strong>{rollapp.name}</strong>
               </Typography>
-              <Typography variant="subtitle2" color="grey">
+              <Typography variant="subtitle2" color="text.secondary">
                 {rollapp.chain_id}
               </Typography>
             </MenuItem>

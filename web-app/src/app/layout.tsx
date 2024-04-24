@@ -21,7 +21,7 @@ export default async function RootLayout({
   const themeCookie = cookieStore.get('theme');
   const themeMode = themeCookie
     ? (themeCookie.value as ThemeMode)
-    : ThemeMode.LIGHT;
+    : ThemeMode.DARK;
 
   const chainInfos = await getChainInfos();
 
