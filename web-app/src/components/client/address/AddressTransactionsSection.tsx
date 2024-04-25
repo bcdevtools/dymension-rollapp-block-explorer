@@ -35,7 +35,7 @@ export default function AddressTransactionsSection({
     <Card>
       <Tabs
         value={txType}
-        sx={{ mb: 2 }}
+        sx={{ mb: 3 }}
         onChange={(e, newValue) => {
           const newSearchParams = new URLSearchParams(
             newValue && {

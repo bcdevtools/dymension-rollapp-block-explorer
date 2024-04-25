@@ -2,7 +2,7 @@ import Card from '@/components/commons/Card';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import { Transaction } from '@/consts/rpcResTypes';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import CosmosEventLogs from './_CosmosEventLogs';
 import Messages from './_Messages';
 import DefaultLoading from '@/components/commons/DefaultLoading';
@@ -11,6 +11,7 @@ import EvmReceiptDetails from './_EvmReceiptDetails';
 import EvmEventLogs from './_EvmEventLogs';
 import { TransactionType } from '@/consts/transaction';
 import { getTransactionType } from '@/utils/transaction';
+import Box from '@mui/material/Box';
 
 type TransactionDataProps = Readonly<{
   transaction: Transaction | null;
@@ -83,31 +84,34 @@ export default function TransactionData({ transaction }: TransactionDataProps) {
         <DefaultLoading />
       ) : (
         <>
-          <Tabs
-            value={tabValue}
-            sx={{ mb: 2 }}
-            onChange={(e, newValue) => setCurrentTab(newValue)}>
-            {getTabsByTransaction(transaction, transactionType!).map(tab => (
-              <Tab key={tab.value} label={tab.label} value={tab.value} />
-            ))}
-          </Tabs>
-          {(function () {
-            switch (tabValue) {
-              case TabValue.MESSAGES:
-              default:
-                return <Messages transaction={transaction} />;
-              case TabValue.COSMOS_EVENT_LOGS:
-                return <CosmosEventLogs transaction={transaction} />;
-              case TabValue.EVM_DETAILS:
-                return <EvmDetails transaction={transaction} />;
-              case TabValue.EVM_RECEIPT:
-                return <EvmReceiptDetails transaction={transaction} />;
-              case TabValue.EVM_EVENT_LOGS:
-                return <EvmEventLogs transaction={transaction} />;
-              case TabValue.COSMOS_EVENT_LOGS:
-                return <CosmosEventLogs transaction={transaction} />;
-            }
-          })()}
+          <Box mb={3} borderBottom={1} borderColor="divider">
+            <Tabs
+              value={tabValue}
+              onChange={(e, newValue) => setCurrentTab(newValue)}>
+              {getTabsByTransaction(transaction, transactionType!).map(tab => (
+                <Tab key={tab.value} label={tab.label} value={tab.value} />
+              ))}
+            </Tabs>
+          </Box>
+          <Box>
+            {(function () {
+              switch (tabValue) {
+                case TabValue.MESSAGES:
+                default:
+                  return <Messages transaction={transaction} />;
+                case TabValue.COSMOS_EVENT_LOGS:
+                  return <CosmosEventLogs transaction={transaction} />;
+                case TabValue.EVM_DETAILS:
+                  return <EvmDetails transaction={transaction} />;
+                case TabValue.EVM_RECEIPT:
+                  return <EvmReceiptDetails transaction={transaction} />;
+                case TabValue.EVM_EVENT_LOGS:
+                  return <EvmEventLogs transaction={transaction} />;
+                case TabValue.COSMOS_EVENT_LOGS:
+                  return <CosmosEventLogs transaction={transaction} />;
+              }
+            })()}
+          </Box>
         </>
       )}
     </Card>

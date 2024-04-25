@@ -17,7 +17,7 @@ import { Path } from '@/consts/path';
 import { useRollappStore } from '@/stores/rollappStore';
 import { getNewPathByRollapp, isNotFoundPath } from '@/utils/common';
 import RollappSelect from '../RollappSelect';
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 
 type SiderProps = Readonly<{
   menuOpen: boolean;

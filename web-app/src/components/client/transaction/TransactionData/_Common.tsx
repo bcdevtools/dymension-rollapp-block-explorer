@@ -1,14 +1,12 @@
 import Grid from '@mui/material/Grid';
 import React from 'react';
 import Typography from '@mui/material/Typography';
-import { Erc20ContractInfo } from '@/consts/rpcResTypes';
-import { divideAmountByDecimals, hexToDec } from '@/utils/number';
 
 export function ItemContainer({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <Grid container spacing={1}>
+    <Grid container spacing={2}>
       {children}
     </Grid>
   );
