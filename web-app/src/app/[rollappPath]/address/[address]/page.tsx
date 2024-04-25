@@ -95,7 +95,7 @@ export default async function Address({ params, searchParams }: AddressProps) {
   return (
     <>
       <PageTitle
-        title="Address"
+        title="Account"
         subtitle={
           <>
             {bech32Address}
