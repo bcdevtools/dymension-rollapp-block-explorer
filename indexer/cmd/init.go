@@ -50,6 +50,8 @@ indexing:
   url-check: 5m # interval health-check Json-RPC urls
   index-block: 10s # interval indexing new block each chain
   disable-retry-failed-blocks: false
+  whitelist: []
+  ignore-list: []
 logging:
   level: info # debug || info || error
   format: text # text || json
