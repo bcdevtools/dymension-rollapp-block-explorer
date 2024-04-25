@@ -31,7 +31,7 @@ export default function AddressSummary({
       <Card sx={{ mb: 3 }}>
         <Tabs
           value={tab}
-          sx={{ mb: 2 }}
+          sx={{ mb: 3 }}
           onChange={(e, value) => void setTab(value)}>
           <Tab
             value={AccountSummaryTab.COINS}
