@@ -136,7 +136,9 @@ export default function DataTable({
             <TableRow>
               {headers.map((header, idx) => (
                 <TableCell key={idx}>
-                  <Typography color="text.secondary">{header}</Typography>
+                  <Typography color="text.secondary">
+                    <b>{header}</b>
+                  </Typography>
                 </TableCell>
               ))}
             </TableRow>
