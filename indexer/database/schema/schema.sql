@@ -313,3 +313,16 @@ CREATE TABLE failed_block (
 
     CONSTRAINT failed_block_pkey PRIMARY KEY (chain_id, height)
 ) PARTITION BY LIST(chain_id);
+
+-- table partition_table_info
+CREATE TABLE partition_table_info (
+    partition_table_name    TEXT    NOT NULL,
+    large_table_name        TEXT    NOT NULL,
+    partition_key           TEXT    NOT NULL, -- string representation of partition keys
+
+    -- partition key parts, is part 1 only if single partition key, part 2 is optional when multi-key combined
+    partition_key_part_1    TEXT    NOT NULL,
+    partition_key_part_2    TEXT,
+    CONSTRAINT partition_table_info_pkey PRIMARY KEY (partition_table_name)
+);
+CREATE INDEX pti_table_name_index ON partition_table_info(large_table_name);
