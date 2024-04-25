@@ -112,3 +112,13 @@ export function toSortedDenoms(accountBalances: AccountBalances) {
     return isIbcA ? 1 : -1;
   });
 }
+
+function addSpaceBetweenWords(word: string) {
+  return word.replace(/\B(?=[A-Z])/g, ' ');
+}
+
+export function getPrototypeFromTypeUrl(typeUrl: string) {
+  const matched = typeUrl.match(/(?<=\.)[^\.]+$/);
+  if (!matched) return addSpaceBetweenWords(typeUrl);
+  else return addSpaceBetweenWords(matched[0]);
+}

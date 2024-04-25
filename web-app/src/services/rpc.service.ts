@@ -1,4 +1,5 @@
 import {
+  Account,
   AccountBalances,
   Block,
   ChainInfo,
@@ -11,6 +12,7 @@ import {
   CallRpcOptions,
   RpcClient,
   getAccountBalancesParam,
+  getAccountParam,
   getBlockByNumberParam,
   getChainInfoParam,
   getErc20ContractInfo,
@@ -90,7 +92,9 @@ export class RpcService {
   ) {
     if (Array.isArray(contractsAddress))
       return this._rpcClient.callRpc(
-        contractsAddress.map(contractAddress => getErc20ContractInfo(contractAddress)),
+        contractsAddress.map(contractAddress =>
+          getErc20ContractInfo(contractAddress)
+        ),
         callRpcOptions
       );
     else
@@ -118,5 +122,12 @@ export class RpcService {
       getAccountBalancesParam(address),
       fetchOptions
     );
+  }
+
+  getAccount(
+    address: string,
+    fetchOptions?: CallRpcOptions
+  ): RpcResult<Account> {
+    return this._rpcClient.callRpc(getAccountParam(address), fetchOptions);
   }
 }

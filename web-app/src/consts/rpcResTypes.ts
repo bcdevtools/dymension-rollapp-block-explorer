@@ -140,6 +140,14 @@ export interface AccountBalances {
   [denom: string]: string;
 }
 
+export interface Account {
+  address: { cosmos: string; evm: string };
+  balances: AccountBalances;
+  staking: any;
+  txsCount: number;
+  typeUrl: string;
+}
+
 export interface Erc20ContractInfo {
   name: string;
   symbol: string;

@@ -1,7 +1,5 @@
 import AddressTransactionsSection from '@/components/client/address/AddressTransactionsSection';
 import AddressSummary from '@/components/client/address/AddressSummary';
-import CopyButton from '@/components/client/commons/CopyButton';
-import PageTitle from '@/components/commons/PageTitle';
 import {
   AddressPageSearchParams,
   AddressTransactionType,
@@ -26,6 +24,7 @@ import {
   getAccountTransactions,
 } from '@/services/db/accounts';
 import TransactionListTable from '@/components/client/transaction/TransactionListTable';
+import { AddressPageTitle } from '@/components/client/address/AddressPageTitle';
 
 type AddressProps = Readonly<{
   params: { address: string; rollappPath: string };
@@ -94,22 +93,7 @@ export default async function Address({ params, searchParams }: AddressProps) {
 
   return (
     <>
-      <PageTitle
-        title="Address"
-        subtitle={
-          <>
-            <b>{bech32Address}</b>
-            <CopyButton size="small" textToCopy={bech32Address} />
-            {isEVMChain && (
-              <>
-                <br />
-                <b>{evmAddress}</b>
-                <CopyButton size="small" textToCopy={evmAddress!} />
-              </>
-            )}
-          </>
-        }
-      />
+      <AddressPageTitle bech32Address={bech32Address} evmAddress={evmAddress} />
       <AddressSummary address={bech32Address} />
       <AddressTransactionsSection
         txType={searchParams.txType as AddressTransactionType}>
