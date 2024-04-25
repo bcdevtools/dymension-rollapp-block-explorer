@@ -98,12 +98,12 @@ export default async function Address({ params, searchParams }: AddressProps) {
         title="Address"
         subtitle={
           <>
-            {bech32Address}
+            <b>{bech32Address}</b>
             <CopyButton size="small" textToCopy={bech32Address} />
             {isEVMChain && (
               <>
                 <br />
-                {evmAddress}
+                <b>{evmAddress}</b>
                 <CopyButton size="small" textToCopy={evmAddress!} />
               </>
             )}

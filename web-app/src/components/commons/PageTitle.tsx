@@ -14,7 +14,7 @@ export default function PageTitle({ title, subtitle }: PageTitleProps) {
         <b>{title}</b>
       </Typography>
       {subtitle && (
-        <Typography variant="subtitle1" color="text.secondary">
+        <Typography variant="subtitle2" color="text.secondary">
           {subtitle}
         </Typography>
       )}
