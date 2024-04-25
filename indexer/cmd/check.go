@@ -15,7 +15,7 @@ var checkCmd = &cobra.Command{
 		conf, err := loadConfig(homeDir)
 		libutils.ExitIfErr(err, "unable to load configuration")
 
-		chainList, err := loadChainList(homeDir)
+		chainList, err := loadChainList(homeDir, conf)
 		libutils.ExitIfErr(err, "unable to load chain list configuration")
 
 		// Output some options to console
