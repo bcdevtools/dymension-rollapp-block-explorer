@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography';
 import React from 'react';
 
 type PageTitleProps = Readonly<{
-  title: string;
+  title: React.ReactNode;
   subtitle?: React.ReactNode | null;
 }>;
 
