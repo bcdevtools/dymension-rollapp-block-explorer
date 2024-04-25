@@ -72,6 +72,7 @@ Templates for Unreleased:
 - (chain) [#42](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/42) Chain based config expiry
 - (search) [#48](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/48) Interchain search & refactor code
 - (other) [#54](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/54) Add new flat mode in snapshot helper
+- (sql) [#66](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/66) Store partitioned tables name
 
 ### Improvements
 
