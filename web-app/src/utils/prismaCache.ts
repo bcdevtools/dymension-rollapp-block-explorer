@@ -38,10 +38,7 @@ function queryWithCache<T, A, F extends Operation>(
   else {
     const { revalidate = DEFAULT_CACHE_DURATION, tags } = cacheStrategy;
     return unstable_cache(
-      actionQuery => {
-        console.log('result', 'ahihi');
-        return context[action](actionQuery);
-      },
+      actionQuery => context[action](actionQuery),
       [
         cacheStrategy.key ||
           `${(this as any).name}-${action}-${stringify(queryArgs)}`,
