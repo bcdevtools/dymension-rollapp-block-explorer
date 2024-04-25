@@ -28,6 +28,8 @@ type Indexing struct {
 	UrlCheckInterval              time.Duration `mapstructure:"url-check"`
 	IndexBlockInterval            time.Duration `mapstructure:"index-block"`
 	DisableRetryIndexFailedBlocks bool          `mapstructure:"disable-retry-failed-blocks"`
+	Whitelist                     []string      `mapstructure:"whitelist"`
+	IgnoreList                    []string      `mapstructure:"ignore-list"`
 }
 
 // Secret is the structure representation of configuration from `config.yaml` file, at `secret` section.
@@ -89,6 +91,16 @@ func (c Config) PrintOptions() {
 	headerPrintf("  + Json-RPC URL health-check every: %s\n", c.IndexingConfig.UrlCheckInterval)
 	headerPrintf("  + Index new block every: %s\n", c.IndexingConfig.IndexBlockInterval)
 	headerPrintf("  + Disable retry failed blocks: %t\n", c.IndexingConfig.DisableRetryIndexFailedBlocks)
+	if len(c.IndexingConfig.Whitelist) > 0 {
+		headerPrintf("  + Whitelist: %v\n", c.IndexingConfig.Whitelist)
+	} else {
+		headerPrintln("  + No whitelist")
+	}
+	if len(c.IndexingConfig.IgnoreList) > 0 {
+		headerPrintf("  + Ignore list: %v\n", c.IndexingConfig.IgnoreList)
+	} else {
+		headerPrintln("  + No ignore list")
+	}
 	headerPrintln("- Tokens configuration:")
 	if len(c.SecretConfig.TelegramToken) > 0 {
 		headerPrintln("  + Telegram bot token has set")

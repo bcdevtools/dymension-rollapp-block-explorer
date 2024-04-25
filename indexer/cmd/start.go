@@ -34,7 +34,7 @@ var startCmd = &cobra.Command{
 		conf, err := loadConfig(homeDir)
 		libutils.ExitIfErr(err, "unable to load configuration")
 
-		chainList, err := loadChainList(homeDir)
+		chainList, err := loadChainList(homeDir, conf)
 		libutils.ExitIfErr(err, "unable to load chain list configuration")
 
 		// Perform validation
@@ -114,7 +114,7 @@ var startCmd = &cobra.Command{
 			for {
 				time.Sleep(primaryWait)
 
-				chainList, err := loadChainList(homeDir)
+				chainList, err := loadChainList(homeDir, conf)
 				if err != nil {
 					logger.Error("chain list invalid, hot-reload failed", "error", err.Error())
 					continue
