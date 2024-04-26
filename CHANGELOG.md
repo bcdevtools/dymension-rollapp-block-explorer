@@ -94,6 +94,7 @@ Templates for Unreleased:
 - (txs) [#56](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/56) Simple translate EVM event logs
 - (txs) [#59](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/59) Mapping contracts name and translate events
 - (indexer) [#64](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/64) Whitelist and Ignore-list for indexer
+- (sql) [#70](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/70) Remove record from `partition_table_info` when drop corresponding partitioned table.
 
 ### Bug Fixes
 
