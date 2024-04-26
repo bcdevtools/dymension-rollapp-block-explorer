@@ -123,29 +123,18 @@ func NewDatabaseIntegrationTestSuite(
 			t,
 			runPsql("postgres", "postgres", "-c", fmt.Sprintf("ALTER DATABASE %s OWNER TO %s;", databaseName, databaseOwner)),
 		)
+
 		const schemaDir = "../schema"
-		files, err := os.ReadDir(schemaDir)
-		require.NoErrorf(t, err, "failed to read schema dir %s", schemaDir)
-		for _, file := range files {
-			if !strings.HasSuffix(file.Name(), ".sql") {
-				continue
-			}
-			filePath := path.Join(schemaDir, file.Name())
-			_, err := os.Stat(filePath)
-			if err != nil {
-				if os.IsNotExist(err) {
-					pwd, err := os.Getwd()
-					require.NoError(t, err, "failed to get current working dir")
-					panic(fmt.Sprintf("Wrong working dir, schema could not be found. Current working dir: %s", pwd))
-				}
-			}
-			require.NoError(t, err)
-			require.NoErrorf(
-				t,
-				runPsql(databaseName, databaseOwner, "-f", filePath),
-				"failed to create schema from file %s", file.Name(),
-			)
-		}
+
+		filePathSchemaSql := path.Join(schemaDir, "schema.sql")
+		_, err = os.Stat(filePathSchemaSql)
+		require.NoError(t, err)
+		runPsql(databaseName, databaseOwner, "-f", filePathSchemaSql)
+
+		filePathSuperSchemaSql := path.Join(schemaDir, "super-schema.sql")
+		_, err = os.Stat(filePathSuperSchemaSql)
+		require.NoError(t, err)
+		runPsql(databaseName, "postgres", "-f", filePathSuperSchemaSql)
 	}
 
 	// Initialize connection
