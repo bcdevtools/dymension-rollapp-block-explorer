@@ -318,6 +318,8 @@ CREATE TABLE failed_block (
 CREATE TABLE partition_table_info (
     partition_table_name    TEXT    NOT NULL,
     large_table_name        TEXT    NOT NULL,
+
+    -- for information only
     partition_key           TEXT    NOT NULL, -- string representation of partition keys
 
     -- partition key parts, is part 1 only if single partition key, part 2 is optional when multi-key combined
@@ -325,4 +327,4 @@ CREATE TABLE partition_table_info (
     partition_key_part_2    TEXT,
     CONSTRAINT partition_table_info_pkey PRIMARY KEY (partition_table_name)
 );
-CREATE INDEX pti_table_name_index ON partition_table_info(large_table_name);
+CREATE INDEX pti_table_and_key1_index ON partition_table_info(large_table_name, partition_key_part_1);
