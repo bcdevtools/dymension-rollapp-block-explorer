@@ -51,8 +51,8 @@ pm2 logs web-app
 pm2 logs web-app --lines 200
 
 # Managing
-pm2 restart app_name
-pm2 reload app_name
-pm2 stop app_name
-pm2 delete app_name
+pm2 restart web-app
+pm2 reload web-app
+pm2 stop web-app
+pm2 delete web-app
 ```
