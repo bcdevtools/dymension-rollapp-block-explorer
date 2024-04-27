@@ -12,7 +12,7 @@ type LinkTopBlockNoProps = Readonly<{
 export default function LinkToBlockNo({ blockNo }: LinkTopBlockNoProps) {
   const pathname = usePathname();
   return (
-    <Link href={`${getNewPathByRollapp(pathname, Path.BLOCKS)}/${blockNo}`}>
+    <Link href={`${getNewPathByRollapp(pathname, Path.BLOCK)}/${blockNo}`}>
       {blockNo}
     </Link>
   );

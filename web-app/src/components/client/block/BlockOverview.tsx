@@ -61,7 +61,7 @@ export default function BlockOverview() {
                   <Link
                     href={getNewPathByRollapp(
                       pathname,
-                      `${Path.BLOCKS}/${block.height}`
+                      `${Path.BLOCK}/${block.height}`
                     )}>
                     {block.height}
                   </Link>
