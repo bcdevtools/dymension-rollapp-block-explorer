@@ -48,7 +48,9 @@ export default function BlockListTable({
   const [blocks, loading] = useBlockList(latestBlockNo, page, pageSize);
 
   const body = blocks.map(b => [
-    <Link key={b.height} href={`${pathname}/${b.height}`}>
+    <Link 
+      key={b.height} 
+      href={getNewPathByRollapp(pathname, `/${Path.BLOCK}/${b.height}`)}>
       {b.height}
     </Link>,
     formatUnixTime(b.timeEpochUTC),
