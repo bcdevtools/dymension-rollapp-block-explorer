@@ -24,8 +24,12 @@ export function AddressPageTitle({
   );
 
   useEffect(() => {
-    if (account && account.typeUrl) {
-      setPrototype(getPrototypeFromTypeUrl(account.typeUrl));
+    if (account) {
+      if (account.contract) {
+        setPrototype(`Smart Contract${account.contract.name ? `: ${account.contract.name}` : ''}${account.contract.symbol ? ` (${account.contract.symbol})` : ''}`);
+      } else if (account.typeUrl) {
+        setPrototype(getPrototypeFromTypeUrl(account.typeUrl));
+      }
     }
   }, [account]);
   return (
