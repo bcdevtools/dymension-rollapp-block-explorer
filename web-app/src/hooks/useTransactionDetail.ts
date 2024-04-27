@@ -53,7 +53,7 @@ export default function useTransactionDetail(
                 });
               }
 
-              if (_transaction.result?.success) {
+              if (_transaction.result?.success && uniqueContractAddresses.size > 0) {
                 const contractAddressToErc20ContractInfo = new Map<
                   string,
                   Erc20ContractInfo

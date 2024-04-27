@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography';
 import React from 'react';
 
 type PageTitleProps = Readonly<{
-  title: string;
+  title: React.ReactNode;
   subtitle?: React.ReactNode | null;
 }>;
 
@@ -14,7 +14,7 @@ export default function PageTitle({ title, subtitle }: PageTitleProps) {
         <b>{title}</b>
       </Typography>
       {subtitle && (
-        <Typography variant="subtitle1" color="text.secondary">
+        <Typography variant="subtitle2" color="text.secondary">
           {subtitle}
         </Typography>
       )}

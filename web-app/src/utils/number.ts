@@ -1,7 +1,6 @@
 import Big from 'big.js';
 
 export function formatNumber(value: number | Big | string) {
-  if (typeof value === 'number') return value.toLocaleString();
   return formatNumberString(value.toString());
 }
 
@@ -13,7 +12,11 @@ export function hexToDec(hexStr: string) {
 }
 
 export function formatNumberString(value: string) {
-  return value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const splitted = value.split('.');
+
+  splitted[0] = splitted[0].replace(/\B(?=(\d{3})+$)/g, ',');
+  if (splitted.length === 1) return splitted[0];
+  return splitted.join('.');
 }
 
 export function divideAmountByDecimals(amount: Big | string, decimals: number) {

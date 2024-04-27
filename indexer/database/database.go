@@ -25,8 +25,8 @@ type Database interface {
 	// PreparePartitionedTablesForChainId create partitioned tables for the corresponding chain-id.
 	PreparePartitionedTablesForChainId(chainId string) error
 
-	// PreparePartitionedTablesForEpoch create partitioned tables for the corresponding epoch UTC.
-	PreparePartitionedTablesForEpoch(epochUtcSeconds int64) error
+	// PreparePartitionedTablesForEpochAndChainId create partitioned tables for the corresponding epoch UTC and chain-id.
+	PreparePartitionedTablesForEpochAndChainId(epochUtcSeconds int64, chainId string) error
 
 	// Chains info
 

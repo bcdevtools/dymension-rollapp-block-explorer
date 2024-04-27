@@ -75,27 +75,31 @@ function TablePaginationActions({
     <Box flexShrink={0} marginLeft={2.5}>
       <IconButton
         onClick={handleFirstPageButtonClick}
+        color="secondary"
         disabled={page === 0}
         aria-label="first page">
-        <FirstPageIcon color="secondary" />
+        <FirstPageIcon />
       </IconButton>
       <IconButton
         onClick={handleBackButtonClick}
+        color="secondary"
         disabled={page === 0}
         aria-label="previous page">
-        <KeyboardArrowLeft color="secondary" />
+        <KeyboardArrowLeft />
       </IconButton>
       <IconButton
         onClick={handleNextButtonClick}
+        color="secondary"
         disabled={page >= maxPage}
         aria-label="next page">
-        <KeyboardArrowRight color="secondary" />
+        <KeyboardArrowRight />
       </IconButton>
       <IconButton
         onClick={handleLastPageButtonClick}
+        color="secondary"
         disabled={page >= maxPage}
         aria-label="last page">
-        <LastPageIcon color="secondary" />
+        <LastPageIcon />
       </IconButton>
     </Box>
   );
@@ -136,7 +140,9 @@ export default function DataTable({
             <TableRow>
               {headers.map((header, idx) => (
                 <TableCell key={idx}>
-                  <Typography color="text.secondary">{header}</Typography>
+                  <Typography color="text.secondary">
+                    <b>{header}</b>
+                  </Typography>
                 </TableCell>
               ))}
             </TableRow>

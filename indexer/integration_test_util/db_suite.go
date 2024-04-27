@@ -123,29 +123,20 @@ func NewDatabaseIntegrationTestSuite(
 			t,
 			runPsql("postgres", "postgres", "-c", fmt.Sprintf("ALTER DATABASE %s OWNER TO %s;", databaseName, databaseOwner)),
 		)
+
 		const schemaDir = "../schema"
-		files, err := os.ReadDir(schemaDir)
-		require.NoErrorf(t, err, "failed to read schema dir %s", schemaDir)
-		for _, file := range files {
-			if !strings.HasSuffix(file.Name(), ".sql") {
-				continue
-			}
-			filePath := path.Join(schemaDir, file.Name())
-			_, err := os.Stat(filePath)
-			if err != nil {
-				if os.IsNotExist(err) {
-					pwd, err := os.Getwd()
-					require.NoError(t, err, "failed to get current working dir")
-					panic(fmt.Sprintf("Wrong working dir, schema could not be found. Current working dir: %s", pwd))
-				}
-			}
-			require.NoError(t, err)
-			require.NoErrorf(
-				t,
-				runPsql(databaseName, databaseOwner, "-f", filePath),
-				"failed to create schema from file %s", file.Name(),
-			)
-		}
+
+		filePathSchemaSql := path.Join(schemaDir, "schema.sql")
+		_, err = os.Stat(filePathSchemaSql)
+		require.NoError(t, err)
+		err = runPsql(databaseName, databaseOwner, "-f", filePathSchemaSql)
+		require.NoError(t, err)
+
+		filePathSuperSchemaSql := path.Join(schemaDir, "super-schema.sql")
+		_, err = os.Stat(filePathSuperSchemaSql)
+		require.NoError(t, err)
+		err = runPsql(databaseName, "postgres", "-f", filePathSuperSchemaSql)
+		require.NoError(t, err)
 	}
 
 	// Initialize connection
@@ -192,10 +183,12 @@ func NewDatabaseIntegrationTestSuite(
 				require.NoError(t, err)
 			}
 		}
-		for _, tableName := range constants.GetTablesPartitionedByEpochWeek() {
+		for _, tableName := range constants.GetTablesPartitionedByEpochWeekAndChainId() {
 			epochWeek := utils.GetEpochWeek(0)
-			for ew := epochWeek - 20; ew <= epochWeek+20; ew++ {
-				result.createPartitionedTableForEpochWeek(tableName, ew)
+			for _, chain := range result.Chains {
+				for ew := epochWeek - 20; ew <= epochWeek+20; ew++ {
+					result.createPartitionedTableForEpochWeekAndChainId(tableName, ew, chain.ChainId)
+				}
 			}
 		}
 	}
@@ -281,14 +274,15 @@ func (suite *DatabaseIntegrationTestSuite) createPartitionedTableForChainId(tabl
 }
 
 // createPartitionTable creates a new partition table for a given table.
-func (suite *DatabaseIntegrationTestSuite) createPartitionedTableForEpochWeek(tableName string, epochWeek int64) {
-	partitionTable := fmt.Sprintf("%s_%d", tableName, epochWeek)
+func (suite *DatabaseIntegrationTestSuite) createPartitionedTableForEpochWeekAndChainId(tableName string, epochWeek int64, chainId string) {
+	partitionTable := utils.GetPartitionedTableNameBySaltInt64AndChainId(tableName, epochWeek, chainId)
+	partitionId := utils.MakePartitionIdFromKeys(epochWeek, chainId)
 
 	stmt := fmt.Sprintf(
-		"CREATE TABLE IF NOT EXISTS %s PARTITION OF %s FOR VALUES IN (%d)",
+		"CREATE TABLE IF NOT EXISTS %s PARTITION OF %s FOR VALUES IN ('%s')",
 		partitionTable,
 		tableName,
-		epochWeek,
+		partitionId,
 	)
 	_, err := suite.Database.Exec(stmt)
 	if err != nil {

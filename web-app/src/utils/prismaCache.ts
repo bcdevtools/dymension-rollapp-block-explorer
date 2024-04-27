@@ -25,26 +25,28 @@ type Operation =
 function queryWithCache<T, A, F extends Operation>(
   this: T,
   action: F,
-  args?: Prisma.Exact<A, Prisma.Args<T, F> & CustomCacheStrategy> | undefined
+  args?: Prisma.Exact<A, Prisma.Args<T, F> & CustomCacheStrategy>
 ): Prisma.PrismaPromise<Prisma.Result<T, A, F>> {
   const context = Prisma.getExtensionContext(this) as any;
-  if (!args) return context[action](args);
+  if (!args) return context[action]();
 
   //@ts-ignore
   const { cacheStrategy, ...queryArgs } = args;
 
-  if (!cacheStrategy || !cacheStrategy.enabled)
+  if (!cacheStrategy || !cacheStrategy.enabled) {
     return context[action](queryArgs);
-  else {
+  } else {
     const { revalidate = DEFAULT_CACHE_DURATION, tags } = cacheStrategy;
     return unstable_cache(
-      () => context[action](queryArgs),
-      [
-        cacheStrategy.key ||
-          `${(this as any).name}-${action}-${stringify(queryArgs)}`,
-      ],
+      actionQuery => {
+        const context = Prisma.getExtensionContext(this) as any;
+        return context[action](actionQuery);
+      },
+      cacheStrategy.key
+        ? [cacheStrategy.key]
+        : [(this as any).name, action, stringify(queryArgs)],
       { revalidate, tags }
-    )();
+    )(queryArgs);
   }
 }
 

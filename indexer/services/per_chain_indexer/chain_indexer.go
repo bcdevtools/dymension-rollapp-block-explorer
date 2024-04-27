@@ -481,33 +481,35 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 		}
 
 		epochWeek := utils.GetEpochWeek(block.TimeEpochUTC)
-		if !d.sharedCache.IsCreatedPartitionsForEpochWeekRL(epochWeek) {
+		if !d.sharedCache.IsCreatedPartitionsForEpochWeekAndChainIdRL(epochWeek, d.chainId) {
 			// prepare partitioned tables for this epoch week
-			sqlErr := utils.ObserveLongOperation("create partitioned tables for epoch week", func() error {
-				return db.PreparePartitionedTablesForEpoch(block.TimeEpochUTC)
+			sqlErr := utils.ObserveLongOperation("create partitioned tables for epoch week and chain-id", func() error {
+				return db.PreparePartitionedTablesForEpochAndChainId(block.TimeEpochUTC, d.chainId)
 			}, 15*time.Second, logger)
 			if sqlErr != nil {
 				// error when preparing the partitioned tables, then it is a fatal error
 
 				logger.Error(
-					"failed to create partitioned tables for epoch, retrying...",
+					"failed to create partitioned tables for epoch and chain-id, retrying...",
 					"epoch-week", epochWeek,
+					"chain-id", d.chainId,
 					"error", sqlErr.Error(),
 				)
 				time.Sleep(15 * time.Second)
 
 				fatalError = errors.Wrap(
 					sqlErr,
-					fmt.Sprintf("failed to create partitioned tables for epoch week: %d", epochWeek),
+					fmt.Sprintf("failed to create partitioned tables for epoch week %d and chain id %s", epochWeek, d.chainId),
 				)
 				return
 			}
 
 			logger.Info(
-				"successfully prepared partitioned tables for epoch week",
+				"successfully prepared partitioned tables for epoch week and chain id",
 				"epoch-week", epochWeek,
+				"chain-id", d.chainId,
 			)
-			d.sharedCache.MarkCreatedPartitionsForEpochWeekWL(epochWeek)
+			d.sharedCache.MarkCreatedPartitionsForEpochWeekAndChainIdWL(epochWeek, d.chainId)
 		}
 
 		dbTx, sqlErr := db.BeginDatabaseTransaction(context.Background())

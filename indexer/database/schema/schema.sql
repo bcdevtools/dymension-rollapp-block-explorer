@@ -9,31 +9,13 @@ CREATE TABLE chain_info (
     latest_indexed_block                BIGINT  NOT NULL DEFAULT 0, -- the latest successfully indexed block height
     increased_latest_indexed_block_at   BIGINT NOT NULL DEFAULT 0, -- the epoch UTC seconds when the latest_indexed_block updated with greater value
     postponed                           BOOLEAN, -- true if the chain is postponed/stopped operation
-    keep_recent_account_tx_count        INT, -- number of recent account txs to keep
+    keep_recent_account_tx_count        INT, -- number of recent account txs to keep, default to be 50
+    keep_weeks_of_recent_txs            INT, -- number of weeks of recent txs to keep, default to be 1, business logic should be buffer 1 more week
     expiry_at_epoch                     BIGINT, -- the epoch UTC seconds when the chain is expired
 
     CONSTRAINT chain_info_pkey PRIMARY KEY (chain_id),
     CONSTRAINT chain_info_unique_chain_name UNIQUE ("name") -- chain name must be unique
 );
--- function get_indexing_fallbehind_chains
--- Used to get the list of chains which indexed block height is behind the current time by more than a specific threshold
-CREATE OR REPLACE FUNCTION get_indexing_fallbehind_chains(threshold_seconds BIGINT) RETURNS TABLE(chain_id TEXT, height BIGINT, epoch BIGINT, epoch_diff BIGINT) AS $$
-DECLARE
-    epoch_utc_now BIGINT;
-BEGIN
-    SELECT FLOOR(EXTRACT(epoch FROM NOW() AT TIME ZONE 'utc' AT TIME ZONE 'utc')::BIGINT)::BIGINT INTO epoch_utc_now;
-    RETURN QUERY SELECT ci.chain_id, ci.height, ci.epoch, ci.epoch_diff FROM (
-		SELECT
-			i.chain_id,
-			i.latest_indexed_block AS height,
-			i.increased_latest_indexed_block_at AS epoch,
-			epoch_utc_now - i.increased_latest_indexed_block_at AS epoch_diff
-		FROM chain_info i
-		WHERE i.postponed IS NOT TRUE AND (i.expiry_at_epoch IS NULL OR i.expiry_at_epoch > epoch_utc_now)
-	) ci
-	WHERE ci.epoch_diff > threshold_seconds
-    ORDER BY ci.epoch_diff DESC;
-END;$$ LANGUAGE plpgsql;
 
 -- table account
 -- Page: search multi-chain accounts, search single-chain, showing account details
@@ -263,7 +245,7 @@ CREATE TABLE transaction (
     chain_id            TEXT    NOT NULL,
     height              BIGINT  NOT NULL,
     hash                TEXT    NOT NULL, -- normalized: Cosmos: uppercase without 0x, Ethereum: lowercase with 0x
-    partition_id        INT     NOT NULL, -- epoch week = FLOOR(epoch UTC seconds / (3600 sec x 24 hours x 7 days))
+    partition_id        TEXT    NOT NULL, -- `${epoch week}_${chain_id}` (epoch week = FLOOR(epoch UTC seconds / (3600 sec x 24 hours x 7 days)))
 
     -- other fields
     epoch               BIGINT  NOT NULL, -- epoch UTC seconds
@@ -318,6 +300,8 @@ CREATE TABLE failed_block (
 CREATE TABLE partition_table_info (
     partition_table_name    TEXT    NOT NULL,
     large_table_name        TEXT    NOT NULL,
+
+    -- for information only
     partition_key           TEXT    NOT NULL, -- string representation of partition keys
 
     -- partition key parts, is part 1 only if single partition key, part 2 is optional when multi-key combined
@@ -325,4 +309,55 @@ CREATE TABLE partition_table_info (
     partition_key_part_2    TEXT,
     CONSTRAINT partition_table_info_pkey PRIMARY KEY (partition_table_name)
 );
-CREATE INDEX pti_table_name_index ON partition_table_info(large_table_name);
+CREATE INDEX pti_table_and_key1_index ON partition_table_info(large_table_name, partition_key_part_1);
+
+-- Helper methods
+
+-- function get_indexing_fallbehind_chains
+-- Used to get the list of chains which indexed block height is behind the current time by more than a specific threshold
+CREATE OR REPLACE FUNCTION get_indexing_fallbehind_chains(threshold_seconds BIGINT) RETURNS TABLE(chain_id TEXT, height BIGINT, epoch BIGINT, epoch_diff BIGINT) AS $$
+DECLARE
+	epoch_utc_now BIGINT;
+BEGIN
+	SELECT FLOOR(EXTRACT(epoch FROM NOW() AT TIME ZONE 'utc' AT TIME ZONE 'utc')::BIGINT)::BIGINT INTO epoch_utc_now;
+	RETURN QUERY SELECT ci.chain_id, ci.height, ci.epoch, ci.epoch_diff FROM (
+		SELECT
+			i.chain_id,
+			i.latest_indexed_block AS height,
+			i.increased_latest_indexed_block_at AS epoch,
+			epoch_utc_now - i.increased_latest_indexed_block_at AS epoch_diff
+		FROM chain_info i
+		WHERE i.postponed IS NOT TRUE AND (i.expiry_at_epoch IS NULL OR i.expiry_at_epoch > epoch_utc_now)
+	) ci
+	WHERE ci.epoch_diff > threshold_seconds
+	ORDER BY ci.epoch_diff DESC;
+END;$$ LANGUAGE plpgsql;
+
+-- function get_partitioned_transaction_tables_to_prune
+-- Used to get the list of partitioned tables of the large table "transaction" which should be pruned, based on configuration and current epoch
+CREATE OR REPLACE FUNCTION get_partitioned_transaction_tables_to_prune(epoch_utc_now BIGINT) RETURNS TABLE(partition_table_name TEXT) AS $$
+DECLARE
+	epoch_input_vs_server_diff BIGINT;
+	current_epoch_week INT;
+BEGIN
+	-- validate input
+	SELECT ABS(FLOOR(EXTRACT(epoch FROM NOW() AT TIME ZONE 'utc' AT TIME ZONE 'utc')::BIGINT)::BIGINT - epoch_utc_now) INTO epoch_input_vs_server_diff;
+	IF epoch_input_vs_server_diff > 86400 THEN
+		RAISE EXCEPTION 'provided epoch UTC vs server epoch UTC has big tolerant %', epoch_input_vs_server_diff;
+	END IF;
+
+	-- prepare variables
+	SELECT FLOOR(epoch_utc_now / (86400 * 7))::INT INTO current_epoch_week;
+
+	--
+	RETURN QUERY SELECT a.partition_table_name FROM (
+		SELECT ci.chain_id, GREATEST(1, COALESCE(ci.keep_weeks_of_recent_txs, 1)) + 1 AS keep_weeks_of_recent_txs_with_buffer, sub_pti.*
+		FROM chain_info ci
+		LEFT JOIN (
+			SELECT pti.partition_table_name, pti.partition_key_part_1, pti.partition_key_part_2
+			FROM partition_table_info pti
+			WHERE pti.large_table_name = 'transaction'
+		) sub_pti
+		ON ci.chain_id = sub_pti.partition_key_part_2
+	) a WHERE current_epoch_week - a.partition_key_part_1::INT >= a.keep_weeks_of_recent_txs_with_buffer;
+END;$$ LANGUAGE plpgsql;
