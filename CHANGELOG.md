@@ -96,6 +96,7 @@ Templates for Unreleased:
 - (indexer) [#64](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/64) Whitelist and Ignore-list for indexer
 - (sql) [#70](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/70) Remove record from `partition_table_info` when drop corresponding partitioned table.
 - (sql) [#71](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/71) Re-partition table `transaction`, use combination of epoch week + chain-id as partition-id
+- (sql) [#72](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/72) Add new column to allow configures number of weeks keep recent txs 
 
 ### Bug Fixes
 

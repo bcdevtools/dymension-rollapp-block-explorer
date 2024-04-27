@@ -32,6 +32,7 @@ model chain_info {
   postponed                         Boolean?
   keep_recent_account_tx_count      Int?
   expiry_at_epoch                   BigInt?
+  keep_weeks_of_recent_txs          Int?
   account                           account[]
 }
 
