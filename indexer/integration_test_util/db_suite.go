@@ -181,10 +181,12 @@ func NewDatabaseIntegrationTestSuite(
 				require.NoError(t, err)
 			}
 		}
-		for _, tableName := range constants.GetTablesPartitionedByEpochWeek() {
+		for _, tableName := range constants.GetTablesPartitionedByEpochWeekAndChainId() {
 			epochWeek := utils.GetEpochWeek(0)
-			for ew := epochWeek - 20; ew <= epochWeek+20; ew++ {
-				result.createPartitionedTableForEpochWeek(tableName, ew)
+			for _, chain := range result.Chains {
+				for ew := epochWeek - 20; ew <= epochWeek+20; ew++ {
+					result.createPartitionedTableForEpochWeekAndChainId(tableName, ew, chain.ChainId)
+				}
 			}
 		}
 	}
@@ -270,14 +272,15 @@ func (suite *DatabaseIntegrationTestSuite) createPartitionedTableForChainId(tabl
 }
 
 // createPartitionTable creates a new partition table for a given table.
-func (suite *DatabaseIntegrationTestSuite) createPartitionedTableForEpochWeek(tableName string, epochWeek int64) {
-	partitionTable := fmt.Sprintf("%s_%d", tableName, epochWeek)
+func (suite *DatabaseIntegrationTestSuite) createPartitionedTableForEpochWeekAndChainId(tableName string, epochWeek int64, chainId string) {
+	partitionTable := utils.GetPartitionedTableNameBySaltInt64AndChainId(tableName, epochWeek, chainId)
+	partitionId := utils.MakePartitionIdFromKeys(epochWeek, chainId)
 
 	stmt := fmt.Sprintf(
-		"CREATE TABLE IF NOT EXISTS %s PARTITION OF %s FOR VALUES IN (%d)",
+		"CREATE TABLE IF NOT EXISTS %s PARTITION OF %s FOR VALUES IN ('%s')",
 		partitionTable,
 		tableName,
-		epochWeek,
+		partitionId,
 	)
 	_, err := suite.Database.Exec(stmt)
 	if err != nil {

@@ -2,6 +2,7 @@ package pg_db_tx
 
 import (
 	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
+	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/utils"
 	"time"
 )
 
@@ -46,7 +47,7 @@ func (suite *IntegrationTestSuite) Test_InsertRecordTransactionsIfNotExists_IT()
 		suite.Equal(originalRecord1.ChainId, record1.ChainId)
 		suite.Equal(originalRecord1.Height, record1.Height)
 		suite.Equal(originalRecord1.Hash, record1.Hash)
-		suite.Equal(originalRecord1.PartitionId, record1.PartitionId)
+		suite.Equal(utils.MakePartitionIdFromKeys(utils.GetEpochWeek(originalRecord1.Epoch), originalRecord1.ChainId), record1.PartitionId)
 		suite.Equal(originalRecord1.Epoch, record1.Epoch)
 		suite.Equal(originalRecord1.MessageTypes, record1.MessageTypes)
 		suite.Equal(originalRecord1.TxType, record1.TxType)
@@ -57,7 +58,7 @@ func (suite *IntegrationTestSuite) Test_InsertRecordTransactionsIfNotExists_IT()
 		suite.Equal(originalRecord2.ChainId, record2.ChainId)
 		suite.Equal(originalRecord2.Height, record2.Height)
 		suite.Equal(originalRecord2.Hash, record2.Hash)
-		suite.Equal(originalRecord2.PartitionId, record2.PartitionId)
+		suite.Equal(utils.MakePartitionIdFromKeys(utils.GetEpochWeek(originalRecord2.Epoch), originalRecord2.ChainId), record2.PartitionId)
 		suite.Equal(originalRecord2.Epoch, record2.Epoch)
 		suite.Equal(originalRecord2.MessageTypes, record2.MessageTypes)
 		suite.Equal(originalRecord2.TxType, record2.TxType)
@@ -81,7 +82,6 @@ func (suite *IntegrationTestSuite) Test_InsertRecordTransactionsIfNotExists_IT()
 		suite.Equal(originalRecord1.ChainId, record1.ChainId)
 		suite.Equal(originalRecord1.Height, record1.Height)
 		suite.Equal(originalRecord1.Hash, record1.Hash)
-		suite.Equal(originalRecord1.PartitionId, record1.PartitionId)
 		suite.Equal(originalRecord1.Epoch, record1.Epoch)
 		suite.Equal(originalRecord1.MessageTypes, record1.MessageTypes)
 		suite.Equal(originalRecord1.TxType, record1.TxType)

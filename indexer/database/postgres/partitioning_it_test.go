@@ -40,8 +40,10 @@ func (suite *IntegrationTestSuite) Test_PreparePartitionedTablesForChainId_IT() 
 }
 
 //goland:noinspection SqlDialectInspection,SqlNoDataSourceInspection
-func (suite *IntegrationTestSuite) Test_PreparePartitionedTablesForEpoch_Week_IT() {
+func (suite *IntegrationTestSuite) Test_PreparePartitionedTablesForEpochAndChainId_Week_IT() {
 	db := suite.Database()
+
+	const chainId = "chain-id-1"
 
 	cntPartitionedTablesInfo := suite.CountRows2("partition_table_info")
 
@@ -50,7 +52,7 @@ func (suite *IntegrationTestSuite) Test_PreparePartitionedTablesForEpoch_Week_IT
 	}
 
 	for id := 1; id <= 10; id++ {
-		err := db.PreparePartitionedTablesForEpoch(generateEpochOfWeek(id))
+		err := db.PreparePartitionedTablesForEpochAndChainId(generateEpochOfWeek(id), chainId)
 		suite.Require().NoError(err)
 
 		newCntPartitionedTablesInfo := suite.CountRows2("partition_table_info")
@@ -58,7 +60,7 @@ func (suite *IntegrationTestSuite) Test_PreparePartitionedTablesForEpoch_Week_IT
 		cntPartitionedTablesInfo = newCntPartitionedTablesInfo
 	}
 
-	err := db.PreparePartitionedTablesForEpoch(generateEpochOfWeek(1))
+	err := db.PreparePartitionedTablesForEpochAndChainId(generateEpochOfWeek(1), chainId)
 	suite.Require().NoError(err)
 	suite.Equal(cntPartitionedTablesInfo, suite.CountRows2("partition_table_info"), "no new record for existing weeks")
 
@@ -82,10 +84,12 @@ func (suite *IntegrationTestSuite) Test_PreparePartitionedTablesForEpoch_Week_IT
 func (suite *IntegrationTestSuite) Test_DropPartitionedTables_IT() {
 	db := suite.Database()
 
+	const chainId = "chain-id-1"
+
 	cntPartitionedTablesInfo := suite.CountRows2("partition_table_info")
 
 	for id := 1; id <= 15; id++ {
-		err := db.PreparePartitionedTablesForEpoch((86400 * 7) * int64(id))
+		err := db.PreparePartitionedTablesForEpochAndChainId((86400*7)*int64(id), chainId)
 		suite.Require().NoError(err)
 
 		newCntPartitionedTablesInfo := suite.CountRows2("partition_table_info")

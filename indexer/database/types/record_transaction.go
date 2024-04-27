@@ -11,7 +11,7 @@ type RecordTransaction struct {
 	ChainId     string
 	Height      int64
 	Hash        string
-	PartitionId int
+	PartitionId string
 
 	Epoch        int64
 	MessageTypes []string
@@ -30,11 +30,12 @@ func NewRecordTransactionForInsert(
 	messageTypes []string,
 	txType string,
 ) RecordTransaction {
+	chainId = utils.NormalizeChainId(chainId)
 	return RecordTransaction{
-		ChainId:      utils.NormalizeChainId(chainId),
+		ChainId:      chainId,
 		Height:       height,
 		Hash:         hash,
-		PartitionId:  int(utils.GetEpochWeek(epoch)),
+		PartitionId:  "",
 		Epoch:        epoch,
 		MessageTypes: messageTypes,
 		TxType:       txType,
@@ -87,8 +88,8 @@ func (t RecordTransaction) ValidateBasic() error {
 		return fmt.Errorf("height must be possitive, got %d", t.Height)
 	}
 
-	if t.PartitionId < 0 {
-		return fmt.Errorf("partition id must be non-negative, got %d", t.PartitionId)
+	if t.PartitionId != "" {
+		return fmt.Errorf("partition id must not be set, got %s", t.PartitionId)
 	}
 
 	if t.Epoch < 1 {
