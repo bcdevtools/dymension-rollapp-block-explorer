@@ -11,6 +11,12 @@ func GetTablesPartitionedByEpochWeek() []string {
 	}
 }
 
+func GetTablesPartitionedByEpochWeekAndChainId() []string {
+	return []string{
+		//"transaction",
+	}
+}
+
 func GetTablesPartitionedByChainId() []string {
 	return []string{
 		"account",

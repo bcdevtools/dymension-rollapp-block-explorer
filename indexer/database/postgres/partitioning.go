@@ -26,12 +26,13 @@ func (db *Database) PreparePartitionedTablesForChainId(chainId string) error {
 // createPartitionedTableForChainIdIfNotExists creates a new partition for the given chain-id if not exists.
 func (db *Database) createPartitionedTableForChainIdIfNotExists(table, chainId string) error {
 	partitionTable := utils.GetPartitionedTableNameByChainId(table, chainId)
+	partitionId := chainId
 
 	stmt := fmt.Sprintf(
 		"CREATE TABLE IF NOT EXISTS %s PARTITION OF %s FOR VALUES IN ('%s')",
 		partitionTable,
 		table,
-		chainId,
+		partitionId,
 	)
 
 	_, err := db.Sql.Exec(stmt)
@@ -43,7 +44,7 @@ func (db *Database) createPartitionedTableForChainIdIfNotExists(table, chainId s
 		return err
 	}
 
-	err = db.insertNewPartitionedTableInfoIfNotExists(table, partitionTable, chainId, chainId)
+	err = db.insertNewPartitionedTableInfoIfNotExists(table, partitionTable, partitionId, chainId)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("failed to insert new partitioned table info for %s", partitionTable))
 	}
@@ -69,12 +70,13 @@ func (db *Database) PreparePartitionedTablesForEpoch(epochUtcSeconds int64) erro
 // createPartitionedTableForEpochWeekIfNotExists creates a new partition for the given epoch week if not exists.
 func (db *Database) createPartitionedTableForEpochWeekIfNotExists(table string, epochWeek int64) error {
 	partitionTable := fmt.Sprintf("%s_%d", table, epochWeek)
+	partitionId := epochWeek
 
 	stmt := fmt.Sprintf(
 		"CREATE TABLE IF NOT EXISTS %s PARTITION OF %s FOR VALUES IN (%d)",
 		partitionTable,
 		table,
-		epochWeek,
+		partitionId,
 	)
 
 	_, err := db.Sql.Exec(stmt)
@@ -86,7 +88,51 @@ func (db *Database) createPartitionedTableForEpochWeekIfNotExists(table string, 
 		return err
 	}
 
-	err = db.insertNewPartitionedTableInfoIfNotExists(table, partitionTable, fmt.Sprintf("%d", epochWeek), epochWeek)
+	err = db.insertNewPartitionedTableInfoIfNotExists(table, partitionTable, fmt.Sprintf("%d", partitionId), epochWeek)
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("failed to insert new partitioned table info for %s", partitionTable))
+	}
+
+	return nil
+}
+
+func (db *Database) PreparePartitionedTablesForEpochAndChainId(epochUtcSeconds int64, chainId string) error {
+	db.muCreatePartitionedTables.Lock()
+	defer db.muCreatePartitionedTables.Unlock()
+
+	epochWeek := utils.GetEpochWeek(epochUtcSeconds)
+	for _, tableName := range constants.GetTablesPartitionedByEpochWeekAndChainId() {
+		err := db.createPartitionedTableForEpochWeekAndChainIdIfNotExists(tableName, epochWeek, chainId)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("failed to create partitioned table of table %s for epoch week & chain id: [%d. %s]", tableName, epochWeek, chainId))
+		}
+	}
+
+	return nil
+}
+
+// createPartitionedTableForEpochWeekIfNotExists creates a new partition for the given epoch week and chain_id if not exists.
+func (db *Database) createPartitionedTableForEpochWeekAndChainIdIfNotExists(table string, epochWeek int64, chainId string) error {
+	partitionTable := utils.GetPartitionedTableNameBySaltInt64AndChainId(table, epochWeek, chainId)
+	partitionId := fmt.Sprintf("%d %s", epochWeek, chainId)
+
+	stmt := fmt.Sprintf(
+		"CREATE TABLE IF NOT EXISTS %s PARTITION OF %s FOR VALUES IN ('%s')",
+		partitionTable,
+		table,
+		partitionId,
+	)
+
+	_, err := db.Sql.Exec(stmt)
+
+	if err != nil {
+		if isErrPartitionTableAlreadyExists(err, partitionTable) {
+			return nil
+		}
+		return err
+	}
+
+	err = db.insertNewPartitionedTableInfoIfNotExists(table, partitionTable, partitionId, epochWeek, chainId)
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("failed to insert new partitioned table info for %s", partitionTable))
 	}
