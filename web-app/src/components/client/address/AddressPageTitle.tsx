@@ -4,7 +4,7 @@ import PageTitle from '@/components/commons/PageTitle';
 import CopyButton from '../commons/CopyButton';
 import useAccount from '@/hooks/useAccount';
 import { useEffect, useState } from 'react';
-import { getPrototypeFromTypeUrl } from '@/utils/address';
+import { getAccountType } from '@/utils/address';
 import CircularProgress from '@mui/material/CircularProgress';
 
 type AddressPageTypeProps = Readonly<{
@@ -24,8 +24,8 @@ export function AddressPageTitle({
   );
 
   useEffect(() => {
-    if (account && account.typeUrl) {
-      setPrototype(getPrototypeFromTypeUrl(account.typeUrl));
+    if (account) {
+      setPrototype(getAccountType(account));
     }
   }, [account]);
   return (

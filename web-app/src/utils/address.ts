@@ -6,7 +6,7 @@ import {
 } from '@/consts/address';
 import { bech32 } from 'bech32';
 import { getAddress } from '@ethersproject/address';
-import { AccountBalances } from '@/consts/rpcResTypes';
+import { Account, AccountBalances } from '@/consts/rpcResTypes';
 
 export function isEvmAddress(value: string) {
   return EVM_ADDRESS_REGEX.test(value);
@@ -117,8 +117,16 @@ function addSpaceBetweenWords(word: string) {
   return word.replace(/\B(?=[A-Z])/g, ' ');
 }
 
-export function getPrototypeFromTypeUrl(typeUrl: string) {
+function getPrototypeFromTypeUrl(typeUrl: string) {
   const matched = typeUrl.match(/(?<=\.)[^\.]+$/);
   if (!matched) return addSpaceBetweenWords(typeUrl);
   else return addSpaceBetweenWords(matched[0]);
+}
+
+export function getAccountType(account: Account) {
+  if (account.contract) {
+    return `Smart Contract${account.contract.name ? `: ${account.contract.name}` : ''}${account.contract.symbol ? ` (${account.contract.symbol})` : ''}`;
+  } else if (account.typeUrl) {
+    return getPrototypeFromTypeUrl(account.typeUrl);
+  }
 }
