@@ -436,15 +436,15 @@ func (suite *IntegrationTestSuite) Test_KeepRecentAccountTx_IT() {
 			}()
 
 			suite.Require().True(rows.Next())
-			var min, max int64
-			err = rows.Scan(&min, &max)
+			var minH, maxH int64
+			err = rows.Scan(&minH, &maxH)
 			suite.Require().NoError(err)
 			suite.Require().False(rows.Next())
 
-			wantMax := startHeight + recordsToInsert
-			wantMin := wantMax - int64(tt.wantSize) + 1
-			suite.Equal(wantMin, min, "kept txs must be in descending order")
-			suite.Equal(wantMax, max, "kept txs must be in descending order")
+			wantMaxH := startHeight + recordsToInsert
+			wantMinH := wantMaxH - int64(tt.wantSize) + 1
+			suite.Equal(wantMinH, minH, "kept txs must be in descending order")
+			suite.Equal(wantMaxH, maxH, "kept txs must be in descending order")
 		})
 	}
 }

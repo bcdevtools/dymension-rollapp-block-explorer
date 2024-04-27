@@ -129,12 +129,14 @@ func NewDatabaseIntegrationTestSuite(
 		filePathSchemaSql := path.Join(schemaDir, "schema.sql")
 		_, err = os.Stat(filePathSchemaSql)
 		require.NoError(t, err)
-		runPsql(databaseName, databaseOwner, "-f", filePathSchemaSql)
+		err = runPsql(databaseName, databaseOwner, "-f", filePathSchemaSql)
+		require.NoError(t, err)
 
 		filePathSuperSchemaSql := path.Join(schemaDir, "super-schema.sql")
 		_, err = os.Stat(filePathSuperSchemaSql)
 		require.NoError(t, err)
-		runPsql(databaseName, "postgres", "-f", filePathSuperSchemaSql)
+		err = runPsql(databaseName, "postgres", "-f", filePathSuperSchemaSql)
+		require.NoError(t, err)
 	}
 
 	// Initialize connection

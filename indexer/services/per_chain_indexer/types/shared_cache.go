@@ -1,6 +1,9 @@
 package types
 
-import "sync"
+import (
+	"fmt"
+	"sync"
+)
 
 type SharedCache interface {
 	MarkCreatedPartitionsForEpochWeekAndChainIdWL(epochWeek int64, chainId string)
@@ -35,5 +38,5 @@ func (s *sharedCache) IsCreatedPartitionsForEpochWeekAndChainIdRL(epochWeek int6
 }
 
 func buildKeyFromEpochWeekAndChainId(epochWeek int64, chainId string) string {
-	return chainId + " w" + string(epochWeek)
+	return fmt.Sprintf("%s w%d", chainId, epochWeek)
 }
