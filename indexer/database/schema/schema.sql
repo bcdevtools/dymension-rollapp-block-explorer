@@ -9,7 +9,8 @@ CREATE TABLE chain_info (
     latest_indexed_block                BIGINT  NOT NULL DEFAULT 0, -- the latest successfully indexed block height
     increased_latest_indexed_block_at   BIGINT NOT NULL DEFAULT 0, -- the epoch UTC seconds when the latest_indexed_block updated with greater value
     postponed                           BOOLEAN, -- true if the chain is postponed/stopped operation
-    keep_recent_account_tx_count        INT, -- number of recent account txs to keep
+    keep_recent_account_tx_count        INT, -- number of recent account txs to keep, default to be 50
+    keep_weeks_of_recent_txs            INT, -- number of weeks of recent txs to keep, default to be 1, business logic should be buffer 1 more week
     expiry_at_epoch                     BIGINT, -- the epoch UTC seconds when the chain is expired
 
     CONSTRAINT chain_info_pkey PRIMARY KEY (chain_id),
