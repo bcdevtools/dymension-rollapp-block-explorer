@@ -54,7 +54,7 @@ model transaction {
   chain_id      String
   height        BigInt
   hash          String
-  partition_id  Int
+  partition_id  String
   epoch         BigInt
   message_types String[]
   tx_type       String
@@ -114,4 +114,14 @@ model ibc_transaction {
 
   @@id([chain_id, height, hash])
   @@index([chain_id, sequence_no, port, channel, incoming], map: "ibctx_same_sequence_index")
+}
+
+model partition_table_info {
+  partition_table_name String  @id
+  large_table_name     String
+  partition_key        String
+  partition_key_part_1 String
+  partition_key_part_2 String?
+
+  @@index([large_table_name, partition_key_part_1], map: "pti_table_and_key1_index")
 }

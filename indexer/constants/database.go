@@ -5,7 +5,7 @@ const (
 	RetryIndexingFailedBlockMaxRetries = 100
 )
 
-func GetTablesPartitionedByEpochWeek() []string {
+func GetTablesPartitionedByEpochWeekAndChainId() []string {
 	return []string{
 		"transaction",
 	}

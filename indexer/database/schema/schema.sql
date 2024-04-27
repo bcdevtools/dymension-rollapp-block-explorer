@@ -263,7 +263,7 @@ CREATE TABLE transaction (
     chain_id            TEXT    NOT NULL,
     height              BIGINT  NOT NULL,
     hash                TEXT    NOT NULL, -- normalized: Cosmos: uppercase without 0x, Ethereum: lowercase with 0x
-    partition_id        INT     NOT NULL, -- epoch week = FLOOR(epoch UTC seconds / (3600 sec x 24 hours x 7 days))
+    partition_id        TEXT    NOT NULL, -- `${epoch week}_${chain_id}` (epoch week = FLOOR(epoch UTC seconds / (3600 sec x 24 hours x 7 days)))
 
     -- other fields
     epoch               BIGINT  NOT NULL, -- epoch UTC seconds

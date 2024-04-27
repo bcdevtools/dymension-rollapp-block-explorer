@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	dbtypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/database/types"
+	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/utils"
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 )
@@ -32,7 +33,7 @@ INSERT INTO transaction (
 
 	var params []interface{}
 
-	for i, account := range txs {
+	for i, transaction := range txs {
 		pi := i * 9
 
 		if i > 0 {
@@ -41,18 +42,18 @@ INSERT INTO transaction (
 		stmt += fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d)", pi+1, pi+2, pi+3, pi+4, pi+5, pi+6, pi+7, pi+8, pi+9)
 		params = append(
 			params,
-			account.ChainId,                // 1
-			account.Height,                 // 2
-			account.Hash,                   // 3
-			account.PartitionId,            // 4
-			account.Epoch,                  // 5
-			pq.Array(account.MessageTypes), // 6
-			account.TxType,                 // 7
+			transaction.ChainId, // 1
+			transaction.Height,  // 2
+			transaction.Hash,    // 3
+			utils.MakePartitionIdFromKeys(utils.GetEpochWeek(transaction.Epoch), transaction.ChainId), // 4
+			transaction.Epoch,                  // 5
+			pq.Array(transaction.MessageTypes), // 6
+			transaction.TxType,                 // 7
 			sql.NullString{ // 8
-				String: account.Action,
-				Valid:  account.Action != "",
+				String: transaction.Action,
+				Valid:  transaction.Action != "",
 			},
-			pq.Array(account.Value), // 9
+			pq.Array(transaction.Value), // 9
 		)
 	}
 
