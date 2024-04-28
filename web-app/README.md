@@ -38,6 +38,9 @@ npm run build
 
 ```shell
 pm2 restart web-app
+
+# if run with multi instances, use reload will make zero downtime deployment
+pm2 reload web-app
 ```
 
 ### Some PM2 commands
@@ -55,4 +58,14 @@ pm2 restart web-app
 pm2 reload web-app
 pm2 stop web-app
 pm2 delete web-app
+```
+
+### Notes
+
+Uncomment these lines of code to run server with multi instances
+
+```json
+instances: 0, //means No of instances = No of logical cores
+exec_mode: 'cluster',
+wait_ready: true,
 ```
