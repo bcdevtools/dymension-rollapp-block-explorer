@@ -62,7 +62,7 @@ pm2 delete web-app
 
 ### Notes
 
-Uncomment these lines of code to run server with multi instances
+Uncomment these lines in `pm2.config.js` to run server with multi instances
 
 ```json
 instances: 0, //means No of instances = No of logical cores
