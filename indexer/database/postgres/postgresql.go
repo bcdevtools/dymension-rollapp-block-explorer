@@ -28,7 +28,7 @@ type Database struct {
 func NewPostgresDatabase(dbCfg libdbtypes.PostgresDatabaseConfig, logger logging.Logger) (*Database, error) {
 	sslMode := "disable"
 	if dbCfg.EnableSsl {
-		sslMode = "enable"
+		sslMode = "require"
 	}
 
 	schema := "public"
