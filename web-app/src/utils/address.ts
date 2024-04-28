@@ -7,6 +7,10 @@ import {
 import { bech32 } from 'bech32';
 import { getAddress } from '@ethersproject/address';
 import { Account, AccountBalances } from '@/consts/rpcResTypes';
+import {
+  BalanceWithMetadata,
+  UseAccountBalancesResult,
+} from '@/hooks/useAccountBalances';
 
 export function isEvmAddress(value: string) {
   return EVM_ADDRESS_REGEX.test(value);
@@ -104,12 +108,20 @@ export function getDefaultBech32Config(
   };
 }
 
-export function toSortedDenoms(accountBalances: AccountBalances) {
+export function getSymbolToDisplay(
+  denom: string,
+  accountBalances: UseAccountBalancesResult
+) {
+  return accountBalances[denom].metadata
+    ? accountBalances[denom].metadata!.symbol
+    : denom;
+}
+
+export function toSortedDenoms(accountBalances: UseAccountBalancesResult) {
   return Object.keys(accountBalances).sort((a, b) => {
-    const isIbcA = a.startsWith(IBC_COIN_PREFIX);
-    const isIbcB = b.startsWith(IBC_COIN_PREFIX);
-    if ((isIbcA && isIbcB) || (!isIbcA && !isIbcB)) return a.localeCompare(b);
-    return isIbcA ? 1 : -1;
+    return getSymbolToDisplay(a, accountBalances).localeCompare(
+      getSymbolToDisplay(b, accountBalances)
+    );
   });
 }
 
@@ -125,7 +137,9 @@ function getPrototypeFromTypeUrl(typeUrl: string) {
 
 export function getAccountType(account: Account) {
   if (account.contract) {
-    return `Smart Contract${account.contract.name ? `: ${account.contract.name}` : ''}${account.contract.symbol ? ` (${account.contract.symbol})` : ''}`;
+    return `Smart Contract${
+      account.contract.name ? `: ${account.contract.name}` : ''
+    }${account.contract.symbol ? ` (${account.contract.symbol})` : ''}`;
   } else if (account.typeUrl) {
     return getPrototypeFromTypeUrl(account.typeUrl);
   }

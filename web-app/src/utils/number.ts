@@ -26,7 +26,7 @@ export function divideAmountByDecimals(amount: Big | string, decimals: number) {
 
 export function formatBlockchainAmount(
   value: string | Big,
-  decimals: number = 18
+  decimals: number = 0
 ) {
   return formatNumber(divideAmountByDecimals(value, decimals));
 }
