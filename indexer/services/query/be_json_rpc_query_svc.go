@@ -78,7 +78,7 @@ func (d *defaultBeJsonRpcQueryService) BeGetChainInfo() (res *querytypes.Respons
 	var bz []byte
 	bz, err = d.doQuery(
 		types.NewJsonRpcQueryBuilder("be_getChainInfo"),
-		1*time.Second,
+		10*time.Second,
 	)
 	if err != nil {
 		return
@@ -112,7 +112,7 @@ func (d *defaultBeJsonRpcQueryService) BeGetLatestBlockNumber() (res *querytypes
 	var bz []byte
 	bz, err = d.doQuery(
 		types.NewJsonRpcQueryBuilder("be_getLatestBlockNumber"),
-		2*time.Second,
+		5*time.Second,
 	)
 	if err != nil {
 		return
@@ -145,7 +145,7 @@ func (d *defaultBeJsonRpcQueryService) BeTransactionsInBlockRange(from, to int64
 			types.NewJsonRpcInt64QueryParam(from),
 			types.NewJsonRpcInt64QueryParam(to),
 		),
-		10*time.Second,
+		30*time.Second,
 	)
 	if err != nil {
 		return
