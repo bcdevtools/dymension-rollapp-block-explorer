@@ -23,7 +23,7 @@ npm run build
 4. Start
 
 ```shell
-pm2 start pm2.config.js -i max
+pm2 start pm2.config.js
 ```
 
 ### Update Web-app
