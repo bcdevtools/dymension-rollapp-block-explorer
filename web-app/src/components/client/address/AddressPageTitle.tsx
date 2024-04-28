@@ -2,21 +2,22 @@
 
 import PageTitle from '@/components/commons/PageTitle';
 import CopyButton from '../commons/CopyButton';
-import useAccount from '@/hooks/useAccount';
 import { useEffect, useState } from 'react';
 import { getAccountType } from '@/utils/address';
 import CircularProgress from '@mui/material/CircularProgress';
+import { Account } from '@/consts/rpcResTypes';
 
 type AddressPageTypeProps = Readonly<{
   bech32Address: string;
   evmAddress: string | null;
+  account: Account | null;
 }>;
 
 export function AddressPageTitle({
   bech32Address,
   evmAddress,
+  account,
 }: AddressPageTypeProps) {
-  const [account] = useAccount(bech32Address);
   const [prototype, setPrototype] = useState<React.ReactNode>(
     <>
       Account <CircularProgress size={'1.5rem'} />
@@ -28,6 +29,7 @@ export function AddressPageTitle({
       setPrototype(getAccountType(account));
     }
   }, [account]);
+
   return (
     <PageTitle
       title={prototype}
