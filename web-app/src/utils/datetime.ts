@@ -2,9 +2,11 @@ import { DEFAULT_DATE_TIME_FORMAT } from '@/consts/setting';
 import dayjs, { Dayjs } from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
+import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
+dayjs.extend(utc);
 
 dayjs.updateLocale('en', {
   relativeTime: {
@@ -25,7 +27,7 @@ dayjs.updateLocale('en', {
 });
 
 export function formatUnixTime(unixTime: number) {
-  return dayjs.unix(unixTime).format(DEFAULT_DATE_TIME_FORMAT);
+  return dayjs.unix(unixTime).utc().format(DEFAULT_DATE_TIME_FORMAT);
 }
 
 export function getTimeDurationDisplay(date: number | Date | Dayjs) {

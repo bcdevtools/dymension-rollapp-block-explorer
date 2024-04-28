@@ -1,4 +1,4 @@
-export const DEFAULT_DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
+export const DEFAULT_DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss +UTC';
 
 export const APP_NAME = 'Dr.BE';
 
