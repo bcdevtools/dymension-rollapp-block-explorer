@@ -108,6 +108,20 @@ function EvmDetailsDeployContract(
       ) : (
         <RowItem label="Deploy New Contract" value="Missing contract address" />
       )}
+      {
+        evmTx.input && <RowItem
+        label="Deployment Bytecode"
+        value={
+          <TextField
+            value={evmTx.input}
+            multiline
+            sx={{ width: '100%', fontStyle: 'italic' }}
+            size="small"
+            maxRows={12}
+          />
+        }
+      />
+      }
       <RowItem
         label="Gas Price"
         value={formatNumber(
