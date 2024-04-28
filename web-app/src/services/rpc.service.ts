@@ -3,6 +3,7 @@ import {
   AccountBalances,
   Block,
   ChainInfo,
+  DenomsMetadata,
   Erc20ContractInfo,
   LatestBlockNumber,
   RpcResponse,
@@ -15,6 +16,7 @@ import {
   getAccountParam,
   getBlockByNumberParam,
   getChainInfoParam,
+  getDenomsMetadataParam,
   getErc20ContractInfo,
   getLatestBlockNumber,
   getTransactionByHashParam,
@@ -122,6 +124,10 @@ export class RpcService {
       getAccountBalancesParam(address),
       fetchOptions
     );
+  }
+
+  getDenomsMetadata(fetchOptions?: CallRpcOptions): RpcResult<DenomsMetadata> {
+    return this._rpcClient.callRpc(getDenomsMetadataParam(), fetchOptions);
   }
 
   getAccount(

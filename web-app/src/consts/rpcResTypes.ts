@@ -140,6 +140,18 @@ export interface AccountBalances {
   [denom: string]: string;
 }
 
+export interface DenomMetadata {
+  denomUnits: { denom: string; exponent: number }[];
+  base: string;
+  name: string;
+  symbol: string;
+  highestExponent: number;
+}
+
+export interface DenomsMetadata {
+  [denom: string]: DenomMetadata;
+}
+
 export interface Account {
   address: { cosmos: string; evm: string };
   balances: AccountBalances;
