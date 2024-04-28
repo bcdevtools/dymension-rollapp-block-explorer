@@ -132,7 +132,7 @@ export default function SearchResultContent({
                 chainId={rollapp.chain_id}
                 value={`#${blocks.block}`}
                 handleClick={() => {
-                  router.push(`${rollapp.path}${Path.BLOCKS}/${blocks.block}`);
+                  router.push(`${rollapp.path}${Path.BLOCK}/${blocks.block}`);
                   handleClickSearchItem();
                 }}
               />
@@ -149,7 +149,7 @@ export default function SearchResultContent({
                 value={txHash}
                 handleClick={() => {
                   router.push(
-                    `${rollappInfo.path}${Path.TRANSACTIONS}/${txHash}`
+                    `${rollappInfo.path}${Path.TRANSACTION}/${txHash}`
                   );
                   handleClickSearchItem();
                 }}

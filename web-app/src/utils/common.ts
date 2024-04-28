@@ -66,38 +66,3 @@ export function getOffsetFromPageAndPageSize(page: number, pageSize: number) {
   if (isNaN(page) || page < 0) return 0;
   return page * pageSize;
 }
-
-export function handleSearch(
-  rollappInfo: RollappInfo,
-  searchText: string,
-  cb: (newPath: string) => void
-) {
-  const { path: rollappPath } = rollappInfo;
-  searchText = searchText.trim();
-
-  if (!searchText) return;
-
-  if (/^\d+$/.test(searchText))
-    return cb(`${rollappPath}${Path.BLOCKS}/${searchText}`);
-
-  if (rollappInfo.chain_type === ChainType.EVM && isEvmAddress(searchText))
-    return cb(`${rollappPath}${Path.ADDRESS}/${searchText}`);
-
-  const searchTextInLowerCase = searchText.toLowerCase();
-  if (isCosmosAddress(searchTextInLowerCase)) {
-    try {
-      RollappAddress.fromBech32(
-        searchTextInLowerCase,
-        (rollappInfo.bech32! as JsonObject).addr as string
-      );
-      return cb(`${rollappPath}${Path.ADDRESS}/${searchText}`);
-    } catch (e) {
-      return cb(`${rollappPath}${Path.NOT_FOUND}`);
-    }
-  }
-
-  if (isTxHash(searchText))
-    return cb(`${rollappPath}${Path.TRANSACTIONS}/${searchText}`);
-
-  return cb(`${rollappPath}${Path.NOT_FOUND}`);
-}

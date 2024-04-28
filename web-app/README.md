@@ -5,7 +5,7 @@
 1. Install PM2
 
 ```shell
-npm i pm2 -g
+sudo npm i pm2 -g
 ```
 
 2. Install web-app dependencies

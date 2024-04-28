@@ -146,10 +146,17 @@ export interface Account {
   staking: any;
   txsCount: number;
   typeUrl: string;
+  contract?: ContractAccountInfo;
 }
 
 export interface Erc20ContractInfo {
   name: string;
   symbol: string;
   decimals: number;
+}
+
+export interface ContractAccountInfo {
+  name?: string;
+  symbol?: string;
+  decimals?: number;
 }

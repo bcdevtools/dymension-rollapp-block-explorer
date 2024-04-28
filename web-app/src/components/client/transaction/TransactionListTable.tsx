@@ -58,7 +58,7 @@ export default function TransactionListTable({
       cells.push(
         <Link
           key={hash}
-          href={getNewPathByRollapp(pathname, `/${Path.TRANSACTIONS}/${hash}`)}>
+          href={getNewPathByRollapp(pathname, `/${Path.TRANSACTION}/${hash}`)}>
           {hash.substring(0, 6)}...{hash.substring(hash.length - 6)}
         </Link>
       );
