@@ -6,6 +6,8 @@ const withBundleAnalyzer = NextBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-const nextConfig = {};
+const nextConfig = {
+  basePath: process.env.BASE_PATH || '',
+};
 
 export default withBundleAnalyzer(nextConfig);

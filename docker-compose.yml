@@ -4,7 +4,9 @@ services:
       context: web-app
       args:
         - DATABASE_URL=${DATABASE_URL}
+        - BASE_PATH=${BASE_PATH}
     ports:
       - '3000:3000'
     environment:
       - DATABASE_URL=${DATABASE_URL}
+      - BASE_PATH=${BASE_PATH}
