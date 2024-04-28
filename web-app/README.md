@@ -5,7 +5,7 @@
 1. Install PM2
 
 ```shell
-npm i pm2 -g
+sudo npm i pm2 -g
 ```
 
 2. Install web-app dependencies
@@ -23,7 +23,7 @@ npm run build
 4. Start
 
 ```shell
-pm2 start pm2.config.js
+pm2 start pm2.config.js -i max
 ```
 
 ### Update Web-app
