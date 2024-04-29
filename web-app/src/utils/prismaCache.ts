@@ -65,6 +65,18 @@ export function withCache() {
             args
           ) as Prisma.PrismaPromise<Prisma.Result<T, A, 'findMany'>>;
         },
+        findUniqueWithCache<T, A>(
+          this: T,
+          args: Prisma.Exact<
+            A,
+            Prisma.Args<T, 'findUnique'> & CustomCacheStrategy
+          >
+        ): Prisma.PrismaPromise<Prisma.Result<T, A, 'findUnique'>> {
+          return queryWithCache.bind(this)(
+            'findUnique',
+            args
+          ) as Prisma.PrismaPromise<Prisma.Result<T, A, 'findUnique'>>;
+        },
         countWithCache<T, A>(
           this: T,
           args?:

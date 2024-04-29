@@ -4,6 +4,7 @@ import {
   Block,
   ChainInfo,
   DenomsMetadata,
+  Erc20Balances,
   Erc20ContractInfo,
   LatestBlockNumber,
   RpcResponse,
@@ -17,6 +18,7 @@ import {
   getBlockByNumberParam,
   getChainInfoParam,
   getDenomsMetadataParam,
+  getErc20BalanceParam,
   getErc20ContractInfo,
   getLatestBlockNumber,
   getTransactionByHashParam,
@@ -135,5 +137,16 @@ export class RpcService {
     fetchOptions?: CallRpcOptions
   ): RpcResult<Account> {
     return this._rpcClient.callRpc(getAccountParam(address), fetchOptions);
+  }
+
+  getErc20Balance(
+    address: string,
+    tokenAddresses: string[],
+    fetchOptions?: CallRpcOptions
+  ): RpcResult<Erc20Balances> {
+    return this._rpcClient.callRpc(
+      getErc20BalanceParam(address, tokenAddresses),
+      fetchOptions
+    );
   }
 }

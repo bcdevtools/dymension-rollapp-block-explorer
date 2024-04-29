@@ -21,6 +21,7 @@ import {
 import {
   AccountTransactionFilterOption,
   countAccountTransactions,
+  getAccount,
   getAccountTransactions,
 } from '@/services/db/accounts';
 import TransactionListTable from '@/components/client/transaction/TransactionListTable';
@@ -72,29 +73,43 @@ export default async function Address({ params, searchParams }: AddressProps) {
     searchParams[AddressPageSearchParams.TX_TYPE]
   );
 
-  const totalTransactions = await countAccountTransactions(
-    rollappInfo.chain_id,
-    bech32Address,
-    filterOptions
-  );
+  const [
+    { accountTransactions, totalTransactions, pageSize, page },
+    accountInfo,
+  ] = await Promise.all([
+    (async function () {
+      const totalTransactions = await countAccountTransactions(
+        rollappInfo.chain_id,
+        bech32Address,
+        filterOptions
+      );
 
-  const [pageSize, page] = getPageAndPageSizeFromStringParam(
-    searchParams[PAGE_SIZE_PARAM_NAME],
-    searchParams[PAGE_PARAM_NAME],
-    totalTransactions
-  );
+      const [pageSize, page] = getPageAndPageSizeFromStringParam(
+        searchParams[PAGE_SIZE_PARAM_NAME],
+        searchParams[PAGE_PARAM_NAME],
+        totalTransactions
+      );
 
-  const accountTransactions = await getAccountTransactions(
-    rollappInfo.chain_id,
-    bech32Address,
-    filterOptions,
-    { take: pageSize, skip: getOffsetFromPageAndPageSize(page, pageSize) }
-  );
+      const accountTransactions = await getAccountTransactions(
+        rollappInfo.chain_id,
+        bech32Address,
+        filterOptions,
+        { take: pageSize, skip: getOffsetFromPageAndPageSize(page, pageSize) }
+      );
+
+      return { accountTransactions, totalTransactions, pageSize, page };
+    })(),
+    getAccount(rollappInfo.chain_id, bech32Address),
+  ]);
 
   return (
     <>
       <AddressPageTitle bech32Address={bech32Address} evmAddress={evmAddress} />
-      <AddressSummary address={bech32Address} />
+      <AddressSummary
+        address={bech32Address}
+        accountInfo={accountInfo}
+        evmAddress={evmAddress}
+      />
       <AddressTransactionsSection
         txType={searchParams.txType as AddressTransactionType}>
         <TransactionListTable

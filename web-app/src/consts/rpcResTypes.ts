@@ -172,3 +172,15 @@ export interface ContractAccountInfo {
   symbol?: string;
   decimals?: number;
 }
+
+export interface Erc20Balance {
+  balance: string;
+  contract: string;
+  decimals: number;
+  display: string;
+}
+
+export interface Erc20Balances {
+  account: string;
+  erc20Balances: Erc20Balance[];
+}
