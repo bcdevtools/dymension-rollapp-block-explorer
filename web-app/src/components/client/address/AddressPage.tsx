@@ -7,14 +7,17 @@ import useDenomsMetadata from '@/hooks/useDenomsMetadata';
 import { useMemo } from 'react';
 import { BalancesWithMetadata } from '@/utils/address';
 import AccountContext from '@/contexts/AccountContext';
+import { Account } from '@/services/db/accounts';
 
 type AddressPageProps = Readonly<{
   bech32Address: string;
   evmAddress: string | null;
+  accountInfo: Account | null;
 }>;
 
 export default function AddressPageTitleAndSummary({
   bech32Address,
+  accountInfo,
   evmAddress,
 }: AddressPageProps) {
   const [accountData, accountLoading] = useAccount(bech32Address);
@@ -48,7 +51,11 @@ export default function AddressPageTitleAndSummary({
           balancesWithMetadata,
           loading: accountLoading || denomsMetadataLoading,
         }}>
-        <AddressSummary address={bech32Address} />
+        <AddressSummary
+          address={bech32Address}
+          accountInfo={accountInfo}
+          evmAddress={evmAddress}
+        />
       </AccountContext.Provider>
     </>
   );
