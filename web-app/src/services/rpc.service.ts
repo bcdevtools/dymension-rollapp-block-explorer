@@ -136,9 +136,20 @@ export class RpcService {
 
   getAccount(
     address: string,
-    fetchOptions?: CallRpcOptions
-  ): RpcResult<Account> {
-    return this._rpcClient.callRpc(getAccountParam(address), fetchOptions);
+    callRpcOptions?: CallRpcOptions
+  ): RpcResult<Account>;
+  getAccount(
+    addresses: string[],
+    callRpcOptions?: CallRpcOptions
+  ): RpcResult<Account[]>;
+  getAccount(address: string | string[], callRpcOptions?: CallRpcOptions) {
+    if (Array.isArray(address))
+      return this._rpcClient.callRpc(
+        address.map(a => getAccountParam(a)),
+        callRpcOptions
+      );
+    else
+      return this._rpcClient.callRpc(getAccountParam(address), callRpcOptions);
   }
 
   getErc20Balance(
