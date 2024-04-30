@@ -8,8 +8,8 @@ import { normalizeRollappsInfo } from '@/utils/rollapp';
 import ThemeProvider from '@/components/client/commons/ThemeProvider';
 
 export const metadata: Metadata = {
-  title: 'Blockchain Explorer',
-  description: 'Blockchain Explorer by TeddyNguyen',
+  title: 'Dymension RollApps Blockchain Explorer',
+  description: 'Dymension RollApps Blockchain Explorer',
 };
 
 export default async function RootLayout({
