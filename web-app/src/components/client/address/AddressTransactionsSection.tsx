@@ -7,7 +7,8 @@ import {
   AddressPageSearchParams,
   AddressTransactionType,
 } from '@/consts/addressPage';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 const transactionTabs = [
   { value: AddressTransactionType.TRANSACTIONS, label: 'Transactions' },
@@ -29,25 +30,21 @@ export default function AddressTransactionsSection({
   txType = AddressTransactionType.TRANSACTIONS,
 }: AddressTransactionsSectionProps) {
   const pathname = usePathname();
-  const router = useRouter();
 
   return (
     <Card>
-      <Tabs
-        value={txType}
-        sx={{ mb: 3 }}
-        onChange={(e, newValue) => {
-          const newSearchParams = new URLSearchParams(
-            newValue && {
-              [AddressPageSearchParams.TX_TYPE]: newValue,
-            }
-          );
-          router.push(`${pathname}?${newSearchParams.toString()}`, {
-            scroll: false,
-          });
-        }}>
+      <Tabs value={txType} sx={{ mb: 3 }}>
         {transactionTabs.map(({ label, value }) => (
-          <Tab key={value} label={label} value={value} />
+          <Tab
+            component={Link}
+            href={`${pathname}?${new URLSearchParams({
+              [AddressPageSearchParams.TX_TYPE]: value,
+            }).toString()}`}
+            scroll={false}
+            key={value}
+            label={label}
+            value={value}
+          />
         ))}
       </Tabs>
       {children}

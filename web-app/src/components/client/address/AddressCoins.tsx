@@ -1,15 +1,14 @@
 import DataTable from '@/components/commons/DataTable';
 import { ADDRESS_SUMMARY_COINS_PAGE_SIZE } from '@/consts/setting';
-import useAccountBalances from '@/hooks/useAccountBalances';
+import AccountContext from '@/contexts/AccountContext';
 import { toSortedDenoms } from '@/utils/address';
 import { formatBlockchainAmount } from '@/utils/number';
-import { useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 
-export default function AddressCoins({
-  address,
-}: Readonly<{ address: string }>) {
+export default function AddressCoins() {
   const [page, setPage] = useState(0);
-  const [accountBalances, loading] = useAccountBalances(address);
+  const { balancesWithMetadata: accountBalances, loading } =
+    useContext(AccountContext);
 
   const [rowKeys, body] = useMemo((): [string[], [string, string][]] => {
     if (!accountBalances) return [[], []];
