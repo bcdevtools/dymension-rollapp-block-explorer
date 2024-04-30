@@ -10,7 +10,7 @@ import {
   getOffsetFromPageAndPageSize,
   getPageAndPageSizeFromStringParam,
 } from '@/utils/common';
-import { permanentRedirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { JsonObject } from '@prisma/client/runtime/library';
 import {
   ChainType,
@@ -62,7 +62,7 @@ export default async function Address({ params, searchParams }: AddressProps) {
     prefix,
     rollappInfo.chain_type === ChainType.EVM
   );
-  if (!rollappAddress) return permanentRedirect(`/${params.rollappPath}`);
+  if (!rollappAddress) return redirect(`/${params.rollappPath}`);
 
   const isEVMChain = rollappInfo.chain_type === ChainType.EVM;
   const bech32Address = rollappAddress.toBech32();
