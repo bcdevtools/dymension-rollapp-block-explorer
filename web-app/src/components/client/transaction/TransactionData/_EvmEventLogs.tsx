@@ -9,11 +9,9 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { ItemContainer, RowItem } from './_Common';
 import { usePathname } from 'next/navigation';
-import { getNewPathByRollapp } from '@/utils/common';
-import { Path } from '@/consts/path';
 import { translateEvmLogIfPossible } from '@/utils/transaction';
 import { getAddress } from '@ethersproject/address';
-import Link from '@/components/commons/Link';
+import AddressLink from '@/components/commons/AddressLink';
 
 export default function EvmEventLogs({
   transaction,
@@ -39,14 +37,7 @@ export default function EvmEventLogs({
             <RowItem
               label="Contract"
               value={
-                <Link
-                  href={getNewPathByRollapp(
-                    pathname,
-                    `${Path.ADDRESS}/${event.address}`
-                  )}
-                  sx={{ fontStyle: 'normal' }}>
-                  {contractNameOrAddress}
-                </Link>
+                <AddressLink address={getAddress(event.address)} display={contractNameOrAddress} pathname={pathname} />
               }
             />
             {renderTopicsAndData(
@@ -101,27 +92,13 @@ function renderTopicsAndData(
         <RowItem
           label="From"
           value={
-            <Link
-              href={getNewPathByRollapp(
-                pathname,
-                `${Path.ADDRESS}/${translatedOrNull.from}`
-              )}
-              sx={{ fontStyle: 'normal' }}>
-              {translatedOrNull.from}
-            </Link>
+            <AddressLink address={getAddress(translatedOrNull.from)} pathname={pathname} />
           }
         />
         <RowItem
           label="To"
           value={
-            <Link
-              href={getNewPathByRollapp(
-                pathname,
-                `${Path.ADDRESS}/${translatedOrNull.to}`
-              )}
-              sx={{ fontStyle: 'normal' }}>
-              {translatedOrNull.to}
-            </Link>
+            <AddressLink address={getAddress(translatedOrNull.to)} pathname={pathname} />
           }
         />
         <RowItem

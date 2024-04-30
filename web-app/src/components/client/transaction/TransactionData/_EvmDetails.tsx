@@ -8,7 +8,6 @@ import {
   Erc20ContractInfo,
   EvmLog,
 } from '@/consts/rpcResTypes';
-import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname } from 'next/navigation';
@@ -22,7 +21,7 @@ import {
 import { getAddress } from '@ethersproject/address';
 import { formatNumber } from '@/utils/number';
 import Link from '@/components/commons/Link';
-import { Divider } from '@mui/material';
+import AddressLink from '@/components/commons/AddressLink';
 
 export default function EvmDetails({
   transaction,
@@ -72,38 +71,16 @@ function EvmDetailsDeployContract(
       <RowItem
         label="Deployer"
         value={
-          <Typography sx={{ fontStyle: 'italic' }}>
-            {
-              <Link
-                href={getNewPathByRollapp(
-                  pathname,
-                  `${Path.ADDRESS}/${evmTx.from}`
-                )}
-                sx={{ fontStyle: 'normal' }}>
-                {getAddress(evmTx.from)}
-              </Link>
-            }
-          </Typography>
+          <AddressLink address={getAddress(evmTx.from)} pathname={pathname} />
         }
       />
       {evmTxReceipt.contractAddress ? (
         <RowItem
           label="Deploy New Contract"
           value={
-            <Typography sx={{ fontStyle: 'italic' }}>
-              {
-                <Link
-                  href={getNewPathByRollapp(
-                    pathname,
-                    `${Path.ADDRESS}/${evmTxReceipt.contractAddress}`
-                  )}
-                  sx={{ fontStyle: 'normal' }}>
-                  {contractAddressToErc20ContractInfo?.get(
-                    evmTxReceipt.contractAddress
-                  )?.name || getAddress(evmTxReceipt.contractAddress)}
-                </Link>
-              }
-            </Typography>
+            <AddressLink address={getAddress(evmTxReceipt.contractAddress)} display={contractAddressToErc20ContractInfo?.get(
+              evmTxReceipt.contractAddress
+            )?.name} pathname={pathname} />
           }
         />
       ) : (
@@ -143,35 +120,13 @@ function EvmDetailsGeneralTransfer(evmTx: EvmTx, pathname: string) {
       <RowItem
         label="From"
         value={
-          <Typography sx={{ fontStyle: 'italic' }}>
-            {
-              <Link
-                href={getNewPathByRollapp(
-                  pathname,
-                  `${Path.ADDRESS}/${evmTx.from}`
-                )}
-                sx={{ fontStyle: 'normal' }}>
-                {evmTx.from}
-              </Link>
-            }
-          </Typography>
+          <AddressLink address={getAddress(evmTx.from)} pathname={pathname} />
         }
       />
       <RowItem
         label="To"
         value={
-          <Typography sx={{ fontStyle: 'italic' }}>
-            {
-              <Link
-                href={getNewPathByRollapp(
-                  pathname,
-                  `${Path.ADDRESS}/${evmTx.to}`
-                )}
-                sx={{ fontStyle: 'normal' }}>
-                {evmTx.to}
-              </Link>
-            }
-          </Typography>
+          evmTx.to && <AddressLink address={getAddress(evmTx.to)} pathname={pathname} />
         }
       />
       <RowItem
@@ -201,36 +156,13 @@ function EvmDetailsContractCall(
       <RowItem
         label="Caller"
         value={
-          <Typography sx={{ fontStyle: 'italic' }}>
-            {
-              <Link
-                href={getNewPathByRollapp(
-                  pathname,
-                  `${Path.ADDRESS}/${evmTx.from}`
-                )}
-                sx={{ fontStyle: 'normal' }}>
-                {getAddress(evmTx.from)}
-              </Link>
-            }
-          </Typography>
+          <AddressLink address={getAddress(evmTx.from)} pathname={pathname} />
         }
       />
       <RowItem
         label="Contract"
         value={
-          <Typography sx={{ fontStyle: 'italic' }}>
-            {
-              <Link
-                href={getNewPathByRollapp(
-                  pathname,
-                  `${Path.ADDRESS}/${evmTx.to}`
-                )}
-                sx={{ fontStyle: 'normal' }}>
-                {contractAddressToErc20ContractInfo?.get(evmTx.to!)?.name ||
-                  getAddress(evmTx.to!)}
-              </Link>
-            }
-          </Typography>
+          evmTx.to && <AddressLink address={getAddress(evmTx.to)} pathname={pathname} />
         }
       />
       <RowItem label="Method" value={evmTx.input!.substring(0, 10)} />

@@ -1,15 +1,12 @@
 'use client';
 
 import { Transaction } from '@/consts/rpcResTypes';
-import Typography from '@mui/material/Typography';
-import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname } from 'next/navigation';
-import { Path } from '@/consts/path';
 import { ItemContainer, RowItem } from './_Common';
 import { fromHexStringToEthereumGasPriceValue } from '@/utils/transaction';
 import { formatNumber, hexToDec } from '@/utils/number';
 import { getAddress } from '@ethersproject/address';
-import Link from '@/components/commons/Link';
+import AddressLink from '@/components/commons/AddressLink';
 
 export default function EvmReceiptDetails({
   transaction,
@@ -25,36 +22,14 @@ export default function EvmReceiptDetails({
         <RowItem
           label="From"
           value={
-            <Typography sx={{ fontStyle: 'italic' }}>
-              {
-                <Link
-                  href={getNewPathByRollapp(
-                    pathname,
-                    `${Path.ADDRESS}/${evmReceiptInfo.from}`
-                  )}
-                  sx={{ fontStyle: 'normal' }}>
-                  {getAddress(evmReceiptInfo.from)}
-                </Link>
-              }
-            </Typography>
+            <AddressLink address={getAddress(evmReceiptInfo.from)} pathname={pathname} />
           }
         />
         {evmReceiptInfo.to && (
           <RowItem
             label="To"
             value={
-              <Typography sx={{ fontStyle: 'italic' }}>
-                {
-                  <Link
-                    href={getNewPathByRollapp(
-                      pathname,
-                      `${Path.ADDRESS}/${evmReceiptInfo.to}`
-                    )}
-                    sx={{ fontStyle: 'normal' }}>
-                    {getAddress(evmReceiptInfo.to)}
-                  </Link>
-                }
-              </Typography>
+              <AddressLink address={getAddress(evmReceiptInfo.to)} pathname={pathname} />
             }
           />
         )}
@@ -62,18 +37,7 @@ export default function EvmReceiptDetails({
           <RowItem
             label="New Contract Address"
             value={
-              <Typography sx={{ fontStyle: 'italic' }}>
-                {
-                  <Link
-                    href={getNewPathByRollapp(
-                      pathname,
-                      `${Path.ADDRESS}/${evmReceiptInfo.contractAddress}`
-                    )}
-                    sx={{ fontStyle: 'normal' }}>
-                    {getAddress(evmReceiptInfo.contractAddress)}
-                  </Link>
-                }
-              </Typography>
+              <AddressLink address={getAddress(evmReceiptInfo.contractAddress)} pathname={pathname} />
             }
           />
         )}
