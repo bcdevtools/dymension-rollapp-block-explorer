@@ -21,7 +21,7 @@ export default function Messages({
 }>) {
   const pathname = usePathname();
   return transaction.msgs?.map((msg, idx) => (
-    <Accordion key={msg.idx}>
+    <Accordion key={msg.idx} defaultExpanded={idx === 0}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <b>
           #{idx + 1} {getMessageName(msg.type)}
@@ -29,7 +29,6 @@ export default function Messages({
       </AccordionSummary>
       <AccordionDetails>
         <ItemContainer>
-          <RowItem label="Type" value={msg.type} />
           <RowItem
             label="Content"
             value={
@@ -48,8 +47,9 @@ export default function Messages({
               </Typography>
             }
           />
+          <RowItem label="Type" value={msg.type} />
           <RowItem
-            label="Proto Content"
+            label="Proto Message"
             value={
               <TextField
                 value={JSON.stringify(msg.protoContent, null, 4)}
