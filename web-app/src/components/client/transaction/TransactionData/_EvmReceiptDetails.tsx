@@ -10,6 +10,7 @@ import { fromHexStringToEthereumGasPriceValue } from '@/utils/transaction';
 import { formatNumber, hexToDec } from '@/utils/number';
 import { getAddress } from '@ethersproject/address';
 import Link from '@/components/commons/Link';
+import CopyButton from '../../commons/CopyButton';
 
 export default function EvmReceiptDetails({
   transaction,
@@ -27,6 +28,7 @@ export default function EvmReceiptDetails({
           value={
             <Typography sx={{ fontStyle: 'italic' }}>
               {
+                <>
                 <Link
                   href={getNewPathByRollapp(
                     pathname,
@@ -35,6 +37,10 @@ export default function EvmReceiptDetails({
                   sx={{ fontStyle: 'normal' }}>
                   {getAddress(evmReceiptInfo.from)}
                 </Link>
+                <CopyButton
+                size="small"
+                textToCopy={evmReceiptInfo.from}/>
+                </>
               }
             </Typography>
           }
@@ -45,6 +51,7 @@ export default function EvmReceiptDetails({
             value={
               <Typography sx={{ fontStyle: 'italic' }}>
                 {
+                  <>
                   <Link
                     href={getNewPathByRollapp(
                       pathname,
@@ -53,6 +60,10 @@ export default function EvmReceiptDetails({
                     sx={{ fontStyle: 'normal' }}>
                     {getAddress(evmReceiptInfo.to)}
                   </Link>
+                  <CopyButton
+                  size="small"
+                  textToCopy={evmReceiptInfo.to}/>
+                  </>
                 }
               </Typography>
             }
@@ -64,6 +75,7 @@ export default function EvmReceiptDetails({
             value={
               <Typography sx={{ fontStyle: 'italic' }}>
                 {
+                  <>
                   <Link
                     href={getNewPathByRollapp(
                       pathname,
@@ -72,6 +84,10 @@ export default function EvmReceiptDetails({
                     sx={{ fontStyle: 'normal' }}>
                     {getAddress(evmReceiptInfo.contractAddress)}
                   </Link>
+                  <CopyButton
+                  size="small"
+                  textToCopy={evmReceiptInfo.contractAddress}/>
+                  </>
                 }
               </Typography>
             }

@@ -14,6 +14,7 @@ import { Path } from '@/consts/path';
 import { translateEvmLogIfPossible } from '@/utils/transaction';
 import { getAddress } from '@ethersproject/address';
 import Link from '@/components/commons/Link';
+import CopyButton from '../../commons/CopyButton';
 
 export default function EvmEventLogs({
   transaction,
@@ -39,6 +40,7 @@ export default function EvmEventLogs({
             <RowItem
               label="Contract"
               value={
+                <>
                 <Link
                   href={getNewPathByRollapp(
                     pathname,
@@ -47,6 +49,10 @@ export default function EvmEventLogs({
                   sx={{ fontStyle: 'normal' }}>
                   {contractNameOrAddress}
                 </Link>
+                <CopyButton
+                size="small"
+                textToCopy={event.address}/>
+                </>
               }
             />
             {renderTopicsAndData(
@@ -101,6 +107,7 @@ function renderTopicsAndData(
         <RowItem
           label="From"
           value={
+            <>
             <Link
               href={getNewPathByRollapp(
                 pathname,
@@ -109,11 +116,16 @@ function renderTopicsAndData(
               sx={{ fontStyle: 'normal' }}>
               {translatedOrNull.from}
             </Link>
+            <CopyButton
+            size="small"
+            textToCopy={translatedOrNull.from}/>
+            </>
           }
         />
         <RowItem
           label="To"
           value={
+            <>
             <Link
               href={getNewPathByRollapp(
                 pathname,
@@ -122,6 +134,10 @@ function renderTopicsAndData(
               sx={{ fontStyle: 'normal' }}>
               {translatedOrNull.to}
             </Link>
+            <CopyButton
+            size="small"
+            textToCopy={translatedOrNull.to}/>
+            </>
           }
         />
         <RowItem

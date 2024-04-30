@@ -23,6 +23,7 @@ import { getAddress } from '@ethersproject/address';
 import { formatNumber } from '@/utils/number';
 import Link from '@/components/commons/Link';
 import { Divider } from '@mui/material';
+import CopyButton from '../../commons/CopyButton';
 
 export default function EvmDetails({
   transaction,
@@ -74,6 +75,7 @@ function EvmDetailsDeployContract(
         value={
           <Typography sx={{ fontStyle: 'italic' }}>
             {
+              <>
               <Link
                 href={getNewPathByRollapp(
                   pathname,
@@ -82,6 +84,10 @@ function EvmDetailsDeployContract(
                 sx={{ fontStyle: 'normal' }}>
                 {getAddress(evmTx.from)}
               </Link>
+              <CopyButton
+              size="small"
+              textToCopy={evmTx.from}/>
+              </>
             }
           </Typography>
         }
@@ -92,6 +98,7 @@ function EvmDetailsDeployContract(
           value={
             <Typography sx={{ fontStyle: 'italic' }}>
               {
+                <>
                 <Link
                   href={getNewPathByRollapp(
                     pathname,
@@ -102,6 +109,10 @@ function EvmDetailsDeployContract(
                     evmTxReceipt.contractAddress
                   )?.name || getAddress(evmTxReceipt.contractAddress)}
                 </Link>
+                <CopyButton
+                size="small"
+                textToCopy={evmTxReceipt.contractAddress}/>
+                </>
               }
             </Typography>
           }
@@ -145,6 +156,7 @@ function EvmDetailsGeneralTransfer(evmTx: EvmTx, pathname: string) {
         value={
           <Typography sx={{ fontStyle: 'italic' }}>
             {
+              <>
               <Link
                 href={getNewPathByRollapp(
                   pathname,
@@ -153,6 +165,10 @@ function EvmDetailsGeneralTransfer(evmTx: EvmTx, pathname: string) {
                 sx={{ fontStyle: 'normal' }}>
                 {evmTx.from}
               </Link>
+              <CopyButton
+              size="small"
+              textToCopy={evmTx.from}/>
+              </>
             }
           </Typography>
         }
@@ -162,6 +178,7 @@ function EvmDetailsGeneralTransfer(evmTx: EvmTx, pathname: string) {
         value={
           <Typography sx={{ fontStyle: 'italic' }}>
             {
+              <>
               <Link
                 href={getNewPathByRollapp(
                   pathname,
@@ -170,6 +187,10 @@ function EvmDetailsGeneralTransfer(evmTx: EvmTx, pathname: string) {
                 sx={{ fontStyle: 'normal' }}>
                 {evmTx.to}
               </Link>
+              <CopyButton
+              size="small"
+              textToCopy={evmTx.to!}/>
+              </>
             }
           </Typography>
         }
@@ -203,6 +224,7 @@ function EvmDetailsContractCall(
         value={
           <Typography sx={{ fontStyle: 'italic' }}>
             {
+              <>
               <Link
                 href={getNewPathByRollapp(
                   pathname,
@@ -211,6 +233,10 @@ function EvmDetailsContractCall(
                 sx={{ fontStyle: 'normal' }}>
                 {getAddress(evmTx.from)}
               </Link>
+              <CopyButton
+              size="small"
+              textToCopy={evmTx.from}/>
+              </>
             }
           </Typography>
         }
@@ -220,6 +246,7 @@ function EvmDetailsContractCall(
         value={
           <Typography sx={{ fontStyle: 'italic' }}>
             {
+              <>
               <Link
                 href={getNewPathByRollapp(
                   pathname,
@@ -229,6 +256,10 @@ function EvmDetailsContractCall(
                 {contractAddressToErc20ContractInfo?.get(evmTx.to!)?.name ||
                   getAddress(evmTx.to!)}
               </Link>
+              <CopyButton
+              size="small"
+              textToCopy={evmTx.to!}/>
+              </>
             }
           </Typography>
         }
