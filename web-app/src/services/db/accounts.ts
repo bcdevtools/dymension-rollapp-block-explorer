@@ -60,3 +60,26 @@ export const getAccountTransactions = function (
     cacheStrategy: { enabled: true },
   });
 };
+
+export type Account = {
+  chain_id: string;
+  bech32_address: string;
+  balance_on_erc20_contracts: string[];
+  balance_on_nft_contracts: string[];
+};
+
+export const getAccount = function (
+  chain_id: string,
+  bech32_address: string
+): Promise<Account | null> {
+  return prisma.account.findUniqueWithCache({
+    select: {
+      chain_id: true,
+      bech32_address: true,
+      balance_on_erc20_contracts: true,
+      balance_on_nft_contracts: true,
+    },
+    where: { chain_id_bech32_address: { chain_id, bech32_address } },
+    cacheStrategy: { enabled: true },
+  });
+};

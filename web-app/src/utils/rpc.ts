@@ -112,6 +112,28 @@ export function getAccountParam(address: string): RpcCallParam {
   };
 }
 
+export function getErc20BalanceParam(
+  address: string,
+  tokenAddresses: string[]
+): RpcCallParam {
+  return {
+    method: 'evm_getErc20Balance',
+    params: [address, tokenAddresses],
+    jsonrpc: '2.0',
+  };
+}
+
+export function getCw20BalanceParam(
+  address: string,
+  tokenAddresses: string[]
+): RpcCallParam {
+  return {
+    method: 'evm_getCw20Balance',
+    params: [address, tokenAddresses],
+    jsonrpc: '2.0',
+  };
+}
+
 export function getErc20ContractInfo(contractAddress: string): RpcCallParam {
   return {
     method: 'evm_getErc20ContractInfo',

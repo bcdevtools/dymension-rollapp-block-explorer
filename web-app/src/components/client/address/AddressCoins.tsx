@@ -31,7 +31,10 @@ export default function AddressCoins() {
   return (
     <DataTable
       headers={['Denom', 'Balance']}
-      body={body}
+      body={body.slice(
+        page * ADDRESS_SUMMARY_COINS_PAGE_SIZE,
+        (page + 1) * ADDRESS_SUMMARY_COINS_PAGE_SIZE
+      )}
       rowKeys={rowKeys}
       total={rowKeys.length}
       page={page}
