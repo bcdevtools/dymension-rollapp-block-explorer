@@ -27,7 +27,7 @@ export default function EvmEventLogs({
         ?.name || getAddress(event.address);
     const logIndex = Number(event.logIndex);
     return (
-      <Accordion key={idx}>
+      <Accordion key={idx} defaultExpanded={idx <= 10}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <b>
             [{logIndex}] {contractNameOrAddress} emits{' '}
