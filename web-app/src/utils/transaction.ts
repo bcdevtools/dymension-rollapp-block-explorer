@@ -3,6 +3,9 @@ import { TransactionType } from '@/consts/transaction';
 import { divideAmountByDecimals, hexToDec } from './number';
 
 export function getMessageName(messageType: string) {
+  if (/^([a-z\d]+\.)+Msg/.test(messageType)) {
+    messageType = "/" + messageType
+  }
   switch (messageType) {
     case '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward':
       return 'Withdraw Reward';
