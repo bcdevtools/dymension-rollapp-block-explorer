@@ -1,6 +1,10 @@
 import Big from 'big.js';
 
+Big.PE = 1e6;
+Big.NE = -1e6;
+
 export function formatNumber(value: number | Big | string) {
+  if (!(value instanceof Big)) value = new Big(value);
   return formatNumberString(value.toString());
 }
 
