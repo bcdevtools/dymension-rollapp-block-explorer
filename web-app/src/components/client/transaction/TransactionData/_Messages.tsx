@@ -21,7 +21,7 @@ export default function Messages({
 }>) {
   const pathname = usePathname();
   return transaction.msgs?.map((msg, idx) => (
-    <Accordion key={msg.idx}>
+    <Accordion key={msg.idx} defaultExpanded={idx === 0}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <b>
           #{idx + 1} {getMessageName(msg.type)}
