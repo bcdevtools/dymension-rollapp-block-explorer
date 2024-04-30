@@ -13,7 +13,7 @@ export default function CosmosEventLogs({
   transaction: Transaction;
 }>) {
   return transaction.result.events.map((event, idx) => (
-    <Accordion key={idx}>
+    <Accordion key={idx} defaultExpanded={idx < 10}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <b>{event.type}</b>
       </AccordionSummary>
