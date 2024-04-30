@@ -6,8 +6,6 @@ import { APP_NAME } from '@/consts/setting';
 
 const { BASE_PATH = '' } = process.env;
 
-console.log('BASE_PATH:', BASE_PATH);
-
 export default async function Home() {
   return (
     <Box

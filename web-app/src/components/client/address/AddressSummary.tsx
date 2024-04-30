@@ -3,7 +3,7 @@
 import Card from '@/components/commons/Card';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import AddressCoins from './AddressCoins';
 import { Account } from '@/services/db/accounts';
 import AddressTokens from './AddressTokens';
@@ -28,7 +28,7 @@ function getContent(
   switch (tab) {
     case AccountSummaryTab.COINS:
     default:
-      return <AddressCoins address={address} />;
+      return <AddressCoins />;
     case AccountSummaryTab.TOKENS:
       return (
         <AddressTokens accountInfo={accountInfo!} evmAddress={evmAddress} />
@@ -36,7 +36,7 @@ function getContent(
   }
 }
 
-export default function AddressSummary({
+export default React.memo(function AddressSummary({
   address,
   accountInfo,
   evmAddress,
@@ -60,4 +60,4 @@ export default function AddressSummary({
       {getContent(address, evmAddress, accountInfo, tab)}
     </Card>
   );
-}
+});

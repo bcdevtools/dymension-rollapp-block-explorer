@@ -19,6 +19,10 @@ const DEFAULT_TX_OVERVIEW_SIZE = 10;
 export default async function Overview({ params }: RollappOverviewProps) {
   const rollappInfo = (await getRollAppInfoByRollappPath(params.rollappPath))!;
 
+  if (!rollappInfo) {
+    console.log('Trying to access invalid rollapp path', params.rollappPath);
+    return null;
+  }
   const transactions = await getTransactionsByHeight(
     rollappInfo.chain_id,
     null,

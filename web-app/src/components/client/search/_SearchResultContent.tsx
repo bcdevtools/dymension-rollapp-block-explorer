@@ -8,27 +8,32 @@ import CardActionArea from '@mui/material/CardActionArea';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { useRouter } from 'next/navigation';
 import { Path } from '@/consts/path';
 import SearchResultDisplayContext from '@/contexts/SearchResultDisplayContext';
+import Link from 'next/link';
 
 function SearchResultItem({
   rollappName,
   chainId,
   value,
   handleClick,
+  href,
 }: Readonly<{
   rollappName: string;
   chainId: string;
   value?: string;
   handleClick: () => void;
+  href: string;
 }>) {
   return (
     <SearchResultDisplayContext.Consumer>
       {({ displayColumns }) => (
         <Grid item xs={12} md={12 / displayColumns}>
           <Card variant="outlined">
-            <CardActionArea onClick={handleClick}>
+            <CardActionArea
+              LinkComponent={Link}
+              href={href}
+              onClick={handleClick}>
               <CardHeader
                 title={
                   <>
@@ -89,8 +94,6 @@ export default function SearchResultContent({
   searchResult: SearchResult;
   handleClickSearchItem: () => void;
 }>) {
-  const router = useRouter();
-
   if (!Object.keys(searchResult).length) {
     return (
       <Box
@@ -115,10 +118,8 @@ export default function SearchResultContent({
                 key={rollapp.chain_id}
                 rollappName={rollapp.name}
                 chainId={rollapp.chain_id}
-                handleClick={() => {
-                  router.push(rollapp.path);
-                  handleClickSearchItem();
-                }}
+                href={rollapp.path}
+                handleClick={handleClickSearchItem}
               />
             ))}
           </SearchResultSection>
@@ -131,10 +132,8 @@ export default function SearchResultContent({
                 rollappName={rollapp.name}
                 chainId={rollapp.chain_id}
                 value={`#${blocks.block}`}
-                handleClick={() => {
-                  router.push(`${rollapp.path}${Path.BLOCK}/${blocks.block}`);
-                  handleClickSearchItem();
-                }}
+                href={`${rollapp.path}${Path.BLOCK}/${blocks.block}`}
+                handleClick={handleClickSearchItem}
               />
             ))}
           </SearchResultSection>
@@ -147,12 +146,8 @@ export default function SearchResultContent({
                 rollappName={rollappInfo.name}
                 chainId={rollappInfo.chain_id}
                 value={txHash}
-                handleClick={() => {
-                  router.push(
-                    `${rollappInfo.path}${Path.TRANSACTION}/${txHash}`
-                  );
-                  handleClickSearchItem();
-                }}
+                href={`${rollappInfo.path}${Path.TRANSACTION}/${txHash}`}
+                handleClick={handleClickSearchItem}
               />
             ))}
           </SearchResultSection>
@@ -165,12 +160,8 @@ export default function SearchResultContent({
                 rollappName={rollappInfo.name}
                 chainId={rollappInfo.chain_id}
                 value={accounts.account}
-                handleClick={() => {
-                  router.push(
-                    `${rollappInfo.path}${Path.ADDRESS}/${accounts.account}`
-                  );
-                  handleClickSearchItem();
-                }}
+                href={`${rollappInfo.path}${Path.ADDRESS}/${accounts.account}`}
+                handleClick={handleClickSearchItem}
               />
             ))}
           </SearchResultSection>

@@ -1,16 +1,17 @@
 import {
   COSMOS_ADDRESS_REGEX,
   EVM_ADDRESS_REGEX,
-  IBC_COIN_PREFIX,
   TX_HASH_ADDRESS_REGEX,
 } from '@/consts/address';
 import { bech32 } from 'bech32';
 import { getAddress } from '@ethersproject/address';
-import { Account, AccountBalances } from '@/consts/rpcResTypes';
-import {
-  BalanceWithMetadata,
-  UseAccountBalancesResult,
-} from '@/hooks/useAccountBalances';
+import { Account, DenomMetadata } from '@/consts/rpcResTypes';
+
+export type BalanceWithMetadata = { balance: string; metadata?: DenomMetadata };
+
+export type BalancesWithMetadata = {
+  [denom: string]: BalanceWithMetadata;
+};
 
 export function isEvmAddress(value: string) {
   return EVM_ADDRESS_REGEX.test(value);
@@ -110,14 +111,14 @@ export function getDefaultBech32Config(
 
 export function getSymbolToDisplay(
   denom: string,
-  accountBalances: UseAccountBalancesResult
+  accountBalances: BalancesWithMetadata
 ) {
   return accountBalances[denom].metadata
     ? accountBalances[denom].metadata!.symbol
     : denom;
 }
 
-export function toSortedDenoms(accountBalances: UseAccountBalancesResult) {
+export function toSortedDenoms(accountBalances: BalancesWithMetadata) {
   return Object.keys(accountBalances).sort((a, b) => {
     return getSymbolToDisplay(a, accountBalances).localeCompare(
       getSymbolToDisplay(b, accountBalances)
@@ -142,5 +143,5 @@ export function getAccountType(account: Account) {
     }${account.contract.symbol ? ` (${account.contract.symbol})` : ''}`;
   } else if (account.typeUrl) {
     return getPrototypeFromTypeUrl(account.typeUrl);
-  }
+  } else return 'Account';
 }

@@ -1,17 +1,4 @@
-import { Path } from '@/consts/path';
-import {
-  ChainType,
-  DEFAULT_PAGINATION_SIZE,
-  MAX_PAGINATION_SIZE,
-} from '@/consts/setting';
-import {
-  RollappAddress,
-  isCosmosAddress,
-  isEvmAddress,
-  isTxHash,
-} from './address';
-import { RollappInfo } from './rollapp';
-import { JsonObject } from '@prisma/client/runtime/library';
+import { DEFAULT_PAGINATION_SIZE, MAX_PAGINATION_SIZE } from '@/consts/setting';
 
 export type SearchParam = string | undefined | null;
 

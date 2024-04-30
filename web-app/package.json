@@ -25,7 +25,7 @@
     "bech32": "^2.0.0",
     "big.js": "^6.2.1",
     "copy-to-clipboard": "^3.3.3",
-    "dayjs": "^1.11.10",
+    "dayjs": "^1.11.11",
     "fast-json-stable-stringify": "^2.1.0",
     "lodash": "^4.17.21",
     "next": "^14.2.3",

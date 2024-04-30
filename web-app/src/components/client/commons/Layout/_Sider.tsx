@@ -18,6 +18,7 @@ import { useRollappStore } from '@/stores/rollappStore';
 import { getNewPathByRollapp, isNotFoundPath } from '@/utils/common';
 import RollappSelect from '../RollappSelect';
 import Typography from '@mui/material/Typography';
+import Link from 'next/link';
 
 type SiderProps = Readonly<{
   menuOpen: boolean;
@@ -49,11 +50,6 @@ export default React.memo(function Sider({
   const router = useRouter();
   const pathname = usePathname();
   const [{ selectedRollappInfo }] = useRollappStore(true);
-
-  const handleMenuItemClick = (path: string) => {
-    router.push(getNewPathByRollapp(pathname, path));
-    handleMenuClose();
-  };
 
   const checkSelected = (path: string) => {
     const splittedPath = pathname.split('/');
@@ -87,7 +83,9 @@ export default React.memo(function Sider({
           return (
             <ListItem key={index} disablePadding>
               <ListItemButton
-                onClick={() => handleMenuItemClick(menuItem.path)}
+                href={getNewPathByRollapp(pathname, menuItem.path)}
+                LinkComponent={Link}
+                onClick={() => handleMenuClose()}
                 selected={isSelected}>
                 <ListItemIcon>
                   <Icon color={isSelected ? 'primary' : 'inherit'} />
