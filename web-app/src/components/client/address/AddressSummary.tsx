@@ -7,10 +7,12 @@ import React, { useState } from 'react';
 import AddressCoins from './AddressCoins';
 import { Account } from '@/services/db/accounts';
 import AddressTokens from './AddressTokens';
+import AddressNft from './AddressNfts';
 
 const enum AccountSummaryTab {
   COINS = 'Coins',
   TOKENS = 'Tokens',
+  NFTS = 'NFTs',
 }
 
 type AccountSummaryProps = Readonly<{
@@ -33,6 +35,8 @@ function getContent(
       return (
         <AddressTokens accountInfo={accountInfo!} evmAddress={evmAddress} />
       );
+    case AccountSummaryTab.NFTS:
+      return <AddressNft accountInfo={accountInfo!} />;
   }
 }
 
@@ -55,6 +59,9 @@ export default React.memo(function AddressSummary({
             value={AccountSummaryTab.TOKENS}
             label={AccountSummaryTab.TOKENS}
           />
+        )}
+        {accountInfo && accountInfo.balance_on_nft_contracts.length && (
+          <Tab value={AccountSummaryTab.NFTS} label={AccountSummaryTab.NFTS} />
         )}
       </Tabs>
       {getContent(address, evmAddress, accountInfo, tab)}
