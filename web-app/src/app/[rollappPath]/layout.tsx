@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: RollappLayoutProps) {
   const rollappInfo = await getRollAppInfoByRollappPath(params.rollappPath);
 
   return {
-    title: `${rollappInfo?.name} Block Explorer`,
-    description: `${rollappInfo?.name} Block Explorer`,
+    title: `${(rollappInfo?.name || '').toUpperCase()} Block Explorer`,
+    description: `Exploring RollApp ${(rollappInfo?.name || '').toUpperCase()} on Dymension`,
   };
 }
 
