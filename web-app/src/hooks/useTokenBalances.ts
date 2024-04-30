@@ -17,10 +17,18 @@ export default function useTokenBalances(
       (async function () {
         try {
           setLoading(true);
-          const result = rpcService.getErc20Balance(address, tokenAddresses);
-          ac = result[1];
-          const balances = await getResponseResult(result[0]);
-          setTokenBalances(balances.erc20Balances);
+          const isERC20 = address.startsWith('0x');
+          if (isERC20) {
+            const result = rpcService.getErc20Balance(address, tokenAddresses);
+            ac = result[1];
+            const balances = await getResponseResult(result[0]);
+            setTokenBalances(balances.erc20Balances);
+          } else {
+            const result = rpcService.getCw20Balance(address, tokenAddresses);
+            ac = result[1];
+            const balances = await getResponseResult(result[0]);
+            setTokenBalances(balances.cw20Balances);
+          }
           setLoading(false);
         } catch (e) {
           console.log(e);

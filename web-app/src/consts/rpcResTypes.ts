@@ -184,3 +184,8 @@ export interface Erc20Balances {
   account: string;
   erc20Balances: Erc20Balance[];
 }
+
+export interface Cw20Balances {
+  account: string;
+  cw20Balances: Erc20Balance[];
+}
