@@ -29,7 +29,6 @@ export default function Messages({
       </AccordionSummary>
       <AccordionDetails>
         <ItemContainer>
-          <RowItem label="Type" value={msg.type} />
           <RowItem
             label="Content"
             value={
@@ -48,8 +47,9 @@ export default function Messages({
               </Typography>
             }
           />
+          <RowItem label="Type" value={msg.type} />
           <RowItem
-            label="Proto Content"
+            label="Proto Message"
             value={
               <TextField
                 value={JSON.stringify(msg.protoContent, null, 4)}
