@@ -3,7 +3,6 @@ import Link from './Link';
 import CopyButton from '../client/commons/CopyButton';
 import { Path } from '@/consts/path';
 import { getNewPathByRollapp } from '@/utils/common';
-import { getAddress } from '@ethersproject/address';
 
 type AddressLinkProps = Readonly<{
   address: string,

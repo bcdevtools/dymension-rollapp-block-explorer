@@ -8,7 +8,6 @@ import {
   Erc20ContractInfo,
   EvmLog,
 } from '@/consts/rpcResTypes';
-import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname } from 'next/navigation';
@@ -22,7 +21,6 @@ import {
 import { getAddress } from '@ethersproject/address';
 import { formatNumber } from '@/utils/number';
 import Link from '@/components/commons/Link';
-import CopyButton from '../../commons/CopyButton';
 import AddressLink from '@/components/commons/AddressLink';
 
 export default function EvmDetails({
