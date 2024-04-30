@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import { CustomToolbar } from '@/components/client/commons/Layout/_Header';
 import Layout from '@/components/client/commons/Layout';
 import { SIDER_WIDTH } from '@/consts/theme';
-import { permanentRedirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 
 type RollappLayoutProps = Readonly<{
   params: { rollappPath: string };
@@ -25,7 +25,7 @@ export default async function RollappLayout({
   params,
 }: RollappLayoutProps) {
   const rollappInfo = await getRollAppInfoByRollappPath(params.rollappPath);
-  if (!rollappInfo) return permanentRedirect('/');
+  if (!rollappInfo) return redirect('/');
   return (
     <Layout>
       <Box
