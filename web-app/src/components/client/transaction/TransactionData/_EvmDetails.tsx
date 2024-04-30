@@ -22,6 +22,7 @@ import {
 import { getAddress } from '@ethersproject/address';
 import { formatNumber } from '@/utils/number';
 import Link from '@/components/commons/Link';
+import { Divider } from '@mui/material';
 
 export default function EvmDetails({
   transaction,
@@ -191,6 +192,12 @@ function EvmDetailsContractCall(
 ) {
   return (
     <ItemContainer>
+      {evmTxReceipt.logs.length > 0 &&
+        renderEvmTxActions(
+          evmTxReceipt.logs,
+          contractAddressToErc20ContractInfo,
+          pathname
+        )}
       <RowItem
         label="Caller"
         value={
@@ -254,12 +261,6 @@ function EvmDetailsContractCall(
           fromHexStringToEthereumGasPriceValue(evmTx.gasPrice)
         )}
       />
-      {evmTxReceipt.logs.length > 0 &&
-        renderEvmTxActions(
-          evmTxReceipt.logs,
-          contractAddressToErc20ContractInfo,
-          pathname
-        )}
     </ItemContainer>
   );
 }
@@ -271,16 +272,26 @@ function renderEvmTxActions(
     | undefined,
   pathname: string
 ) {
-  return evmTxLogs.map((log, idx) => {
-    return renderEvmTxAction(
-      log.topics,
-      log.data,
-      log.address,
-      contractAddressToErc20ContractInfo,
-      pathname,
-      idx
-    );
-  });
+  let renderedAny = false;
+  return <>
+    {
+      evmTxLogs.map((log, idx) => {
+        const renderElement = renderEvmTxAction(
+          log.topics,
+          log.data,
+          log.address,
+          contractAddressToErc20ContractInfo,
+          pathname,
+          idx
+        );
+        renderedAny = renderedAny || !!renderElement;
+        return renderElement;
+      })
+    }
+    {
+      renderedAny && <><br/><br/><br/></>
+    }
+  </>;
 }
 
 function renderEvmTxAction(
