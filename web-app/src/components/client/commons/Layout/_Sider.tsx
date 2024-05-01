@@ -33,10 +33,16 @@ const MENU_ITEMS = [
     path: Path.OVERVIEW,
     Icon: Summarize,
   },
-  { name: 'Blocks', path: Path.BLOCKS, Icon: Widgets },
+  {
+    name: 'Blocks',
+    path: Path.BLOCKS,
+    selectedPath: [Path.BLOCK],
+    Icon: Widgets,
+  },
   {
     name: 'Transactions',
     path: Path.TRANSACTIONS,
+    selectedPath: [Path.TRANSACTION],
     Icon: Receipt,
   },
 ];
@@ -51,12 +57,11 @@ export default React.memo(function Sider({
   const pathname = usePathname();
   const [{ selectedRollappInfo }] = useRollappStore(true);
 
-  const checkSelected = (path: string) => {
+  const checkSelected = (path: string, selectedPaths: string[] = []) => {
     const splittedPath = pathname.split('/');
-    return (
-      (path === '/' && splittedPath.length === 2) ||
-      `/${splittedPath[2]}` === path
-    );
+    if (path === '/' && splittedPath.length === 2) return true;
+    const pathToCheck = `/${splittedPath[2]}`;
+    return pathToCheck === path || selectedPaths.includes(pathToCheck);
   };
 
   const drawer = (
@@ -78,7 +83,10 @@ export default React.memo(function Sider({
           />
         </ListItem>
         {MENU_ITEMS.map((menuItem, index) => {
-          const isSelected = checkSelected(menuItem.path);
+          const isSelected = checkSelected(
+            menuItem.path,
+            menuItem.selectedPath
+          );
           const { Icon } = menuItem;
           return (
             <ListItem key={index} disablePadding>
