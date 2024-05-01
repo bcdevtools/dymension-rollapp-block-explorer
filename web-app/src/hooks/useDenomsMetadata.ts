@@ -1,7 +1,9 @@
 import { DenomsMetadata } from '@/consts/rpcResTypes';
+import ErrorContext from '@/contexts/ErrorContext';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { useMountedState } from './useMountedState';
 
 export default function useDenomsMetadata(
   address: string
@@ -11,10 +13,14 @@ export default function useDenomsMetadata(
     null
   );
   const [{ rpcService }] = useRollappStore();
+  const { showErrorSnackbar } = useContext(ErrorContext);
+  const mounted = useMountedState();
 
   useEffect(() => {
     let ac: AbortController | null;
-    if (rpcService && address) {
+    if (!rpcService) throw new Error('Cannot find Rpc Service');
+
+    if (address) {
       (async function () {
         try {
           setLoading(true);
@@ -27,15 +33,19 @@ export default function useDenomsMetadata(
           setLoading(false);
         } catch (e) {
           console.log(e);
+          if (mounted.current)
+            showErrorSnackbar('Failed to fetch Denoms Metadata');
         } finally {
           ac = null;
+          if (mounted.current) setLoading(false);
         }
       })();
     } else setDenomsMetadata(null);
+
     return () => {
       if (ac) ac.abort();
     };
-  }, [address, rpcService]);
+  }, [address, rpcService, showErrorSnackbar, mounted]);
 
   return [denomsMetadata, loading];
 }

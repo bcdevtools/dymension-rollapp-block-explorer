@@ -1,16 +1,22 @@
 import { Account } from '@/consts/rpcResTypes';
+import ErrorContext from '@/contexts/ErrorContext';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { useMountedState } from './useMountedState';
 
 export default function useAccount(address: string): [Account | null, boolean] {
   const [loading, setLoading] = useState(true);
   const [accountData, setAccountData] = useState<Account | null>(null);
   const [{ rpcService }] = useRollappStore();
+  const { showErrorSnackbar } = useContext(ErrorContext);
+  const mounted = useMountedState();
 
   useEffect(() => {
     let ac: AbortController | null;
-    if (rpcService && address) {
+    if (!rpcService) throw new Error('Cannot find Rpc Service');
+
+    if (address) {
       (async function () {
         try {
           setLoading(true);
@@ -21,15 +27,18 @@ export default function useAccount(address: string): [Account | null, boolean] {
           setLoading(false);
         } catch (e) {
           console.log(e);
+          if (mounted.current) showErrorSnackbar('Failed to fetch account');
         } finally {
           ac = null;
+          if (mounted.current) setLoading(false);
         }
       })();
     } else setAccountData(null);
+
     return () => {
       if (ac) ac.abort();
     };
-  }, [address, rpcService]);
+  }, [address, rpcService, showErrorSnackbar, mounted]);
 
   return [accountData, loading];
 }

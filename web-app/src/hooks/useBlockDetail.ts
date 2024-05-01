@@ -1,7 +1,9 @@
 import { Block } from '@/consts/rpcResTypes';
+import ErrorContext from '@/contexts/ErrorContext';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { useMountedState } from './useMountedState';
 
 export default function useBlockDetail(
   blockNo: number
@@ -9,10 +11,14 @@ export default function useBlockDetail(
   const [loading, setLoading] = useState(true);
   const [block, setBlock] = useState<Block | null>(null);
   const [{ rpcService }] = useRollappStore();
+  const { showErrorSnackbar } = useContext(ErrorContext);
+  const mounted = useMountedState();
 
   useEffect(() => {
     let ac: AbortController | null;
-    if (rpcService && blockNo) {
+    if (!rpcService) throw new Error('Cannot find Rpc Service');
+
+    if (blockNo) {
       (async function () {
         try {
           setLoading(true);
@@ -24,15 +30,19 @@ export default function useBlockDetail(
           setLoading(false);
         } catch (e) {
           console.log(e);
+          if (mounted.current)
+            showErrorSnackbar('Failed to fetch Block Detail');
         } finally {
           ac = null;
+          if (mounted.current) setLoading(false);
         }
       })();
     } else setBlock(null);
+
     return () => {
       if (ac) ac.abort('useBlockDetail cleanup');
     };
-  }, [blockNo, rpcService]);
+  }, [blockNo, rpcService, showErrorSnackbar, mounted]);
 
   return [block, loading];
 }

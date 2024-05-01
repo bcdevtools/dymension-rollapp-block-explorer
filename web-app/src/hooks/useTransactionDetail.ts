@@ -1,7 +1,9 @@
 import { Erc20ContractInfo, Transaction, TxMode } from '@/consts/rpcResTypes';
+import ErrorContext from '@/contexts/ErrorContext';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { useMountedState } from './useMountedState';
 
 export default function useTransactionDetail(
   txHash: string
@@ -9,10 +11,14 @@ export default function useTransactionDetail(
   const [loading, setLoading] = useState(true);
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [{ rpcService }] = useRollappStore();
+  const { showErrorSnackbar } = useContext(ErrorContext);
+  const mounted = useMountedState();
 
   useEffect(() => {
     let ac: AbortController | null;
-    if (rpcService && txHash) {
+    if (!rpcService) throw new Error('Cannot find Rpc Service');
+
+    if (txHash) {
       (async function () {
         try {
           setLoading(true);
@@ -53,7 +59,10 @@ export default function useTransactionDetail(
                 });
               }
 
-              if (_transaction.result?.success && uniqueContractAddresses.size > 0) {
+              if (
+                _transaction.result?.success &&
+                uniqueContractAddresses.size > 0
+              ) {
                 const contractAddressToErc20ContractInfo = new Map<
                   string,
                   Erc20ContractInfo
@@ -85,15 +94,19 @@ export default function useTransactionDetail(
           setLoading(false);
         } catch (e) {
           console.log(e);
+          if (mounted.current)
+            showErrorSnackbar('Failed to fetch Transaction Detail');
         } finally {
           ac = null;
+          if (mounted.current) setLoading(false);
         }
       })();
     } else setTransaction(null);
+
     return () => {
       if (ac) ac.abort('useTransactionDetail cleanup');
     };
-  }, [txHash, rpcService]);
+  }, [txHash, rpcService, showErrorSnackbar, mounted]);
 
   return [transaction, loading];
 }

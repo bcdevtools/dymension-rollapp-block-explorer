@@ -1,7 +1,9 @@
 import { DenomMetadata } from '@/consts/rpcResTypes';
+import ErrorContext from '@/contexts/ErrorContext';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { useMountedState } from './useMountedState';
 
 export type BalanceWithMetadata = { balance: string; metadata?: DenomMetadata };
 
@@ -17,11 +19,15 @@ export default function useAccountBalances(
     null
   );
   const [{ rpcService }] = useRollappStore();
+  const { showErrorSnackbar } = useContext(ErrorContext);
+  const mounted = useMountedState();
 
   useEffect(() => {
     let acAccountBalances: AbortController | null;
     let acGetDenomMetaData: AbortController | null;
-    if (rpcService && address) {
+    if (!rpcService) throw new Error('Cannot find Rpc Service');
+
+    if (address) {
       (async function () {
         try {
           setLoading(true);
@@ -49,17 +55,20 @@ export default function useAccountBalances(
           setLoading(false);
         } catch (e) {
           console.log(e);
+          if (mounted.current) showErrorSnackbar('Failed to fetch balances');
         } finally {
           acAccountBalances = null;
           acGetDenomMetaData = null;
+          if (mounted.current) setLoading(false);
         }
       })();
     } else setBalances(null);
+
     return () => {
       if (acAccountBalances) acAccountBalances.abort();
       if (acGetDenomMetaData) acGetDenomMetaData.abort();
     };
-  }, [address, rpcService]);
+  }, [address, rpcService, showErrorSnackbar, mounted]);
 
   return [balances, loading];
 }

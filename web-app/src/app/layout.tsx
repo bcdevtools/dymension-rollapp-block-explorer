@@ -6,6 +6,8 @@ import { StoreProvider } from '@/components/client/commons/StoreProvider';
 import { getChainInfos } from '@/services/db/chainInfo';
 import { normalizeRollappsInfo } from '@/utils/rollapp';
 import ThemeProvider from '@/components/client/commons/ThemeProvider';
+import { ErrorContextProvider } from '@/contexts/ErrorContext';
+import { ErrorSnackbar } from '@/components/client/commons/ErrorSnackbar';
 
 export const metadata: Metadata = {
   title: 'Dymension RollApps Blockchain Explorer',
@@ -35,7 +37,10 @@ export default async function RootLayout({
         <AppRouterCacheProvider>
           <StoreProvider initialState={initialState}>
             <ThemeProvider initialThemeMode={themeMode}>
-              {children}
+              <ErrorContextProvider>
+                {children}
+                <ErrorSnackbar />
+              </ErrorContextProvider>
             </ThemeProvider>
           </StoreProvider>
         </AppRouterCacheProvider>
