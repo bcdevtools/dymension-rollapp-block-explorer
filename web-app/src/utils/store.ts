@@ -29,7 +29,6 @@ export function getInitialRollappState(
     rollappInfos,
     rollappPath
   );
-  console.log('selectedRollappInfo', selectedRollappInfo);
   const rpcService = getRpcServiceFromSelectedRollappInfo(selectedRollappInfo);
   return {
     rollappInfos,
