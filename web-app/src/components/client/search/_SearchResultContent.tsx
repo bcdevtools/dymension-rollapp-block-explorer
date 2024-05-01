@@ -129,7 +129,7 @@ export default function SearchResultContent({
             {blocks.rollappInfos.map(rollapp => (
               <SearchResultItem
                 key={rollapp.chain_id}
-                rollappName={rollapp.name}
+                rollappName={rollapp.name.toUpperCase()}
                 chainId={rollapp.chain_id}
                 value={`#${blocks.block}`}
                 href={`${rollapp.path}${Path.BLOCK}/${blocks.block}`}
@@ -143,7 +143,7 @@ export default function SearchResultContent({
             {txs.map(({ rollappInfo, txHash }) => (
               <SearchResultItem
                 key={rollappInfo.chain_id}
-                rollappName={rollappInfo.name}
+                rollappName={rollappInfo.name.toUpperCase()}
                 chainId={rollappInfo.chain_id}
                 value={txHash}
                 href={`${rollappInfo.path}${Path.TRANSACTION}/${txHash}`}
@@ -157,7 +157,7 @@ export default function SearchResultContent({
             {accounts.rollappInfos.map(rollappInfo => (
               <SearchResultItem
                 key={rollappInfo.chain_id}
-                rollappName={rollappInfo.name}
+                rollappName={rollappInfo.name.toUpperCase()}
                 chainId={rollappInfo.chain_id}
                 value={accounts.account}
                 href={`${rollappInfo.path}${Path.ADDRESS}/${accounts.account}`}
