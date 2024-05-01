@@ -8,18 +8,14 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import { getMessageName, translateCts } from '@/utils/transaction';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
-import { getNewPathByRollapp } from '@/utils/common';
-import { usePathname } from 'next/navigation';
-import { Path } from '@/consts/path';
 import { ItemContainer, RowItem } from './_Common';
-import Link from '@/components/commons/Link';
+import AddressLink from '../../address/AddressLink';
 
 export default function Messages({
   transaction,
 }: Readonly<{
   transaction: Transaction;
 }>) {
-  const pathname = usePathname();
   return transaction.msgs?.map((msg, idx) => (
     <Accordion key={msg.idx} defaultExpanded={idx === 0}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -34,15 +30,7 @@ export default function Messages({
             value={
               <Typography sx={{ fontStyle: 'italic' }}>
                 {translateCts(msg.content.ctm, (address, idx) => (
-                  <Link
-                    key={idx}
-                    href={getNewPathByRollapp(
-                      pathname,
-                      `${Path.ADDRESS}/${address}`
-                    )}
-                    sx={{ fontStyle: 'normal' }}>
-                    {address}
-                  </Link>
+                  <AddressLink key={idx} address={address} display={address} />
                 ))}
               </Typography>
             }

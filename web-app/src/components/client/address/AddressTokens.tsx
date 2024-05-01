@@ -1,13 +1,11 @@
 import DataTable from '@/components/commons/DataTable';
-import Link from '@/components/commons/Link';
-import { Path } from '@/consts/path';
 import { ADDRESS_SUMMARY_COINS_PAGE_SIZE } from '@/consts/setting';
 import useTokenBalances from '@/hooks/useTokenBalances';
 import { Account } from '@/services/db/accounts';
-import { getNewPathByRollapp } from '@/utils/common';
 import { formatBlockchainAmount } from '@/utils/number';
 import { usePathname } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
+import AddressLink from './AddressLink';
 
 export default function AddressTokens({
   accountInfo,
@@ -34,19 +32,16 @@ export default function AddressTokens({
     );
     const _body = sortedTokenBalances.map<[React.ReactNode, string]>(
       tokenBalance => [
-        <Link
+        <AddressLink
           key={tokenBalance.contract}
-          href={getNewPathByRollapp(
-            pathname,
-            `${Path.ADDRESS}/${tokenBalance.contract}`
-          )}>
-          {tokenBalance.display}
-        </Link>,
+          address={tokenBalance.contract}
+          display={tokenBalance.display}
+        />,
         formatBlockchainAmount(tokenBalance.balance, tokenBalance.decimals),
       ]
     );
     return [_rowKeys, _body];
-  }, [tokenBalances, pathname]);
+  }, [tokenBalances]);
 
   return (
     <DataTable

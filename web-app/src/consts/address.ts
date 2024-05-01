@@ -6,3 +6,7 @@ export const COSMOS_ADDRESS_REGEX =
 export const TX_HASH_ADDRESS_REGEX = /^(0x)?[\da-fA-F]{64}$/;
 
 export const IBC_COIN_PREFIX = 'ibc/';
+
+export const DYM_ADDRESS_PREFIX = 'dym1';
+
+export const DYM_ESCAN_ADDRESS_URL = 'https://dym.fyi/address';
