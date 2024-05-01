@@ -3,7 +3,7 @@
 import useBlockDetail from '@/hooks/useBlockDetail';
 import { getNewPathByRollapp } from '@/utils/common';
 import { Block } from '@/consts/rpcResTypes';
-import { useParams, usePathname, useRouter } from 'next/navigation';
+import { notFound, useParams, usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
 import { formatUnixTime } from '@/utils/datetime';
 import { DetailItem } from '@/components/commons/DetailItem';
@@ -29,9 +29,7 @@ export default function BlockDetailPage() {
   const blockNo = parseInt(params.blockNo);
   const [blockDetail, loading] = useBlockDetail(blockNo);
   const pathname = usePathname();
-  const router = useRouter();
-  if (!blockDetail && !loading)
-    return void router.push(getNewPathByRollapp(pathname, Path.NOT_FOUND));
+  if (!blockDetail && !loading) return notFound();
 
   const txsDisplay = getTxsDisplay(blockDetail, pathname);
   return (

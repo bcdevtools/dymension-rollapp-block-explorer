@@ -11,6 +11,7 @@ import {
 import { formatUnixTime } from '@/utils/datetime';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import React from 'react';
+import LinkToBlockNo from '../LinkToBlockNo';
 
 type BlockListTableProps = Readonly<{
   latestBlockNo: number;
@@ -48,11 +49,7 @@ export default function BlockListTable({
   const [blocks, loading] = useBlockList(latestBlockNo, page, pageSize);
 
   const body = blocks.map(b => [
-    <Link 
-      key={b.height} 
-      href={getNewPathByRollapp(pathname, `/${Path.BLOCK}/${b.height}`)}>
-      {b.height}
-    </Link>,
+    <LinkToBlockNo key={b.height} blockNo={b.height} />,
     formatUnixTime(b.timeEpochUTC),
     getTxsDisplay(b, pathname),
   ]);
