@@ -116,7 +116,7 @@ export default function SearchResultContent({
             {rollapps.map(rollapp => (
               <SearchResultItem
                 key={rollapp.chain_id}
-                rollappName={rollapp.name}
+                rollappName={rollapp.name.toUpperCase()}
                 chainId={rollapp.chain_id}
                 href={rollapp.path}
                 handleClick={handleClickSearchItem}
