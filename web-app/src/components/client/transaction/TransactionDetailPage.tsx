@@ -2,16 +2,14 @@
 
 import useTransactionDetail from '@/hooks/useTransactionDetail';
 import Typography from '@mui/material/Typography';
-import { useParams, usePathname, useRouter } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import Chip from '@mui/material/Chip';
 import LinkToBlockNo from '../block/LinkToBlockNo';
 import ClearIcon from '@mui/icons-material/Clear';
 import DoneIcon from '@mui/icons-material/Done';
-import { getNewPathByRollapp } from '@/utils/common';
 import { formatNumber } from '@/utils/number';
 import CopyButton from '../commons/CopyButton';
 import round from 'lodash/round';
-import { Path } from '@/consts/path';
 import Card from '@/components/commons/Card';
 import TransactionData from './TransactionData';
 import Grid from '@mui/material/Grid';
@@ -29,12 +27,10 @@ function getStatusDisplay(success: boolean) {
 
 export default function TransactionDetailPage() {
   const params = useParams<{ txHash: string }>();
-  const router = useRouter();
-  const pathname = usePathname();
   const [transactionDetail, loading] = useTransactionDetail(params.txHash);
 
   if (!transactionDetail && !loading) {
-    return void router.push(getNewPathByRollapp(pathname, Path.NOT_FOUND));
+    return notFound();
   }
 
   const used: number = get(transactionDetail, 'result.gas.used', 0);

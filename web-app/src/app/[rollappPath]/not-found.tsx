@@ -24,7 +24,7 @@ export default function NotFound() {
         sx={{ transform: 'translate(-50%, -50%)' }}>
         <Error
           //@ts-ignore
-          statusCode={'Search not found'}
+          statusCode={'Not found'}
           //@ts-ignore
           title={
             <>
