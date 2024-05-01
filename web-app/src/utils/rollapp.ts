@@ -1,14 +1,14 @@
-import { chain_info } from '@prisma/client';
+import { ChainInfo } from '@/services/db/chainInfo';
 
 export type RollappInfo = {
   path: string;
-} & chain_info;
+} & ChainInfo;
 
 export interface RollappInfoMap {
   [chainId: string]: RollappInfo;
 }
 
-export function normalizeRollappsInfo(chainInfos: chain_info[]): RollappInfo[] {
+export function normalizeRollappsInfo(chainInfos: ChainInfo[]): RollappInfo[] {
   return chainInfos
     .map(chainInfo => ({
       ...chainInfo,
@@ -22,7 +22,7 @@ export function normalizeRollappsInfo(chainInfos: chain_info[]): RollappInfo[] {
 }
 
 export function getRollappInfoByPath(
-  chainInfos: chain_info[],
+  chainInfos: ChainInfo[],
   path: string
 ): RollappInfo | undefined {
   return normalizeRollappsInfo(chainInfos).find(
