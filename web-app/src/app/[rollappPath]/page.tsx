@@ -31,7 +31,10 @@ export default async function Overview({ params }: RollappOverviewProps) {
 
   return (
     <>
-      <PageTitle title={rollappInfo.name} subtitle={rollappInfo.chain_id} />
+      <PageTitle
+        title={rollappInfo.name.toUpperCase()}
+        subtitle={rollappInfo.chain_id}
+      />
 
       <Card sx={{ mb: 2, width: '100%' }}>
         <Box display="flex" justifyContent="space-between" mb={3}>
