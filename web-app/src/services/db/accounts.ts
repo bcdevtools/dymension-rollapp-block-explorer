@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, account, ref_account_to_recent_tx } from '@prisma/client';
 import prisma from '../../utils/prisma';
 import { QueryPaginationOption } from '@/utils/db';
 
@@ -40,12 +40,41 @@ export const countAccountTransactions = async function (
   });
 };
 
+const select: Prisma.ref_account_to_recent_txSelect = {
+  recent_accounts_transaction: {
+    select: {
+      hash: true,
+      height: true,
+      epoch: true,
+      message_types: true,
+      action: true,
+    },
+  },
+};
+
+export type RefAccountToRecentTx = Pick<
+  Prisma.ref_account_to_recent_txGetPayload<{
+    select: {
+      recent_accounts_transaction: {
+        select: {
+          hash: true;
+          height: true;
+          epoch: true;
+          message_types: true;
+          action: true;
+        };
+      };
+    };
+  }>,
+  'recent_accounts_transaction'
+>;
+
 export const getAccountTransactions = function (
   chain_id: string,
   bech32_address: string,
   options: AccountTransactionFilterOption = {},
   paginationOptions: QueryPaginationOption = {}
-) {
+): Promise<RefAccountToRecentTx[]> {
   const where = getAccountTransactionsWhereCondition(
     chain_id,
     bech32_address,
@@ -53,20 +82,21 @@ export const getAccountTransactions = function (
   );
 
   return prisma.ref_account_to_recent_tx.findManyWithCache({
+    select,
     where,
-    include: { recent_accounts_transaction: true },
     orderBy: { height: 'desc' },
     ...paginationOptions,
     cacheStrategy: { enabled: true },
   });
 };
 
-export type Account = {
-  chain_id: string;
-  bech32_address: string;
-  balance_on_erc20_contracts: string[];
-  balance_on_nft_contracts: string[];
-};
+export type Account = Pick<
+  account,
+  | 'chain_id'
+  | 'bech32_address'
+  | 'balance_on_erc20_contracts'
+  | 'balance_on_nft_contracts'
+>;
 
 export const getAccount = function (
   chain_id: string,
