@@ -37,7 +37,7 @@ function getBlockLoading() {
 }
 
 export default function BlockOverview() {
-  const [latestBlockNo, latestBlockLoading] = useLatestBlock();
+  const [latestBlockNo, latestBlockLoading] = useLatestBlock(false);
   const [blocks, blockListLoading] = useBlockList(
     latestBlockNo,
     0,
