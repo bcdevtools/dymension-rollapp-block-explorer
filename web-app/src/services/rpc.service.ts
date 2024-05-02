@@ -27,18 +27,31 @@ import {
 } from '@/utils/rpc';
 
 export function getResponseResult<T>(
-  rpcPromise: Promise<RpcResponse<T>>
+  rpcPromise: Promise<RpcResponse<T>>,
+  throwError?: boolean
 ): Promise<T>;
 export function getResponseResult<T>(
-  rpcPromise: Promise<RpcResponse<any>[]>
+  rpcPromise: Promise<RpcResponse<any>[]>,
+  throwError?: boolean
 ): Promise<any[]>;
 export async function getResponseResult<T>(
-  rpcPromise: Promise<RpcResponse<T> | RpcResponse<any>[]>
+  rpcPromise: Promise<RpcResponse<T> | RpcResponse<any>[]>,
+  throwError = true
 ) {
   const response = await rpcPromise;
-  return Array.isArray(response)
-    ? response.map(res => res.result)
-    : response.result;
+  if (Array.isArray(response)) {
+    if (response.some(res => res.error) && throwError)
+      throw new Error(
+        JSON.stringify(response.filter(res => res.error).map(res => res.error))
+      );
+    const result = response.map(res => res.result);
+    return result;
+  } else {
+    if (response.error && throwError)
+      throw new Error(JSON.stringify(response.error));
+    const { result } = response;
+    return result;
+  }
 }
 
 type RpcResult<T> = [Promise<RpcResponse<T>>, AbortController];
