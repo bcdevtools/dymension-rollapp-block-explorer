@@ -29,7 +29,6 @@ export default function ErrorLayout({
               component="button"
               onClick={() => {
                 setRetrying(true);
-                console.log('retryinggg');
                 setTimeout(() => {
                   reset();
                 }, 1000);
