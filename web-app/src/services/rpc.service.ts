@@ -44,13 +44,14 @@ export async function getResponseResult<T>(
       throw new Error(
         JSON.stringify(response.filter(res => res.error).map(res => res.error))
       );
-    const result = response.map(res => res.result);
+    const result = response.map(res => res.result || { error: res.error });
     return result;
   } else {
-    if (response.error && throwError)
-      throw new Error(JSON.stringify(response.error));
-    const { result } = response;
-    return result;
+    if (response.error) {
+      if (throwError) throw new Error(JSON.stringify(response.error));
+      return { error: response.error };
+    }
+    return response.result;
   }
 }
 
