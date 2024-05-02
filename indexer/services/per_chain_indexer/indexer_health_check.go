@@ -39,7 +39,7 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 				return d.querySvc.BeGetChainInfo()
 			},
 			querytypes.DefaultRetryOption().
-				MinCount(3). // maximum number of retry
+				MinCount(3).                // maximum number of retry
 				MaxDuration(3*time.Second), /*RPC is not good if response time is too long*/
 		)
 		logger.Debug("after fetching beGetChainInfo for health-check")
@@ -69,9 +69,9 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 			logger.Error("failed to clear be_json_rpc_urls from chain_info record", "chain-id", d.chainId, "error", err.Error())
 		}
 	} else {
-		logger.Debug("found the best response", "chain-id", d.chainId, "url", theBestResponse.url, "latest-block", theBestResponse.res.LatestBlock, "duration", theBestResponse.duration
+		logger.Debug("found the best response", "chain-id", d.chainId, "url", theBestResponse.url, "latest-block", theBestResponse.res.LatestBlock, "duration", theBestResponse.duration)
 		d.updateActiveJsonRpcUrlAndLastCheckWL(theBestResponse.url, time.Now())
-		logger.Debug("updated active json rpc url", "chain-id", d.chainId, "active-json-rpc-url", theBestResponse.url, "last-url-check", time.Now()
+		logger.Debug("updated active json rpc url", "chain-id", d.chainId, "active-json-rpc-url", theBestResponse.url, "last-url-check", time.Now())
 
 		// update URLs into the database
 		var urls []string
