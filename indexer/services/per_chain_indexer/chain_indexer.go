@@ -231,7 +231,7 @@ func (d *defaultIndexer) Start() {
 				}
 
 				logger.Debug(
-					"determined block range to indexed",
+					"determined block range to index",
 					"anyBlock", anyBlock,
 					"nextBlockToIndexFrom", nextBlockToIndexFrom,
 					"nextBlockToIndexTo", nextBlockToIndexTo,
@@ -346,6 +346,8 @@ func (d *defaultIndexer) Start() {
 					logger.Debug("no candidate failed block to retry", "chain-id", d.chainId)
 				}
 			}
+
+			logger.Debug("end of loop")
 
 			return nil
 		})
