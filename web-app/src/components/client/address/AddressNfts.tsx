@@ -1,18 +1,14 @@
+import AddressLink from '@/components/client/address/AddressLink';
 import DataTable from '@/components/commons/DataTable';
-import Link from '@/components/commons/Link';
-import { Path } from '@/consts/path';
 import { ADDRESS_SUMMARY_COINS_PAGE_SIZE } from '@/consts/setting';
 import useAccounts from '@/hooks/useAccounts';
 import { Account } from '@/services/db/accounts';
-import { getNewPathByRollapp } from '@/utils/common';
-import { usePathname } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
 
 export default function AddressNft({
   accountInfo,
 }: Readonly<{ accountInfo: Account }>) {
   const [page, setPage] = useState(0);
-  const pathname = usePathname();
   const [nfts, loading] = useAccounts(accountInfo.balance_on_nft_contracts);
 
   const [rowKeys, body] = useMemo(() => {
@@ -31,17 +27,14 @@ export default function AddressNft({
     return [
       sorted.map(a => a.address.cosmos),
       sorted.map<[React.ReactNode]>(a => [
-        <Link
+        <AddressLink
           key={a.address.cosmos}
-          href={getNewPathByRollapp(
-            pathname,
-            `${Path.ADDRESS}/${a.address.evm || a.address.cosmos}`
-          )}>
-          {a.contract?.name || a.address.evm || a.address.cosmos}
-        </Link>,
+          address={a.address.evm || a.address.cosmos}
+          display={a.contract?.name}
+        />,
       ]),
     ];
-  }, [nfts, pathname]);
+  }, [nfts]);
 
   return (
     <DataTable

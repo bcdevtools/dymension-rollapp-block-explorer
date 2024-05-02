@@ -8,17 +8,15 @@ import React from 'react';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { ItemContainer, RowItem } from './_Common';
-import { usePathname } from 'next/navigation';
 import { translateEvmLogIfPossible } from '@/utils/transaction';
 import { getAddress } from '@ethersproject/address';
-import AddressLink from '@/components/commons/AddressLink';
+import AddressLink from '@/components/client/address/AddressLink';
 
 export default function EvmEventLogs({
   transaction,
 }: Readonly<{
   transaction: Transaction;
 }>) {
-  const pathname = usePathname();
   return transaction.evmReceipt?.logs.map((event, idx) => {
     const contractNameOrAddress =
       transaction.evmContractAddressToErc20ContractInfo?.get(event.address)
@@ -37,15 +35,17 @@ export default function EvmEventLogs({
             <RowItem
               label="Contract"
               value={
-                <AddressLink address={getAddress(event.address)} display={contractNameOrAddress} pathname={pathname} />
+                <AddressLink
+                  address={getAddress(event.address)}
+                  display={contractNameOrAddress}
+                />
               }
             />
             {renderTopicsAndData(
               event.topics,
               event.data,
               event.address,
-              transaction.evmContractAddressToErc20ContractInfo,
-              pathname
+              transaction.evmContractAddressToErc20ContractInfo
             )}
             <RowItem label="Log Index" value={logIndex} />
           </ItemContainer>
@@ -74,10 +74,7 @@ function renderTopicsAndData(
   topics: string[],
   data: string,
   emitter: string,
-  contractAddressToErc20ContractInfo:
-    | Map<string, Erc20ContractInfo>
-    | undefined,
-  pathname: string
+  contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined
 ) {
   const translatedOrNull = translateEvmLogIfPossible(
     topics,
@@ -91,15 +88,11 @@ function renderTopicsAndData(
         <RowItem label="Action" value="Transfer (ERC-20)" />
         <RowItem
           label="From"
-          value={
-            <AddressLink address={getAddress(translatedOrNull.from)} pathname={pathname} />
-          }
+          value={<AddressLink address={getAddress(translatedOrNull.from)} />}
         />
         <RowItem
           label="To"
-          value={
-            <AddressLink address={getAddress(translatedOrNull.to)} pathname={pathname} />
-          }
+          value={<AddressLink address={getAddress(translatedOrNull.to)} />}
         />
         <RowItem
           label="Amount"

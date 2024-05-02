@@ -1,19 +1,17 @@
 'use client';
 
 import { Transaction } from '@/consts/rpcResTypes';
-import { usePathname } from 'next/navigation';
 import { ItemContainer, RowItem } from './_Common';
 import { fromHexStringToEthereumGasPriceValue } from '@/utils/transaction';
 import { formatNumber, hexToDec } from '@/utils/number';
 import { getAddress } from '@ethersproject/address';
-import AddressLink from '@/components/commons/AddressLink';
+import AddressLink from '@/components/client/address/AddressLink';
 
 export default function EvmReceiptDetails({
   transaction,
 }: Readonly<{
   transaction: Transaction;
 }>) {
-  const pathname = usePathname();
   const evmReceiptInfo = transaction.evmReceipt;
 
   return (
@@ -21,23 +19,21 @@ export default function EvmReceiptDetails({
       <ItemContainer>
         <RowItem
           label="From"
-          value={
-            <AddressLink address={getAddress(evmReceiptInfo.from)} pathname={pathname} />
-          }
+          value={<AddressLink address={getAddress(evmReceiptInfo.from)} />}
         />
         {evmReceiptInfo.to && (
           <RowItem
             label="To"
-            value={
-              <AddressLink address={getAddress(evmReceiptInfo.to)} pathname={pathname} />
-            }
+            value={<AddressLink address={getAddress(evmReceiptInfo.to)} />}
           />
         )}
         {evmReceiptInfo.contractAddress && (
           <RowItem
             label="New Contract Address"
             value={
-              <AddressLink address={getAddress(evmReceiptInfo.contractAddress)} pathname={pathname} />
+              <AddressLink
+                address={getAddress(evmReceiptInfo.contractAddress)}
+              />
             }
           />
         )}
