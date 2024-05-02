@@ -28,6 +28,8 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 	var responsesByJsonRpcUrl responseByJsonRpcUrlSlice
 	for _, url := range d.getBeRpcUrlsRL() {
 		d.querySvc.SetQueryEndpoint(url)
+
+		logger.Debug("before fetching beGetChainInfo for health-check")
 		resBeGetChainInfo, duration, err := querysvc.BeJsonRpcQueryWithRetry[*querytypes.ResponseBeGetChainInfo](
 			d.querySvc,
 			func(service querysvc.BeJsonRpcQueryService) (*querytypes.ResponseBeGetChainInfo, time.Duration, error) {
@@ -37,10 +39,13 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 				MinCount(3).                // maximum number of retry
 				MaxDuration(3*time.Second), /*RPC is not good if response time is too long*/
 		)
+		logger.Debug("after fetching beGetChainInfo for health-check")
 		if err != nil {
 			logger.Error("failed to get chain info", "url", url, "chain-id", d.chainId, "error", err.Error())
 			continue
 		}
+
+		logger.Debug("taken result of beGetChainInfo for health-check")
 
 		responsesByJsonRpcUrl = append(responsesByJsonRpcUrl, responseByJsonRpcUrl{
 			url:      url,
@@ -49,7 +54,9 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 		})
 	}
 
+	logger.Debug("before get top")
 	theBestResponse, found := responsesByJsonRpcUrl.GetTop()
+	logger.Debug("after get top")
 	if !found {
 		logger.Error("failed to get chain info from all json-rpc urls", "chain-id", d.chainId)
 		d.forceResetActiveJsonRpcUrlDL(true)
@@ -75,6 +82,8 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 			beGetChainInfoWhenUpdated = theBestResponse.res
 		}
 	}
+
+	logger.Debug("finished health-check urls")
 
 	return
 }
