@@ -45,11 +45,21 @@ export interface LatestBlockNumber {
   latestBlockTimeEpochUTC: number;
 }
 
+export interface TransactionInBlock {
+  code: number;
+  fee: Fee;
+  gasLimit: number;
+  gasUsed: number;
+  hash: string;
+  messages: string[];
+  type: string;
+}
+
 export interface Block {
   hash: string;
   height: number;
   timeEpochUTC: number;
-  txs: Transaction[];
+  txs: TransactionInBlock[];
 }
 
 export interface TransactionGas {

@@ -18,9 +18,9 @@ import Link from '@/components/commons/Link';
 
 type TransactionListTableProps = Readonly<{
   transactions: Required<{
-    height: bigint;
+    height: bigint | number;
     hash: string;
-    epoch: bigint;
+    epoch: bigint | number;
     tx_type: string;
     message_types: string[];
     action: string | null;
@@ -29,6 +29,7 @@ type TransactionListTableProps = Readonly<{
   pageSize?: number;
   page?: number;
   enablePagination?: boolean;
+  loading?: boolean;
 }>;
 
 const headers = ['Transaction Hash', 'Messages', 'Block', 'Date Time'];
@@ -39,11 +40,12 @@ export default function TransactionListTable({
   pageSize = DEFAULT_PAGINATION_SIZE,
   page = 0,
   enablePagination = true,
+  loading = false,
 }: TransactionListTableProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLoading(false);
@@ -87,7 +89,7 @@ export default function TransactionListTable({
       total={totalTransactions}
       page={page}
       pageSize={pageSize}
-      loading={loading}
+      loading={loading || _loading}
       enablePagination={enablePagination}
       onPageChange={newPage => {
         setLoading(true);

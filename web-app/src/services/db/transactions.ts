@@ -16,40 +16,22 @@ export type Transaction = Pick<
   'hash' | 'height' | 'epoch' | 'message_types' | 'tx_type' | 'action'
 >;
 
-function getTransactionsByHeightWhereCondition(
+export const getTransactions = async function (
   chain_id: string,
-  height: number | null
-) {
-  const where: Prisma.transactionWhereInput = {
-    chain_id,
-  };
-  if (height) where.height = height;
-  return where;
-}
-
-export const getTransactionsByHeight = async function (
-  chain_id: string,
-  height: number | null,
   paginationOptions: QueryPaginationOption = {}
 ): Promise<Transaction[]> {
-  const where = getTransactionsByHeightWhereCondition(chain_id, height);
-
   return prisma.transaction.findManyWithCache({
     select,
-    where,
+    where: { chain_id },
     orderBy: [{ epoch: 'desc' }, { height: 'desc' }],
     ...paginationOptions,
     cacheStrategy: { enabled: true },
   });
 };
 
-export const countTransactionsByHeight = async function (
-  chain_id: string,
-  height: number | null
-) {
-  const where = getTransactionsByHeightWhereCondition(chain_id, height);
+export const countTransactions = async function (chain_id: string) {
   return prisma.transaction.countWithCache({
-    where,
+    where: { chain_id },
     cacheStrategy: { enabled: true },
   });
 };

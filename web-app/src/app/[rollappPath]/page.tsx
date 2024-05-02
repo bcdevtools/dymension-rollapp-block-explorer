@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { Path } from '@/consts/path';
 import TransactionListTable from '@/components/client/transaction/TransactionListTable';
-import { getTransactionsByHeight } from '@/services/db/transactions';
+import { getTransactions } from '@/services/db/transactions';
 
 type RollappOverviewProps = Readonly<{
   params: { rollappPath: string };
@@ -23,11 +23,9 @@ export default async function Overview({ params }: RollappOverviewProps) {
     console.log('Trying to access invalid rollapp path', params.rollappPath);
     return null;
   }
-  const transactions = await getTransactionsByHeight(
-    rollappInfo.chain_id,
-    null,
-    { take: DEFAULT_TX_OVERVIEW_SIZE }
-  );
+  const transactions = await getTransactions(rollappInfo.chain_id, {
+    take: DEFAULT_TX_OVERVIEW_SIZE,
+  });
 
   return (
     <>
