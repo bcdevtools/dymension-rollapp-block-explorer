@@ -2,7 +2,7 @@ package constants
 
 const (
 	RpcTxAheadBlockTimeAllowed                     = 86400 - 1 // now + X
-	RpcTxMaximumTxsPerBlockAllowed                 = 20        // maximum X txs per block
+	RpcTxMaximumTxsPerBlockAllowed                 = 50        // maximum X txs per block
 	RpcTxMaximumMessagesPerTxAllowed               = 30        // maximum X msgs per tx
 	RpcTxMaximumStringSizeAllowed                  = 1000      // characters
 	RpcTxMaximumSignersPerTx                       = 10        // maximum X signers per tx
