@@ -31,6 +31,7 @@ export default function AddressNft({
           key={a.address.cosmos}
           address={a.address.evm || a.address.cosmos}
           display={a.contract?.name}
+          showCopyButton={false}
         />,
       ]),
     ];
