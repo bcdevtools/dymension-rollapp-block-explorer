@@ -1,11 +1,13 @@
+export interface RpcError {
+  code: number;
+  message: string;
+}
+
 export interface RpcResponse<T> {
   jsonrpc: string;
   id: number;
   result?: T;
-  error?: {
-    code: number;
-    message: string;
-  };
+  error?: RpcError;
 }
 
 export interface Bech32 {

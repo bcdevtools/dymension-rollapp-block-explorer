@@ -5,11 +5,12 @@ import { useThrowError } from './useThrowError';
 import { isAbortException } from '@/utils/common';
 
 export function useLatestBlock(
-  autoRefresh: boolean = false
+  autoRefresh: boolean = false,
+  shouldThrowError: boolean = true
 ): [number, boolean] {
   const [latestBlockNo, setLatestBlockNo] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [{ rpcService }] = useRollappStore(true);
+  const [{ rpcService, selectedRollappInfo }] = useRollappStore(true);
   const throwError = useThrowError();
 
   useEffect(() => {
@@ -22,8 +23,14 @@ export function useLatestBlock(
         const result = rpcService.getLatestBlockNumber();
 
         ac = result[1];
-        const latestBlockResult = await getResponseResult(result[0]);
-        setLatestBlockNo(latestBlockResult.latestBlock);
+        const latestBlockResult = await getResponseResult(
+          result[0],
+          shouldThrowError
+        );
+        const _latestBlockNo = latestBlockResult.latestBlock
+          ? latestBlockResult.latestBlock
+          : Number(selectedRollappInfo!.latest_indexed_block);
+        setLatestBlockNo(_latestBlockNo);
         setLoading(false);
 
         return result[1];
@@ -44,7 +51,13 @@ export function useLatestBlock(
       if (ac) ac.abort();
       if (intervalId) clearInterval(intervalId);
     };
-  }, [autoRefresh, rpcService, throwError]);
+  }, [
+    autoRefresh,
+    rpcService,
+    throwError,
+    shouldThrowError,
+    selectedRollappInfo,
+  ]);
 
   return [latestBlockNo, loading];
 }
