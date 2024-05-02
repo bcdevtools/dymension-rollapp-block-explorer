@@ -10,9 +10,14 @@ import { usePathname } from 'next/navigation';
 type AddressLinkProps = Readonly<{
   address: string;
   display?: string;
+  showCopyButton?: boolean;
 }>;
 
-export default function AddressLink({ address, display }: AddressLinkProps) {
+export default function AddressLink({
+  address,
+  display,
+  showCopyButton = true,
+}: AddressLinkProps) {
   const pathname = usePathname();
   return (
     <>
@@ -25,7 +30,7 @@ export default function AddressLink({ address, display }: AddressLinkProps) {
         sx={{ fontStyle: 'normal' }}>
         {display || address}
       </Link>
-      <CopyButton size="small" textToCopy={address} />
+      {showCopyButton && <CopyButton size="small" textToCopy={address} />}
     </>
   );
 }

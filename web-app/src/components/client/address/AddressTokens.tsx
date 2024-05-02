@@ -3,7 +3,6 @@ import { ADDRESS_SUMMARY_COINS_PAGE_SIZE } from '@/consts/setting';
 import useTokenBalances from '@/hooks/useTokenBalances';
 import { Account } from '@/services/db/accounts';
 import { formatBlockchainAmount } from '@/utils/number';
-import { usePathname } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
 import AddressLink from './AddressLink';
 
@@ -11,7 +10,6 @@ export default function AddressTokens({
   accountInfo,
   evmAddress,
 }: Readonly<{ accountInfo: Account; evmAddress: string | null }>) {
-  const pathname = usePathname();
   const [page, setPage] = useState(0);
 
   const [tokenBalances, loading] = useTokenBalances(
@@ -36,6 +34,7 @@ export default function AddressTokens({
           key={tokenBalance.contract}
           address={tokenBalance.contract}
           display={tokenBalance.display}
+          showCopyButton={false}
         />,
         formatBlockchainAmount(tokenBalance.balance, tokenBalance.decimals),
       ]
