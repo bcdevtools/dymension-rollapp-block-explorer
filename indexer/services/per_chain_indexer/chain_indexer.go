@@ -176,7 +176,7 @@ func (d *defaultIndexer) Start() {
 			time.Sleep(d.indexingCfg.IndexBlockInterval)
 		}
 
-		_ = d.genericLoop(func(beGetChainInfo querytypes.ResponseBeGetChainInfo) error {
+		err := d.genericLoop(func(beGetChainInfo querytypes.ResponseBeGetChainInfo) error {
 			startTime := time.Now().UTC()
 			catchUp = false
 
@@ -351,6 +351,10 @@ func (d *defaultIndexer) Start() {
 
 			return nil
 		})
+
+		if err != nil {
+			logger.Error("generic loop returns error", "chain-id", d.chainId, "error", err.Error())
+		}
 	}
 
 	logger.Info("shutting down indexer", "name", d.chainName)
@@ -931,16 +935,19 @@ func (d *defaultIndexer) genericLoop(f func(querytypes.ResponseBeGetChainInfo) e
 	d.querySvc.SetQueryEndpoint(activeJsonRpcUrl)
 
 	if beGetChainInfo == nil {
+		logger.Debug("before fetching missing beGetChainInfo")
 		beGetChainInfo, _, err = querysvc.BeJsonRpcQueryWithRetry[*querytypes.ResponseBeGetChainInfo](
 			d.querySvc,
 			func(service querysvc.BeJsonRpcQueryService) (*querytypes.ResponseBeGetChainInfo, time.Duration, error) {
 				return d.querySvc.BeGetChainInfo()
 			},
 		)
+		logger.Debug("after fetching missing beGetChainInfo")
 		if err != nil {
 			logger.Error("failed to get chain info, waiting for next round", "chain-id", d.chainId, "error", err.Error())
 			return err
 		}
+		logger.Debug("fetched beGetChainInfo successfully")
 	}
 
 	// validate chain info
@@ -951,6 +958,7 @@ func (d *defaultIndexer) genericLoop(f func(querytypes.ResponseBeGetChainInfo) e
 		return fmt.Errorf("chain-id mismatch")
 	}
 
+	logger.Debug("before invoking function", "beGetChainInfo is not nil", beGetChainInfo != nil)
 	return f(*beGetChainInfo)
 }
 
