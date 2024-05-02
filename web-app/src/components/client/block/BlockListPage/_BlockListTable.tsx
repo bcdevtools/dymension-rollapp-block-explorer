@@ -47,7 +47,7 @@ export default function BlockListTable({
     latestBlockNo
   );
 
-  const [blocks, loading] = useBlockList(latestBlockNo, page, pageSize);
+  const [blocks, loading] = useBlockList(latestBlockNo, page, pageSize, false);
 
   const rowKeys = blocks.map((b, idx) => latestBlockNo - idx);
 

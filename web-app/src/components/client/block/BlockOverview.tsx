@@ -41,7 +41,8 @@ export default function BlockOverview() {
   const [blocks, blockListLoading] = useBlockList(
     latestBlockNo,
     0,
-    DEFAULT_BLOCK_OVERVIEW_SIZE
+    DEFAULT_BLOCK_OVERVIEW_SIZE,
+    false
   );
 
   const loading = (blockListLoading || latestBlockLoading) && !blocks.length;
