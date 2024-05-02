@@ -232,10 +232,12 @@ func (d *defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, opt
 
 	resp, err := httpClient.Post(d.getQueryEndpointRL(), "application/json", bytes.NewBuffer([]byte(payload)))
 	if err != nil {
+		d.logger.Debug("result query Be Json-RPC", "method", qb.Method(), "error", err)
 		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		d.logger.Debug("result query Be Json-RPC", "method", qb.Method(), "status", resp.StatusCode)
 		return nil, fmt.Errorf("non-OK status code: %d", resp.StatusCode)
 	}
 
@@ -245,8 +247,11 @@ func (d *defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, opt
 
 	bz, err := io.ReadAll(resp.Body)
 	if err != nil {
+		d.logger.Debug("failed to read result query Be Json-RPC", "method", qb.Method(), "error", err)
 		return nil, errors.Wrap(err, "failed to read response body")
 	}
+
+	d.logger.Debug("success result query Be Json-RPC", "method", qb.Method())
 
 	return bz, nil
 }

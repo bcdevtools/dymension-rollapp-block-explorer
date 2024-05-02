@@ -455,6 +455,8 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 	for _, block := range beTransactionsInBlockRange.Blocks {
 		blockHeight := block.Height
 
+		logger.Debug("indexing block", "chain-id", d.chainId, "height", blockHeight)
+
 		if blockHeight == 0 { // unexpected un-set value
 			panic(fmt.Sprintf("unexpected block height 0 when indexing %s", d.chainId))
 		}
@@ -609,6 +611,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				fatalError = sqlErr
 				return
 			}
+
 			continue
 		}
 
@@ -638,6 +641,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				fatalError = sqlErr
 				return
 			}
+
 			continue
 		}
 
