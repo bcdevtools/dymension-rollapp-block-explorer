@@ -3,7 +3,7 @@ import Link from '@/components/commons/Link';
 import { Path } from '@/consts/path';
 import { Block } from '@/consts/rpcResTypes';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
-import { useBlockList } from '@/hooks/useBlockList';
+import { isBlock, useBlockList } from '@/hooks/useBlockList';
 import {
   getNewPathByRollapp,
   getPageAndPageSizeFromStringParam,
@@ -12,6 +12,7 @@ import { formatUnixTime } from '@/utils/datetime';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import React from 'react';
 import LinkToBlockNo from '../LinkToBlockNo';
+import Skeleton from '@mui/material/Skeleton';
 
 type BlockListTableProps = Readonly<{
   latestBlockNo: number;
@@ -46,18 +47,24 @@ export default function BlockListTable({
     latestBlockNo
   );
 
-  const [blocks, loading] = useBlockList<true>(latestBlockNo, page, pageSize);
+  const [blocks, loading] = useBlockList(latestBlockNo, page, pageSize);
 
-  const body = blocks.map(b => [
-    <LinkToBlockNo key={b.height} blockNo={b.height} />,
-    formatUnixTime(b.timeEpochUTC),
-    getTxsDisplay(b, pathname),
-  ]);
+  const rowKeys = blocks.map((b, idx) => latestBlockNo - idx);
+
+  const body = blocks.map((b, idx) => {
+    const height = rowKeys[idx];
+    const isBlockInstance = isBlock(b);
+    return [
+      <LinkToBlockNo key={height} blockNo={height} />,
+      isBlockInstance ? formatUnixTime(b.timeEpochUTC) : <Skeleton />,
+      isBlockInstance ? getTxsDisplay(b, pathname) : <Skeleton />,
+    ];
+  });
 
   return (
     <DataTable
       headers={['Block', 'Date Time', 'Txs']}
-      rowKeys={blocks.map(b => b.height)}
+      rowKeys={rowKeys}
       body={body}
       page={page}
       pageSize={pageSize}

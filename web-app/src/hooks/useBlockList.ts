@@ -5,6 +5,10 @@ import { useEffect, useState } from 'react';
 import { useThrowError } from './useThrowError';
 import { isAbortException } from '@/utils/common';
 
+export function isBlock(block: any): block is Block {
+  return (block as Block).height !== undefined;
+}
+
 export function useBlockList<T extends boolean>(
   latestBlockNo: number,
   page: number,
