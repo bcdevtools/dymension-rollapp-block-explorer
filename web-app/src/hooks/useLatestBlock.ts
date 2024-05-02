@@ -30,7 +30,7 @@ export function useLatestBlock(
       } catch (e: any) {
         if (!isAbortException(e)) {
           console.log(e);
-          throwError(new Error('Failed to fetch Lastest Block'));
+          throwError(new Error('Failed to fetch Latest Block'));
         }
       } finally {
         ac = null;
