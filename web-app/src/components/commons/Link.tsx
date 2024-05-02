@@ -1,22 +1,22 @@
 import MuiLink, { LinkProps as MuiLinkProps } from '@mui/material/Link';
+import { LinkProps as NextLinkProps } from 'next/link';
 
 type LinkProps = Readonly<
-  MuiLinkProps & {
-    children: React.ReactNode;
-  }
+  MuiLinkProps &
+    NextLinkProps & {
+      children: React.ReactNode;
+    }
 >;
 
 export default function Link({
   children,
-  fontWeight,
-  underline,
+  fontWeight = 700,
+  underline = 'hover',
+  prefetch = false,
   ...props
 }: LinkProps) {
   return (
-    <MuiLink
-      fontWeight={fontWeight || 700}
-      underline={underline || 'hover'}
-      {...props}>
+    <MuiLink {...{ ...props, fontWeight, underline, prefetch }}>
       {children}
     </MuiLink>
   );

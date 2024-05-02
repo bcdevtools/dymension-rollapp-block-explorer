@@ -92,7 +92,8 @@ export default React.memo(function Sider({
             <ListItem key={index} disablePadding>
               <ListItemButton
                 href={getNewPathByRollapp(pathname, menuItem.path)}
-                LinkComponent={Link}
+                component={Link}
+                prefetch={true}
                 onClick={() => handleMenuClose()}
                 selected={isSelected}>
                 <ListItemIcon>
