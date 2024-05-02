@@ -1,9 +1,9 @@
 import { Erc20ContractInfo, Transaction, TxMode } from '@/consts/rpcResTypes';
-import ErrorContext from '@/contexts/ErrorContext';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
-import { useContext, useEffect, useState } from 'react';
-import { useMountedState } from './useMountedState';
+import { useEffect, useState } from 'react';
+import { useThrowError } from './useThrowError';
+import { isAbortException } from '@/utils/common';
 
 export default function useTransactionDetail(
   txHash: string
@@ -11,12 +11,11 @@ export default function useTransactionDetail(
   const [loading, setLoading] = useState(true);
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [{ rpcService }] = useRollappStore();
-  const { showErrorSnackbar } = useContext(ErrorContext);
-  const mounted = useMountedState();
+  const throwError = useThrowError();
 
   useEffect(() => {
     let ac: AbortController | null;
-    if (!rpcService) throw new Error('Cannot find Rpc Service');
+    if (!rpcService) throw new Error('Rpc Service is not available');
 
     if (txHash) {
       (async function () {
@@ -92,21 +91,21 @@ export default function useTransactionDetail(
 
           setTransaction(_transaction);
           setLoading(false);
-        } catch (e) {
-          console.log(e);
-          if (mounted.current)
-            showErrorSnackbar('Failed to fetch Transaction Detail');
+        } catch (e: any) {
+          if (!isAbortException(e)) {
+            console.log(e);
+            throwError(new Error('Failed to fetch Transaction Detail'));
+          }
         } finally {
           ac = null;
-          if (mounted.current) setLoading(false);
         }
       })();
     } else setTransaction(null);
 
     return () => {
-      if (ac) ac.abort('useTransactionDetail cleanup');
+      if (ac) ac.abort();
     };
-  }, [txHash, rpcService, showErrorSnackbar, mounted]);
+  }, [txHash, rpcService, throwError]);
 
   return [transaction, loading];
 }

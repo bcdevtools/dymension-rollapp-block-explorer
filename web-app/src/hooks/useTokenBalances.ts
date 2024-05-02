@@ -1,9 +1,9 @@
 import { Erc20Balance } from '@/consts/rpcResTypes';
-import ErrorContext from '@/contexts/ErrorContext';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
-import { useContext, useEffect, useState } from 'react';
-import { useMountedState } from './useMountedState';
+import { useEffect, useState } from 'react';
+import { useThrowError } from './useThrowError';
+import { isAbortException } from '@/utils/common';
 
 export default function useTokenBalances(
   address: string,
@@ -12,12 +12,11 @@ export default function useTokenBalances(
   const [loading, setLoading] = useState(true);
   const [tokenBalances, setTokenBalances] = useState<Erc20Balance[]>([]);
   const [{ rpcService }] = useRollappStore();
-  const { showErrorSnackbar } = useContext(ErrorContext);
-  const mounted = useMountedState();
+  const throwError = useThrowError();
 
   useEffect(() => {
     let ac: AbortController | null;
-    if (!rpcService) throw new Error('Cannot find Rpc Service');
+    if (!rpcService) throw new Error('Rpc Service is not available');
 
     if (address && tokenAddresses.length) {
       (async function () {
@@ -36,13 +35,13 @@ export default function useTokenBalances(
             setTokenBalances(balances.cw20Balances);
           }
           setLoading(false);
-        } catch (e) {
-          console.log(e);
-          if (mounted.current)
-            showErrorSnackbar('Failed to fetch Token Balances');
+        } catch (e: any) {
+          if (!isAbortException(e)) {
+            console.log(e);
+            throwError(new Error('Failed to fetch Token Balances'));
+          }
         } finally {
           ac = null;
-          if (mounted.current) setLoading(false);
         }
       })();
     } else setTokenBalances([]);
@@ -50,7 +49,7 @@ export default function useTokenBalances(
     return () => {
       if (ac) ac.abort();
     };
-  }, [address, tokenAddresses, rpcService, showErrorSnackbar, mounted]);
+  }, [address, tokenAddresses, rpcService, throwError]);
 
   return [tokenBalances, loading];
 }

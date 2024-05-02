@@ -1,8 +1,8 @@
 import { useRollappStore } from '@/stores/rollappStore';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getResponseResult } from '@/services/rpc.service';
-import ErrorContext from '@/contexts/ErrorContext';
-import { useMountedState } from './useMountedState';
+import { useThrowError } from './useThrowError';
+import { isAbortException } from '@/utils/common';
 
 export function useLatestBlock(
   autoRefresh: boolean = false
@@ -10,13 +10,12 @@ export function useLatestBlock(
   const [latestBlockNo, setLatestBlockNo] = useState(0);
   const [loading, setLoading] = useState(true);
   const [{ rpcService }] = useRollappStore(true);
-  const { showErrorSnackbar } = useContext(ErrorContext);
-  const mounted = useMountedState();
+  const throwError = useThrowError();
 
   useEffect(() => {
     let ac: AbortController | null;
     let intervalId: NodeJS.Timeout | null = null;
-    if (!rpcService) throw new Error('Cannot find Rpc Service');
+    if (!rpcService) throw new Error('Rpc Service is not available');
 
     const fetchLatestBlock = async function () {
       try {
@@ -28,12 +27,13 @@ export function useLatestBlock(
         setLoading(false);
 
         return result[1];
-      } catch (e) {
-        console.log(e);
-        if (mounted.current) showErrorSnackbar('Failed to lastest block');
+      } catch (e: any) {
+        if (!isAbortException(e)) {
+          console.log(e);
+          throwError(new Error('Failed to fetch Lastest Block'));
+        }
       } finally {
         ac = null;
-        if (mounted.current) setLoading(false);
       }
     };
 
@@ -41,10 +41,10 @@ export function useLatestBlock(
     else fetchLatestBlock();
 
     return () => {
-      if (ac) ac.abort('useLatestBlock cleanup');
+      if (ac) ac.abort();
       if (intervalId) clearInterval(intervalId);
     };
-  }, [autoRefresh, rpcService, showErrorSnackbar, mounted]);
+  }, [autoRefresh, rpcService, throwError]);
 
   return [latestBlockNo, loading];
 }

@@ -1,9 +1,9 @@
 import { Block } from '@/consts/rpcResTypes';
-import ErrorContext from '@/contexts/ErrorContext';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
-import { useContext, useEffect, useState } from 'react';
-import { useMountedState } from './useMountedState';
+import { useEffect, useState } from 'react';
+import { useThrowError } from './useThrowError';
+import { isAbortException } from '@/utils/common';
 
 export default function useBlockDetail(
   blockNo: number
@@ -11,12 +11,11 @@ export default function useBlockDetail(
   const [loading, setLoading] = useState(true);
   const [block, setBlock] = useState<Block | null>(null);
   const [{ rpcService }] = useRollappStore();
-  const { showErrorSnackbar } = useContext(ErrorContext);
-  const mounted = useMountedState();
+  const throwError = useThrowError();
 
   useEffect(() => {
     let ac: AbortController | null;
-    if (!rpcService) throw new Error('Cannot find Rpc Service');
+    if (!rpcService) throw new Error('Rpc Service is not available');
 
     if (blockNo) {
       (async function () {
@@ -28,21 +27,21 @@ export default function useBlockDetail(
           const _block = await getResponseResult(result[0]);
           setBlock(_block);
           setLoading(false);
-        } catch (e) {
-          console.log(e);
-          if (mounted.current)
-            showErrorSnackbar('Failed to fetch Block Detail');
+        } catch (e: any) {
+          if (!isAbortException(e)) {
+            console.log(e);
+            throwError(new Error('Failed to fetch Block Detail'));
+          }
         } finally {
           ac = null;
-          if (mounted.current) setLoading(false);
         }
       })();
     } else setBlock(null);
 
     return () => {
-      if (ac) ac.abort('useBlockDetail cleanup');
+      if (ac) ac.abort();
     };
-  }, [blockNo, rpcService, showErrorSnackbar, mounted]);
+  }, [blockNo, rpcService, throwError]);
 
   return [block, loading];
 }

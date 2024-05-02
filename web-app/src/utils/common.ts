@@ -53,3 +53,7 @@ export function getOffsetFromPageAndPageSize(page: number, pageSize: number) {
   if (isNaN(page) || page < 0) return 0;
   return page * pageSize;
 }
+
+export function isAbortException(e: Error) {
+  return e instanceof DOMException && e.name === 'AbortError';
+}

@@ -1,9 +1,9 @@
 import { DenomMetadata } from '@/consts/rpcResTypes';
-import ErrorContext from '@/contexts/ErrorContext';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
-import { useContext, useEffect, useState } from 'react';
-import { useMountedState } from './useMountedState';
+import { useEffect, useState } from 'react';
+import { useThrowError } from './useThrowError';
+import { isAbortException } from '@/utils/common';
 
 export type BalanceWithMetadata = { balance: string; metadata?: DenomMetadata };
 
@@ -19,13 +19,12 @@ export default function useAccountBalances(
     null
   );
   const [{ rpcService }] = useRollappStore();
-  const { showErrorSnackbar } = useContext(ErrorContext);
-  const mounted = useMountedState();
+  const throwError = useThrowError();
 
   useEffect(() => {
     let acAccountBalances: AbortController | null;
     let acGetDenomMetaData: AbortController | null;
-    if (!rpcService) throw new Error('Cannot find Rpc Service');
+    if (!rpcService) throw new Error('Rpc Service is not available');
 
     if (address) {
       (async function () {
@@ -53,13 +52,14 @@ export default function useAccountBalances(
 
           setBalances(useAccountBalancesResult);
           setLoading(false);
-        } catch (e) {
-          console.log(e);
-          if (mounted.current) showErrorSnackbar('Failed to fetch balances');
+        } catch (e: any) {
+          if (!isAbortException(e)) {
+            console.log(e);
+            throwError(new Error('Failed to fetch Balances'));
+          }
         } finally {
           acAccountBalances = null;
           acGetDenomMetaData = null;
-          if (mounted.current) setLoading(false);
         }
       })();
     } else setBalances(null);
@@ -68,7 +68,7 @@ export default function useAccountBalances(
       if (acAccountBalances) acAccountBalances.abort();
       if (acGetDenomMetaData) acGetDenomMetaData.abort();
     };
-  }, [address, rpcService, showErrorSnackbar, mounted]);
+  }, [address, rpcService, throwError]);
 
   return [balances, loading];
 }

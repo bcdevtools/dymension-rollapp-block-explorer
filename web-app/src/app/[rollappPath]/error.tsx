@@ -2,7 +2,10 @@
 
 import Error from '@/components/client/commons/Error';
 import ErrorContainer from '@/components/client/commons/RollappErrorContainer';
-import { Link } from '@mui/material';
+import { useMountedState } from '@/hooks/useMountedState';
+import CircularProgress from '@mui/material/CircularProgress';
+import Link from '@mui/material/Link';
+import { useState } from 'react';
 
 export default function ErrorLayout({
   error,
@@ -11,16 +14,34 @@ export default function ErrorLayout({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [retrying, setRetrying] = useState(false);
+  const mounted = useMountedState();
+
   return (
     <ErrorContainer>
       <Error
         //@ts-ignore
-        statusCode={'Something went wrong!'}
+        statusCode={error.message}
         //@ts-ignore
         title={
-          <Link component="button" onClick={() => reset()}>
-            Try again
-          </Link>
+          !retrying ? (
+            <Link
+              component="button"
+              onClick={() => {
+                setRetrying(true);
+                console.log('retryinggg');
+                setTimeout(() => {
+                  reset();
+                }, 1000);
+                setTimeout(() => {
+                  if (mounted.current) setRetrying(false);
+                }, 2000);
+              }}>
+              Try again
+            </Link>
+          ) : (
+            <CircularProgress />
+          )
         }
       />
     </ErrorContainer>
