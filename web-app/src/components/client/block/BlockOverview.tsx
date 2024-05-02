@@ -1,6 +1,6 @@
 'use client';
 
-import { useBlockList } from '@/hooks/useBlockList';
+import { isBlock, useBlockList } from '@/hooks/useBlockList';
 import { useLatestBlock } from '@/hooks/useLatestBlock';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
@@ -10,7 +10,6 @@ import { styled } from '@mui/material/styles';
 import { getTimeDurationDisplay } from '@/utils/datetime';
 import dayjs from 'dayjs';
 import Skeleton from '@mui/material/Skeleton';
-import { Block } from '@/consts/rpcResTypes';
 import LinkToBlockNo from './LinkToBlockNo';
 
 const DEFAULT_BLOCK_OVERVIEW_SIZE = 4;
@@ -35,10 +34,6 @@ function getBlockLoading() {
       </StyledPaper>
     </Grid>
   ));
-}
-
-function isBlock(block: any): block is Block {
-  return (block as Block).height !== undefined;
 }
 
 export default function BlockOverview() {
