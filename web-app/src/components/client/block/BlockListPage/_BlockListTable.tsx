@@ -46,7 +46,7 @@ export default function BlockListTable({
     latestBlockNo
   );
 
-  const [blocks, loading] = useBlockList(latestBlockNo, page, pageSize);
+  const [blocks, loading] = useBlockList<true>(latestBlockNo, page, pageSize);
 
   const body = blocks.map(b => [
     <LinkToBlockNo key={b.height} blockNo={b.height} />,

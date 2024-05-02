@@ -4,16 +4,14 @@ import { useBlockList } from '@/hooks/useBlockList';
 import { useLatestBlock } from '@/hooks/useLatestBlock';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import { getNewPathByRollapp } from '@/utils/common';
-import { usePathname } from 'next/navigation';
-import { Path } from '@/consts/path';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import { getTimeDurationDisplay } from '@/utils/datetime';
 import dayjs from 'dayjs';
 import Skeleton from '@mui/material/Skeleton';
-import Link from '@/components/commons/Link';
+import { Block } from '@/consts/rpcResTypes';
+import LinkToBlockNo from './LinkToBlockNo';
 
 const DEFAULT_BLOCK_OVERVIEW_SIZE = 4;
 
@@ -39,8 +37,11 @@ function getBlockLoading() {
   ));
 }
 
+function isBlock(block: any): block is Block {
+  return (block as Block).height !== undefined;
+}
+
 export default function BlockOverview() {
-  const pathname = usePathname();
   const [latestBlockNo, latestBlockLoading] = useLatestBlock();
   const [blocks, blockListLoading] = useBlockList(
     latestBlockNo,
@@ -54,25 +55,24 @@ export default function BlockOverview() {
     <Grid container spacing={2}>
       {loading
         ? getBlockLoading()
-        : blocks.map(block => (
-            <Grid key={block.height} item xs={12} md={6} xl={3}>
-              <StyledPaper elevation={4}>
-                <Typography variant="h6">
-                  <Link
-                    href={getNewPathByRollapp(
-                      pathname,
-                      `${Path.BLOCK}/${block.height}`
-                    )}>
-                    {block.height}
-                  </Link>
-                </Typography>
-                <Typography color="text.secondary">
-                  {block.txs.length} Transactions{' • '}
-                  {getTimeDurationDisplay(dayjs.unix(block.timeEpochUTC))}
-                </Typography>
-              </StyledPaper>
-            </Grid>
-          ))}
+        : blocks.map((block, idx) => {
+            const height = latestBlockNo - idx;
+            return (
+              <Grid key={height} item xs={12} md={6} xl={3}>
+                <StyledPaper elevation={4}>
+                  <Typography variant="h6">
+                    <LinkToBlockNo blockNo={height} />
+                  </Typography>
+                  {isBlock(block) && (
+                    <Typography color="text.secondary">
+                      {block.txs.length} Transactions{' • '}
+                      {getTimeDurationDisplay(dayjs.unix(block.timeEpochUTC))}
+                    </Typography>
+                  )}
+                </StyledPaper>
+              </Grid>
+            );
+          })}
     </Grid>
   );
 }

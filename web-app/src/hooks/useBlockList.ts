@@ -1,15 +1,16 @@
-import { Block } from '@/consts/rpcResTypes';
+import { Block, RpcError } from '@/consts/rpcResTypes';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
 import { useThrowError } from './useThrowError';
 import { isAbortException } from '@/utils/common';
 
-export function useBlockList(
+export function useBlockList<T extends boolean>(
   latestBlockNo: number,
   page: number,
-  pageSize: number
-): [Block[], boolean] {
+  pageSize: number,
+  shouldThrowError: T = true as T
+): [(T extends true ? Block : Block | { error: RpcError })[], boolean] {
   const [loading, setLoading] = useState(true);
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [{ rpcService }] = useRollappStore();
@@ -32,7 +33,7 @@ export function useBlockList(
             )
           );
           ac = result[1];
-          const _blocks = await getResponseResult(result[0]);
+          const _blocks = await getResponseResult(result[0], shouldThrowError);
           setBlocks(_blocks);
           setLoading(false);
         } catch (e: any) {
@@ -49,7 +50,7 @@ export function useBlockList(
     return () => {
       if (ac) ac.abort();
     };
-  }, [latestBlockNo, rpcService, page, pageSize, throwError]);
+  }, [latestBlockNo, rpcService, page, pageSize, throwError, shouldThrowError]);
 
   return [blocks, loading];
 }
