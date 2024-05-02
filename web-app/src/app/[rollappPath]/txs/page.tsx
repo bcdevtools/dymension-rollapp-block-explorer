@@ -2,10 +2,7 @@ import LinkToBlockNo from '@/components/client/block/LinkToBlockNo';
 import PageTitle from '@/components/commons/PageTitle';
 import TransactionListTable from '@/components/client/transaction/TransactionListTable';
 import { getRollAppInfoByRollappPath } from '@/services/chain.service';
-import {
-  countTransactionsByHeight,
-  getTransactionsByHeight,
-} from '@/services/db/transactions';
+import { countTransactions, getTransactions } from '@/services/db/transactions';
 import {
   SearchParam,
   getNumberFromStringParam,
@@ -14,6 +11,7 @@ import {
 } from '@/utils/common';
 import Card from '@/components/commons/Card';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
+import TransactionListByBlockNo from '@/components/client/transaction/TransactionListByBlockNo';
 
 type TransactionsProps = Readonly<{
   params: { rollappPath: string };
@@ -32,19 +30,31 @@ export default async function Transactions({
 
   const blockNo = getNumberFromStringParam(searchParams.block) || null;
 
-  const total = await countTransactionsByHeight(rollappInfo.chain_id, blockNo);
+  let transactionListComponent: React.ReactNode;
+  if (blockNo === null) {
+    const total = await countTransactions(rollappInfo.chain_id);
 
-  const [pageSize, page] = getPageAndPageSizeFromStringParam(
-    searchParams[PAGE_SIZE_PARAM_NAME],
-    searchParams[PAGE_PARAM_NAME],
-    total
-  );
+    const [pageSize, page] = getPageAndPageSizeFromStringParam(
+      searchParams[PAGE_SIZE_PARAM_NAME],
+      searchParams[PAGE_PARAM_NAME],
+      total
+    );
 
-  const transactions = await getTransactionsByHeight(
-    rollappInfo.chain_id,
-    blockNo,
-    { take: pageSize, skip: getOffsetFromPageAndPageSize(page, pageSize) }
-  );
+    const transactions = await getTransactions(rollappInfo.chain_id, {
+      take: pageSize,
+      skip: getOffsetFromPageAndPageSize(page, pageSize),
+    });
+    transactionListComponent = (
+      <TransactionListTable
+        transactions={transactions}
+        totalTransactions={total}
+        pageSize={pageSize}
+        page={page}
+      />
+    );
+  } else {
+    transactionListComponent = <TransactionListByBlockNo blockNo={blockNo} />;
+  }
 
   const subtitle = blockNo ? (
     <>
@@ -56,14 +66,7 @@ export default async function Transactions({
     <>
       <PageTitle title="Transactions" subtitle={subtitle} />
 
-      <Card>
-        <TransactionListTable
-          transactions={transactions}
-          totalTransactions={total}
-          pageSize={pageSize}
-          page={page}
-        />
-      </Card>
+      <Card>{transactionListComponent}</Card>
     </>
   );
 }
