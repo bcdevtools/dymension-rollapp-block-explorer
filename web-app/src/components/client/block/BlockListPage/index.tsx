@@ -34,7 +34,7 @@ function BlockSummaryCard({
 }
 
 export default function BlockListPage() {
-  const [latestBlockNo, loading] = useLatestBlock();
+  const [latestBlockNo, loading] = useLatestBlock(false);
 
   return (
     <>
