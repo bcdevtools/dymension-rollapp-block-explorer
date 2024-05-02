@@ -2,6 +2,8 @@ import { Erc20Balance } from '@/consts/rpcResTypes';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
+import { useThrowError } from './useThrowError';
+import { isAbortException } from '@/utils/common';
 
 export default function useTokenBalances(
   address: string,
@@ -10,10 +12,13 @@ export default function useTokenBalances(
   const [loading, setLoading] = useState(true);
   const [tokenBalances, setTokenBalances] = useState<Erc20Balance[]>([]);
   const [{ rpcService }] = useRollappStore();
+  const throwError = useThrowError();
 
   useEffect(() => {
     let ac: AbortController | null;
-    if (rpcService && address && tokenAddresses.length) {
+    if (!rpcService) throw new Error('Rpc Service is not available');
+
+    if (address && tokenAddresses.length) {
       (async function () {
         try {
           setLoading(true);
@@ -30,17 +35,21 @@ export default function useTokenBalances(
             setTokenBalances(balances.cw20Balances);
           }
           setLoading(false);
-        } catch (e) {
-          console.log(e);
+        } catch (e: any) {
+          if (!isAbortException(e)) {
+            console.log(e);
+            throwError(new Error('Failed to fetch Token Balances'));
+          }
         } finally {
           ac = null;
         }
       })();
     } else setTokenBalances([]);
+
     return () => {
       if (ac) ac.abort();
     };
-  }, [address, tokenAddresses, rpcService]);
+  }, [address, tokenAddresses, rpcService, throwError]);
 
   return [tokenBalances, loading];
 }

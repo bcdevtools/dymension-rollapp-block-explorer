@@ -2,6 +2,8 @@ import { Block } from '@/consts/rpcResTypes';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
+import { useThrowError } from './useThrowError';
+import { isAbortException } from '@/utils/common';
 
 export default function useBlockDetail(
   blockNo: number
@@ -9,10 +11,13 @@ export default function useBlockDetail(
   const [loading, setLoading] = useState(true);
   const [block, setBlock] = useState<Block | null>(null);
   const [{ rpcService }] = useRollappStore();
+  const throwError = useThrowError();
 
   useEffect(() => {
     let ac: AbortController | null;
-    if (rpcService && blockNo) {
+    if (!rpcService) throw new Error('Rpc Service is not available');
+
+    if (blockNo) {
       (async function () {
         try {
           setLoading(true);
@@ -22,17 +27,21 @@ export default function useBlockDetail(
           const _block = await getResponseResult(result[0]);
           setBlock(_block);
           setLoading(false);
-        } catch (e) {
-          console.log(e);
+        } catch (e: any) {
+          if (!isAbortException(e)) {
+            console.log(e);
+            throwError(new Error('Failed to fetch Block Detail'));
+          }
         } finally {
           ac = null;
         }
       })();
     } else setBlock(null);
+
     return () => {
-      if (ac) ac.abort('useBlockDetail cleanup');
+      if (ac) ac.abort();
     };
-  }, [blockNo, rpcService]);
+  }, [blockNo, rpcService, throwError]);
 
   return [block, loading];
 }

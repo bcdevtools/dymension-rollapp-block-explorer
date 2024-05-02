@@ -1,6 +1,8 @@
 import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
 import { getResponseResult } from '@/services/rpc.service';
+import { useThrowError } from './useThrowError';
+import { isAbortException } from '@/utils/common';
 
 export function useLatestBlock(
   autoRefresh: boolean = false
@@ -8,39 +10,41 @@ export function useLatestBlock(
   const [latestBlockNo, setLatestBlockNo] = useState(0);
   const [loading, setLoading] = useState(true);
   const [{ rpcService }] = useRollappStore(true);
+  const throwError = useThrowError();
 
   useEffect(() => {
     let ac: AbortController | null;
+    let intervalId: NodeJS.Timeout | null = null;
+    if (!rpcService) throw new Error('Rpc Service is not available');
 
-    async function fetchLatestBlock() {
-      if (!rpcService) {
-        setLatestBlockNo(0);
-        return null;
-      }
-      const result = rpcService.getLatestBlockNumber();
+    const fetchLatestBlock = async function () {
       try {
+        const result = rpcService.getLatestBlockNumber();
+
         ac = result[1];
         const latestBlockResult = await getResponseResult(result[0]);
         setLatestBlockNo(latestBlockResult.latestBlock);
         setLoading(false);
-      } catch (e) {
-        console.log(e);
+
+        return result[1];
+      } catch (e: any) {
+        if (!isAbortException(e)) {
+          console.log(e);
+          throwError(new Error('Failed to fetch Lastest Block'));
+        }
       } finally {
         ac = null;
       }
+    };
 
-      return result[1];
-    }
-
-    let intervalId: NodeJS.Timeout | null = null;
     if (autoRefresh) intervalId = setInterval(() => fetchLatestBlock(), 1000);
     else fetchLatestBlock();
 
     return () => {
-      if (ac) ac.abort('useLatestBlock cleanup');
+      if (ac) ac.abort();
       if (intervalId) clearInterval(intervalId);
     };
-  }, [autoRefresh, rpcService]);
+  }, [autoRefresh, rpcService, throwError]);
 
   return [latestBlockNo, loading];
 }
