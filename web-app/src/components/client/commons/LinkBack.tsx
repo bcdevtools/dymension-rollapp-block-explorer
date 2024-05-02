@@ -1,6 +1,6 @@
 'use client';
 
-import Link from '@/components/commons/Link';
+import Link from '@mui/material/Link';
 import { useRouter } from 'next/navigation';
 
 export default function LinkBack({
