@@ -341,6 +341,17 @@ func (d *defaultIndexer) Start() {
 							"error", retryIndexErr.Error(),
 						)
 						// it is not important to be failed
+
+						sqlErr := db.InsertOrUpdateFailedBlocks(d.chainId, []int64{height}, retryIndexErr)
+						if sqlErr != nil {
+							logger.Error(
+								"failed to insert/update failed block for retry indexing failed block",
+								"chain-id", d.chainId,
+								"height", height,
+								"error", sqlErr.Error(),
+							)
+							// it is not critical if failed
+						}
 					}
 				} else {
 					logger.Debug("no candidate failed block to retry", "chain-id", d.chainId)
