@@ -30,7 +30,7 @@ export const handleGlobalSearchOnServer = async function (value: string) {
     return result.length ? { addess: result } : {};
   } else {
     const result = await searchChainInfoByMultipleFields(value);
-    return result
+    return result.length
       ? {
           chainNameOrChainIdOrBlock: result.map(i => ({
             chain_id: i.chain_id,
