@@ -21,19 +21,20 @@ model account {
 }
 
 model chain_info {
-  chain_id                          String    @id
-  name                              String    @unique(map: "chain_info_unique_chain_name")
+  chain_id                          String        @id
+  name                              String        @unique(map: "chain_info_unique_chain_name")
   chain_type                        String
   bech32                            Json
   denoms                            Json
   be_json_rpc_urls                  String[]
-  latest_indexed_block              BigInt    @default(0)
-  increased_latest_indexed_block_at BigInt    @default(0)
+  latest_indexed_block              BigInt        @default(0)
+  increased_latest_indexed_block_at BigInt        @default(0)
   postponed                         Boolean?
   keep_recent_account_tx_count      Int?
   expiry_at_epoch                   BigInt?
   keep_weeks_of_recent_txs          Int?
   account                           account[]
+  transaction                       transaction[]
 }
 
 model ref_account_to_recent_tx {
@@ -61,6 +62,7 @@ model transaction {
   tx_type       String
   action        String?
   value         String[]
+  chain_info    chain_info @relation(fields: [chain_id], references: [chain_id])
 
   @@id([chain_id, height, hash, partition_id])
   @@index([hash], map: "transaction_hash_index")
