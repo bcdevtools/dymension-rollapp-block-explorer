@@ -43,6 +43,14 @@ SET chain_type = excluded.chain_type,
 }
 
 func (db *Database) UpdateBeJsonRpcUrlsIfExists(chainId string, urls []string) (updated bool, err error) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			fmt.Println("=== UpdateBeJsonRpcUrlsIfExists panic", r)
+			panic(r)
+		}
+	}()
+
 	var sqlRes sql.Result
 
 	fmt.Println("=== UpdateBeJsonRpcUrlsIfExists before exec")
