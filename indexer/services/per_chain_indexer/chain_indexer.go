@@ -176,7 +176,7 @@ func (d *defaultIndexer) Start() {
 			time.Sleep(d.indexingCfg.IndexBlockInterval)
 		}
 
-		err := d.genericLoop(func(beGetChainInfo querytypes.ResponseBeGetChainInfo) error {
+		_ = d.genericLoop(func(beGetChainInfo querytypes.ResponseBeGetChainInfo) error {
 			startTime := time.Now().UTC()
 			catchUp = false
 
@@ -351,10 +351,6 @@ func (d *defaultIndexer) Start() {
 
 			return nil
 		})
-
-		if err != nil {
-			logger.Error("generic loop returns error", "chain-id", d.chainId, "error", err.Error())
-		}
 	}
 
 	logger.Info("shutting down indexer", "name", d.chainName)
@@ -383,14 +379,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 			MaxDuration(30*time.Second),
 	)
 
-	printDebugStep := func(debugStepNo float64) {
-		logger.Debug("fetchAndIndexingBlockRange", "step", debugStepNo)
-	}
-
-	printDebugStep(1)
-
 	if fetchErr != nil && querytypes.IsErrBlackList(fetchErr) {
-		printDebugStep(1.5)
 		// it's a malformed response, then it is a fatal error
 		blackListErr := fetchErr
 
@@ -407,10 +396,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 		return
 	}
 
-	printDebugStep(2)
-
 	if fetchErr != nil {
-		printDebugStep(2.5)
 		// failed to query, got no data, then it is a fatal error
 
 		logger.Error(
@@ -425,10 +411,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 		return
 	}
 
-	printDebugStep(3)
-
 	if len(beTransactionsInBlockRange.ErrorBlocks) > 0 {
-		printDebugStep(3.5)
 		sqlErr := db.InsertOrUpdateFailedBlocks(d.chainId, beTransactionsInBlockRange.ErrorBlocks, fmt.Errorf("rpc marks error"))
 		if sqlErr != nil {
 			// insert into the table is mandatory, then it is a fatal error
@@ -445,10 +428,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 		}
 	}
 
-	printDebugStep(4)
-
 	if len(beTransactionsInBlockRange.MissingBlocks) > 0 {
-		printDebugStep(4.5)
 		sqlErr := db.InsertOrUpdateFailedBlocks(d.chainId, beTransactionsInBlockRange.MissingBlocks, fmt.Errorf("rpc marks missing"))
 		if sqlErr != nil {
 			// insert into the table is mandatory, then it is a fatal error
@@ -465,17 +445,12 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 		}
 	}
 
-	printDebugStep(5)
-
 	if len(beTransactionsInBlockRange.Blocks) > 0 {
-		printDebugStep(5.5)
 		// sort ascending
 		slices.SortFunc(beTransactionsInBlockRange.Blocks, func(l, r querytypes.BlockInResponseBeTransactionsInBlockRange) int {
 			return int(l.Height - r.Height)
 		})
 	}
-
-	printDebugStep(6)
 
 	for _, block := range beTransactionsInBlockRange.Blocks {
 		blockHeight := block.Height
@@ -486,10 +461,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 			panic(fmt.Sprintf("unexpected block height 0 when indexing %s", d.chainId))
 		}
 
-		printDebugStep(7)
-
 		if len(block.Transactions) < 1 {
-			printDebugStep(7.5)
 			// skip empty block
 
 			sqlErr := db.SetLatestIndexedBlock(d.chainId, blockHeight)
@@ -512,11 +484,8 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 			continue
 		}
 
-		printDebugStep(8)
-
 		epochWeek := utils.GetEpochWeek(block.TimeEpochUTC)
 		if !d.sharedCache.IsCreatedPartitionsForEpochWeekAndChainIdRL(epochWeek, d.chainId) {
-			printDebugStep(8.5)
 			// prepare partitioned tables for this epoch week
 			sqlErr := utils.ObserveLongOperation("create partitioned tables for epoch week and chain-id", func() error {
 				return db.PreparePartitionedTablesForEpochAndChainId(block.TimeEpochUTC, d.chainId)
@@ -544,12 +513,8 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				"epoch-week", epochWeek,
 				"chain-id", d.chainId,
 			)
-			printDebugStep(8.6)
 			d.sharedCache.MarkCreatedPartitionsForEpochWeekAndChainIdWL(epochWeek, d.chainId)
-			printDebugStep(8.7)
 		}
-
-		printDebugStep(9)
 
 		dbTx, sqlErr := db.BeginDatabaseTransaction(context.Background())
 		if sqlErr != nil {
@@ -565,8 +530,6 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 			return
 		}
 
-		printDebugStep(10)
-
 		perBlockErr := d.insertBlockInformation(blockHeight, block, bech32Cfg, dbTx)
 		if perBlockErr != nil {
 			logger.Error(
@@ -579,8 +542,6 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 			)
 			// to be handled with rollback operation
 		}
-
-		printDebugStep(11)
 
 		if perBlockErr == nil && len(block.Transactions) > 0 {
 			perBlockErr = dbTx.CleanupZeroRefCountRecentAccountTransaction()
@@ -596,8 +557,6 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 			}
 		}
 
-		printDebugStep(12)
-
 		if perBlockErr == nil {
 			perBlockErr = dbTx.SetLatestIndexedBlock(d.chainId, blockHeight)
 			if perBlockErr != nil {
@@ -611,8 +570,6 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				// to be handled with rollback operation
 			}
 		}
-
-		printDebugStep(13)
 
 		if perBlockErr == nil {
 			perBlockErr = dbTx.RemoveFailedBlockRecord(d.chainId, blockHeight)
@@ -628,10 +585,7 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 			}
 		}
 
-		printDebugStep(14)
-
 		if perBlockErr != nil {
-			printDebugStep(14.5)
 			logger.Error(
 				"failed to insert block information, rollback",
 				"chain-id", d.chainId,
@@ -641,8 +595,6 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				"idx-mode", indexingMode.String(),
 			)
 			_ = dbTx.RollbackTransaction()
-
-			printDebugStep(14.6)
 
 			sqlErr := db.InsertOrUpdateFailedBlocks(d.chainId, []int64{blockHeight}, perBlockErr)
 			if sqlErr != nil {
@@ -660,16 +612,11 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				return
 			}
 
-			printDebugStep(14.7)
-
 			continue
 		}
 
-		printDebugStep(15)
-
 		perBlockErr = dbTx.CommitTransaction()
 		if perBlockErr != nil {
-			printDebugStep(15.5)
 			logger.Error(
 				"failed to commit block information",
 				"chain-id", d.chainId,
@@ -678,8 +625,6 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				"error", perBlockErr.Error(),
 				"idx-mode", indexingMode.String(),
 			)
-
-			printDebugStep(15.6)
 
 			sqlErr := db.InsertOrUpdateFailedBlocks(d.chainId, []int64{blockHeight}, perBlockErr)
 			if sqlErr != nil {
@@ -696,8 +641,6 @@ func (d *defaultIndexer) fetchAndIndexingBlockRange(
 				fatalError = sqlErr
 				return
 			}
-
-			printDebugStep(15.7)
 
 			continue
 		}
@@ -935,19 +878,16 @@ func (d *defaultIndexer) genericLoop(f func(querytypes.ResponseBeGetChainInfo) e
 	d.querySvc.SetQueryEndpoint(activeJsonRpcUrl)
 
 	if beGetChainInfo == nil {
-		logger.Debug("before fetching missing beGetChainInfo")
 		beGetChainInfo, _, err = querysvc.BeJsonRpcQueryWithRetry[*querytypes.ResponseBeGetChainInfo](
 			d.querySvc,
 			func(service querysvc.BeJsonRpcQueryService) (*querytypes.ResponseBeGetChainInfo, time.Duration, error) {
 				return d.querySvc.BeGetChainInfo()
 			},
 		)
-		logger.Debug("after fetching missing beGetChainInfo")
 		if err != nil {
 			logger.Error("failed to get chain info, waiting for next round", "chain-id", d.chainId, "error", err.Error())
 			return err
 		}
-		logger.Debug("fetched beGetChainInfo successfully")
 	}
 
 	// validate chain info
@@ -958,7 +898,6 @@ func (d *defaultIndexer) genericLoop(f func(querytypes.ResponseBeGetChainInfo) e
 		return fmt.Errorf("chain-id mismatch")
 	}
 
-	logger.Debug("before invoking function", "beGetChainInfo is not nil", beGetChainInfo != nil)
 	return f(*beGetChainInfo)
 }
 
