@@ -109,7 +109,7 @@ WHERE chain_id = $1 AND retry_count < $2 AND last_retry_epoch < $3
 ORDER BY height DESC
 LIMIT 1
 `,
-		chainId, // 1
+		chainId,                                                              // 1
 		constants.RetryIndexingFailedBlockMaxRetries,                         // 2
 		time.Now().UTC().Unix()-constants.RetryIndexingFailedBlockGapSeconds, // 3
 	)
@@ -118,6 +118,10 @@ LIMIT 1
 		err = errors.Wrap(err, "failed to get failed block")
 		return
 	}
+
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	if !rows.Next() {
 		return
@@ -157,6 +161,10 @@ WHERE chain_id = $1 AND height >= $2 AND height <= $3
 		err = errors.Wrap(err, "failed to get failed block")
 		return
 	}
+
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	for rows.Next() {
 		var height int64
