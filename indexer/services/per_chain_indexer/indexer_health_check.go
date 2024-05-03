@@ -11,17 +11,16 @@ import (
 
 // refreshActiveJsonRpcUrl: check if active json rpc url is still valid, and use the most up-to-date, the fastest one
 func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfoWhenUpdated *querytypes.ResponseBeGetChainInfo) {
+	indexerCtx := types.UnwrapIndexerContext(d.ctx)
+	logger := indexerCtx.GetLogger()
+
 	activeJsonRpcUrl, lastUrlCheck := d.getActiveJsonRpcUrlAndLastCheckRL()
 	if len(activeJsonRpcUrl) != 0 && time.Since(lastUrlCheck) <= d.indexingCfg.UrlCheckInterval {
-		// no need to update
+		// no need to refresh
 		return
 	}
 
 	// update the active json rpc url
-
-	indexerCtx := types.UnwrapIndexerContext(d.ctx)
-	logger := indexerCtx.GetLogger()
-	db := indexerCtx.GetDatabase()
 
 	// fetch from provided URLs
 
@@ -34,7 +33,7 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 				return d.querySvc.BeGetChainInfo()
 			},
 			querytypes.DefaultRetryOption().
-				MinCount(3).                // maximum number of retry
+				MinCount(3). // maximum number of retry
 				MaxDuration(3*time.Second), /*RPC is not good if response time is too long*/
 		)
 		if err != nil {
@@ -50,6 +49,8 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 	}
 
 	theBestResponse, found := responsesByJsonRpcUrl.GetTop()
+
+	db := indexerCtx.GetDatabase()
 	if !found {
 		logger.Error("failed to get chain info from all json-rpc urls", "chain-id", d.chainId)
 		d.forceResetActiveJsonRpcUrlDL(true)
