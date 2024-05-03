@@ -32,8 +32,7 @@ CREATE TABLE account (
     balance_on_nft_contracts    TEXT[], -- normalized: lowercase
 
     CONSTRAINT account_pkey PRIMARY KEY (chain_id, bech32_address),
-    CONSTRAINT account_to_chain_info_fkey FOREIGN KEY (chain_id)
-        REFERENCES chain_info(chain_id)
+    CONSTRAINT account_to_chain_info_fkey FOREIGN KEY (chain_id) REFERENCES chain_info(chain_id)
 ) PARTITION BY LIST(chain_id);
 -- index for lookup account by bech32 address, multi-chain
 CREATE INDEX account_b32_addr_index ON account (bech32_address);
@@ -254,7 +253,8 @@ CREATE TABLE transaction (
     "action"            TEXT, -- action, probably available on evm/wasm txs. Generic values are "create", "transfer", "call:0x..."
     "value"             TEXT[], -- value of the transaction, eg: transfer amount, delegation amount, etc
 
-    CONSTRAINT transaction_pkey PRIMARY KEY (chain_id, height, hash, partition_id)
+    CONSTRAINT transaction_pkey PRIMARY KEY (chain_id, height, hash, partition_id),
+    CONSTRAINT transaction_to_chain_info_fkey FOREIGN KEY (chain_id) REFERENCES chain_info(chain_id)
 ) PARTITION BY LIST(partition_id);
 -- index for lookup transaction by hash, multi-chain & single-chain
 CREATE INDEX transaction_hash_index ON transaction(hash);
