@@ -40,6 +40,10 @@ func BeJsonRpcQueryWithRetry[T any](
 			firstErr = err
 		}
 
+		if querytypes.IsErrResponseValidationFailed(err) {
+			break
+		}
+
 		errMsg := err.Error()
 		if strings.Contains(errMsg, "connection refused") {
 			break

@@ -93,7 +93,7 @@ func (d *defaultBeJsonRpcQueryService) BeGetChainInfo() (res *querytypes.Respons
 
 	responseBeGetChainInfo := resAny.(*querytypes.ResponseBeGetChainInfo)
 	if err = responseBeGetChainInfo.ValidateBasic(); err != nil {
-		err = errors.Wrap(err, "response validation failed")
+		err = querytypes.NewErrResponseValidationFailedFrom(err)
 		return
 	}
 
@@ -127,7 +127,7 @@ func (d *defaultBeJsonRpcQueryService) BeGetLatestBlockNumber() (res *querytypes
 
 	responseBeGetChainInfo := resAny.(*querytypes.ResponseBeGetLatestBlockNumber)
 	if err = responseBeGetChainInfo.ValidateBasic(); err != nil {
-		err = errors.Wrap(err, "response validation failed")
+		err = querytypes.NewErrResponseValidationFailedFrom(err)
 		return
 	}
 
@@ -160,7 +160,7 @@ func (d *defaultBeJsonRpcQueryService) BeTransactionsInBlockRange(from, to int64
 
 	responseBeTransactionsInBlockRange := resAny.(*querytypes.ResponseBeTransactionsInBlockRange)
 	if err = responseBeTransactionsInBlockRange.ValidateBasic(); err != nil {
-		err = errors.Wrap(err, "response validation failed")
+		err = querytypes.NewErrResponseValidationFailedFrom(err)
 		return
 	}
 
