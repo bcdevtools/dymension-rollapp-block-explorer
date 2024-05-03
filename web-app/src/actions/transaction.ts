@@ -1,17 +1,23 @@
 'use server';
 
-import { getChainIdAndTxHashByTxHashes } from '@/services/db/transactions';
-import { isTxHash } from '@/utils/address';
+import {
+  getChainIdAndTxHashByTxHashes,
+  getTxHashAndChainInfoByTxHashes,
+} from '@/services/db/transactions';
+import { getTxHashesQueryValue } from '@/utils/transaction';
 
 export async function getChainIdAndTxHashByHash(txHash: string) {
-  txHash = txHash.trim();
-  if (!txHash || !isTxHash(txHash)) throw new Error('Invalid TxHash');
-
-  const txhashesToCheck = txHash.startsWith('0x')
-    ? [txHash.toLowerCase(), txHash.substring(2).toUpperCase()]
-    : [`0x${txHash.toLowerCase()}`, txHash.toUpperCase()];
+  const txhashesToCheck = getTxHashesQueryValue(txHash);
 
   const txs = await getChainIdAndTxHashByTxHashes(txhashesToCheck);
+
+  return txs;
+}
+
+export async function searchByTxHash(txHash: string) {
+  const txhashesToCheck = getTxHashesQueryValue(txHash);
+
+  const txs = await getTxHashAndChainInfoByTxHashes(txhashesToCheck);
 
   return txs;
 }

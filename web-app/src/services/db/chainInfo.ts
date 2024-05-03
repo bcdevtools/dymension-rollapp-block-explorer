@@ -1,15 +1,7 @@
 import { cache } from 'react';
 import prisma from '../../utils/prisma';
 import { Prisma, chain_info } from '@prisma/client';
-
-// export interface ChainInfo {
-//   name: string;
-//   chain_id: string;
-//   be_json_rpc_urls: string[];
-//   bech32: Prisma.JsonValue;
-//   chain_type: string;
-//   latest_indexed_block: bigint;
-// }
+import { ChainType } from '@/consts/setting';
 
 export type ChainInfo = Pick<
   chain_info,
@@ -36,3 +28,40 @@ export const getChainInfos = cache(function (): Promise<ChainInfo[]> {
     cacheStrategy: { enabled: true },
   });
 });
+
+export const getChainNamesByChainIds = function (chainIds: string[]) {
+  return prisma.chain_info.findManyWithCache({
+    select: { chain_id: true, name: true },
+    where: { chain_id: { in: chainIds } },
+    cacheStrategy: { enabled: true },
+  });
+};
+
+export const getEvmChainInfo = function () {
+  return prisma.chain_info.findManyWithCache({
+    select: { chain_id: true, name: true },
+    where: { chain_type: ChainType.EVM },
+    cacheStrategy: { enabled: true },
+  });
+};
+
+export const getChainInfoByPrefix = function (prefix: string) {
+  return prisma.chain_info.findManyWithCache({
+    select: { chain_id: true, name: true },
+    where: { bech32: { path: ['addr'], equals: prefix } },
+    cacheStrategy: { enabled: true },
+  });
+};
+
+export const searchChainInfoByMultipleFields = function (searchValue: string) {
+  const OR: Prisma.chain_infoWhereInput[] = [
+    { chain_id: { contains: searchValue } },
+    { name: { contains: searchValue } },
+  ];
+  if (/^\d+$/.test(searchValue))
+    OR.push({ latest_indexed_block: { gte: parseInt(searchValue) } });
+  return prisma.chain_info.findMany({
+    select: { chain_id: true, name: true, latest_indexed_block: true },
+    where: { OR },
+  });
+};

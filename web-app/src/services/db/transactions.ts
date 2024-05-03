@@ -39,9 +39,20 @@ export const countTransactions = async function (chain_id: string) {
 export const getChainIdAndTxHashByTxHashes = async function (
   txHashes: string[]
 ) {
-  return prisma.transaction.findManyWithCache({
+  return prisma.transaction.findMany({
     select: { chain_id: true, hash: true },
-    where: { hash: { in: txHashes.sort() } }, // sort txHahses to make sure cache key is consistent
-    cacheStrategy: { enabled: true },
+    where: { hash: { in: txHashes.sort() } },
+  });
+};
+
+export const getTxHashAndChainInfoByTxHashes = async function (
+  txHashes: string[]
+) {
+  return prisma.transaction.findMany({
+    select: {
+      chain_info: { select: { name: true, chain_id: true } },
+      hash: true,
+    },
+    where: { hash: { in: txHashes } },
   });
 };

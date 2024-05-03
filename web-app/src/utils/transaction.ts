@@ -4,7 +4,7 @@ import { divideAmountByDecimals, hexToDec } from './number';
 
 export function getMessageName(messageType: string) {
   if (/^([a-z\d]+\.)+Msg/.test(messageType)) {
-    messageType = "/" + messageType
+    messageType = '/' + messageType;
   }
   switch (messageType) {
     case '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward':
@@ -184,4 +184,10 @@ export function translateEvmLogIfPossible(
 
 function isTopicEvmAddress(topic: string) {
   return topic.startsWith('0x000000000000000000000000');
+}
+
+export function getTxHashesQueryValue(txHash: string) {
+  return txHash.startsWith('0x')
+    ? [txHash.toLowerCase(), txHash.substring(2).toUpperCase()]
+    : [`0x${txHash.toLowerCase()}`, txHash.toUpperCase()];
 }
