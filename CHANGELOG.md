@@ -98,6 +98,7 @@ Templates for Unreleased:
 - (sql) [#71](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/71) Re-partition table `transaction`, use combination of epoch week + chain-id as partition-id
 - (sql) [#72](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/72) Add new column to allow configures number of weeks keep recent txs
 - (sql) [#74](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/74) Add helper method to list prune-able partitioned tables of `transaction` table
+- (indexing) [#110](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/110) Do not retry Be queries if result does not pass validation
 
 ### Bug Fixes
 
