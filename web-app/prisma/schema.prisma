@@ -62,7 +62,7 @@ model transaction {
   tx_type       String
   action        String?
   value         String[]
-  chain_info    chain_info @relation(fields: [chain_id], references: [chain_id])
+  chain_info    chain_info @relation(fields: [chain_id], references: [chain_id], onDelete: NoAction, onUpdate: NoAction, map: "transaction_to_chain_info_fkey")
 
   @@id([chain_id, height, hash, partition_id])
   @@index([hash], map: "transaction_hash_index")
