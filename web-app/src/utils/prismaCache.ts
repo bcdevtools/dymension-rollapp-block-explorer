@@ -44,7 +44,7 @@ function queryWithCache<T, A, F extends Operation>(
       },
       cacheStrategy.key
         ? [cacheStrategy.key]
-        : [(this as any).name, action, stringify(queryArgs)],
+        : ['prisma', (this as any).name, action],
       { revalidate, tags }
     )(queryArgs);
   }
