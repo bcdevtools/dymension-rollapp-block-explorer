@@ -163,11 +163,14 @@ export interface DenomMetadata {
 export interface DenomsMetadata {
   [denom: string]: DenomMetadata;
 }
-
+export interface AccountStaking {
+  rewards: string;
+  staking: { [validator: string]: string } | {};
+}
 export interface Account {
   address: { cosmos: string; evm: string };
   balances: AccountBalances;
-  staking: any;
+  staking: AccountStaking;
   txsCount: number;
   typeUrl: string;
   contract?: ContractAccountInfo;

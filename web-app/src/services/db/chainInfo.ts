@@ -11,6 +11,7 @@ export type ChainInfo = Pick<
   | 'bech32'
   | 'chain_type'
   | 'latest_indexed_block'
+  | 'denoms'
 >;
 
 const select: Prisma.chain_infoSelect = {
@@ -20,6 +21,7 @@ const select: Prisma.chain_infoSelect = {
   bech32: true,
   chain_type: true,
   latest_indexed_block: true,
+  denoms: true,
 };
 
 export const getChainInfos = cache(function (): Promise<ChainInfo[]> {

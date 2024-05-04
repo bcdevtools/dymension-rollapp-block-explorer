@@ -20,16 +20,15 @@ export default function AddressPageTitleAndSummary({
   accountInfo,
   evmAddress,
 }: AddressPageProps) {
-  const [accountData, accountLoading] = useAccount(bech32Address);
-  const [denomsMetadata, denomsMetadataLoading] =
-    useDenomsMetadata(bech32Address);
+  const [accountRpcData, accountLoading] = useAccount(bech32Address);
+  const [denomsMetadata, denomsMetadataLoading] = useDenomsMetadata();
 
   const balancesWithMetadata = useMemo(() => {
-    return accountData && denomsMetadata
-      ? Object.keys(accountData.balances).reduce<BalancesWithMetadata>(
+    return accountRpcData && denomsMetadata
+      ? Object.keys(accountRpcData.balances).reduce<BalancesWithMetadata>(
           (final, denom) => {
             final[denom] = {
-              balance: accountData.balances[denom],
+              balance: accountRpcData.balances[denom],
               metadata: denomsMetadata[denom],
             };
             return final;
@@ -37,14 +36,14 @@ export default function AddressPageTitleAndSummary({
           {}
         )
       : null;
-  }, [denomsMetadata, accountData]);
+  }, [denomsMetadata, accountRpcData]);
 
   return (
     <>
       <AddressPageTitle
         bech32Address={bech32Address}
         evmAddress={evmAddress}
-        account={accountData}
+        account={accountRpcData}
       />
       <AccountContext.Provider
         value={{
@@ -55,6 +54,7 @@ export default function AddressPageTitleAndSummary({
           address={bech32Address}
           accountInfo={accountInfo}
           evmAddress={evmAddress}
+          accountRpcData={accountRpcData}
         />
       </AccountContext.Provider>
     </>

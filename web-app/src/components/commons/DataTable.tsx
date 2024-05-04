@@ -28,6 +28,7 @@ type DataTableProps = Readonly<{
   loading?: boolean;
   enablePagination?: boolean;
   loadingItems?: number;
+  summaryRows?: React.ReactNode;
 }>;
 
 type TablePaginationActionsProps = Readonly<{
@@ -117,6 +118,7 @@ export default function DataTable({
   loading,
   loadingItems,
   enablePagination = true,
+  summaryRows,
 }: DataTableProps) {
   const _body: React.ReactNode[][] = loading
     ? Array(loadingItems || pageSize).fill(
@@ -147,20 +149,20 @@ export default function DataTable({
               ))}
             </TableRow>
           </TableHead>
-          <TableBody>
+          <TableBody
+            sx={
+              !showPagniation
+                ? { '&:last-child td, &:last-child th': { border: 0 } }
+                : {}
+            }>
             {_body.map((row, idx) => (
-              <TableRow
-                key={rowKeys[idx] || idx}
-                sx={
-                  !showPagniation
-                    ? { '&:last-child td, &:last-child th': { border: 0 } }
-                    : {}
-                }>
+              <TableRow key={rowKeys[idx] || idx}>
                 {row.map((cell, idx) => (
                   <TableCell key={idx}>{cell}</TableCell>
                 ))}
               </TableRow>
             ))}
+            {!loading && summaryRows}
           </TableBody>
         </Table>
       </TableContainer>

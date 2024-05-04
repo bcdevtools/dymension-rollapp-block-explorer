@@ -57,3 +57,13 @@ export function getOffsetFromPageAndPageSize(page: number, pageSize: number) {
 export function isAbortException(e: Error) {
   return e instanceof DOMException && e.name === 'AbortError';
 }
+
+export function getAmountFromReward(reward: string) {
+  const matched = reward.match(/^\d+/);
+  return matched ? matched[0] : '0';
+}
+
+export function getDenomFromReward(reward: string) {
+  const matched = reward.match(/[a-z]+$/);
+  return matched ? matched[0] : null;
+}
