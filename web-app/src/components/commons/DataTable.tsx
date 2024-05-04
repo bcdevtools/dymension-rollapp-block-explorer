@@ -162,7 +162,7 @@ export default function DataTable({
                 ))}
               </TableRow>
             ))}
-            {summaryRows}
+            {!loading && summaryRows}
           </TableBody>
         </Table>
       </TableContainer>

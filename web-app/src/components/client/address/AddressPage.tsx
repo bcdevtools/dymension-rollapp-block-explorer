@@ -21,8 +21,7 @@ export default function AddressPageTitleAndSummary({
   evmAddress,
 }: AddressPageProps) {
   const [accountRpcData, accountLoading] = useAccount(bech32Address);
-  const [denomsMetadata, denomsMetadataLoading] =
-    useDenomsMetadata(bech32Address);
+  const [denomsMetadata, denomsMetadataLoading] = useDenomsMetadata();
 
   const balancesWithMetadata = useMemo(() => {
     return accountRpcData && denomsMetadata
