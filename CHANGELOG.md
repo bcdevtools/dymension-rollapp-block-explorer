@@ -110,5 +110,5 @@ Templates for Unreleased:
 - (chain) [#43](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/43) Fix expiration check logic for SQL function `get_indexing_fallbehind_chains`
 - (indexing) [#44](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/44) Handle panic when latest indexed block is zero for new chains
 - (web) [#50](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/50) Fix bug cause RollApp state re-update when change page
-- (indexer) [#106](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/106) Attempt to fix indexer hanging
+- (indexer) [#106](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/106) Release db conn to resolve indexer hanging
 - (indexing) [#112](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/112) Fix retry count not increase on failed block re-indexing failed
