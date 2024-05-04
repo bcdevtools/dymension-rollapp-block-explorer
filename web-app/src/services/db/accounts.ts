@@ -36,7 +36,7 @@ export const countAccountTransactions = async function (
 
   return prisma.ref_account_to_recent_tx.countWithCache({
     where,
-    cacheStrategy: { enabled: true },
+    cacheStrategy: { enabled: false },
   });
 };
 
@@ -86,7 +86,7 @@ export const getAccountTransactions = function (
     where,
     orderBy: { height: 'desc' },
     ...paginationOptions,
-    cacheStrategy: { enabled: true },
+    cacheStrategy: { enabled: false },
   });
 };
 
@@ -110,6 +110,6 @@ export const getAccount = function (
       balance_on_nft_contracts: true,
     },
     where: { chain_id_bech32_address: { chain_id, bech32_address } },
-    cacheStrategy: { enabled: true },
+    cacheStrategy: { enabled: false },
   });
 };
