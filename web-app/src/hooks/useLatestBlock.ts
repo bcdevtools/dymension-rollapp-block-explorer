@@ -23,24 +23,21 @@ export function useLatestBlock(
         const result = rpcService.getLatestBlockNumber();
 
         ac = result[1];
-        const latestBlockResult = await getResponseResult(
-          result[0],
-          shouldThrowError
-        );
-        const _latestBlockNo = latestBlockResult.latestBlock
-          ? latestBlockResult.latestBlock
-          : Number(selectedRollappInfo!.latest_indexed_block);
-        setLatestBlockNo(_latestBlockNo);
-        setLoading(false);
+        const latestBlockResult = await getResponseResult(result[0]);
+        setLatestBlockNo(latestBlockResult.latestBlock);
 
         return result[1];
       } catch (e: any) {
         if (!isAbortException(e)) {
           console.log(e);
-          throwError(new Error('Failed to fetch Latest Block'));
+          if (shouldThrowError)
+            throwError(new Error('Failed to fetch Latest Block'));
+          else
+            setLatestBlockNo(Number(selectedRollappInfo!.latest_indexed_block));
         }
       } finally {
         ac = null;
+        setLoading(false);
       }
     };
 
