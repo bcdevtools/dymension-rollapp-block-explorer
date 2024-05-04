@@ -133,10 +133,12 @@ const getMessageLabel = function (
     }
   }
 
-  return message_types.map((i, idx) => (
+  const messages = Array.from(new Set(message_types.map(getMessageName)));
+
+  return messages.map((i, idx) => (
     <React.Fragment key={idx}>
-      <Chip label={getMessageName(i)} color="default" variant="outlined" />
-      {idx + 1 !== message_types.length && <br />}
+      <Chip label={i} color="default" variant="outlined" />
+      {idx + 1 !== messages.length && <br />}
     </React.Fragment>
   ));
 };
