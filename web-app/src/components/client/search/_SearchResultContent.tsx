@@ -31,8 +31,9 @@ function SearchResultItem({
         <Grid item xs={12} md={12 / displayColumns}>
           <Card variant="outlined">
             <CardActionArea
-              LinkComponent={Link}
+              component={Link}
               href={href}
+              prefetch={false}
               onClick={handleClick}>
               <CardHeader
                 title={
