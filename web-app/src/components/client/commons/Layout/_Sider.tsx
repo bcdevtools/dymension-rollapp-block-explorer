@@ -93,7 +93,6 @@ export default React.memo(function Sider({
               <ListItemButton
                 href={getNewPathByRollapp(pathname, menuItem.path)}
                 component={Link}
-                prefetch={true}
                 onClick={() => handleMenuClose()}
                 selected={isSelected}>
                 <ListItemIcon>
