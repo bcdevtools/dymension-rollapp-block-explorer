@@ -100,7 +100,7 @@ func (d *defaultIndexer) Start() {
 		break
 	}
 
-	logger.Debug("Starting indexer", "chain", d.chainName)
+	logger.Debug("starting indexer", "chain", d.chainName)
 
 	d.ensureNotStartedRL()
 
@@ -176,7 +176,7 @@ func (d *defaultIndexer) Start() {
 			time.Sleep(d.indexingCfg.IndexBlockInterval)
 		}
 
-		_ = d.genericLoop(func(beGetChainInfo querytypes.ResponseBeGetChainInfo) error {
+		err := d.genericLoop(func(beGetChainInfo querytypes.ResponseBeGetChainInfo) error {
 			startTime := time.Now().UTC()
 			catchUp = false
 
@@ -358,10 +358,14 @@ func (d *defaultIndexer) Start() {
 				}
 			}
 
-			logger.Debug("end of loop")
-
 			return nil
 		})
+
+		if err != nil {
+			logger.Debug("generic indexing loop ended with error", "chain-id", d.chainId, "error", err.Error())
+		} else {
+			logger.Debug("generic indexing loop ended", "chain-id", d.chainId)
+		}
 	}
 
 	logger.Info("shutting down indexer", "name", d.chainName)

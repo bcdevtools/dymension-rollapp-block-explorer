@@ -70,7 +70,7 @@ var startCmd = &cobra.Command{
 		ctx = ctx.WithDatabase(db)
 
 		ctx = ctx.Sealed()
-		logger.Debug("Application starts")
+		logger.Debug("application starts")
 
 		if telegramBot != nil {
 			_, _ = telegramBot.SendTelegramLogMessage(fmt.Sprintf("[%s] Application Start", constants.APP_NAME))
@@ -85,7 +85,6 @@ var startCmd = &cobra.Command{
 		libapp.RegisterExitFunction(func(params ...any) {
 			// finalize
 			defer waitGroup.Done()
-			logger.Debug("defer waitGroup::Done")
 
 			// Implements close connection, resources,... here to prevent resource leak
 
