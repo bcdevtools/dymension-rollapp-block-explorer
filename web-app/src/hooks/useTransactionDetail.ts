@@ -71,17 +71,22 @@ export default function useTransactionDetail(
                 const result2 =
                   rpcService.getErc20ContractInfo(contractsAddress);
                 ac = result2[1];
-                const _erc20ContractsInfo = await getResponseResult(result2[0]);
+                const _erc20ContractsInfo = await getResponseResult(
+                  result2[0],
+                  false
+                );
 
-                for (let i = 0; i < _erc20ContractsInfo.length; i++) {
-                  const erc20ContractInfo = _erc20ContractsInfo[i];
-                  if (!erc20ContractInfo) {
-                    continue;
+                if (!(_erc20ContractsInfo as any).error) {
+                  for (let i = 0; i < _erc20ContractsInfo.length; i++) {
+                    const erc20ContractInfo = _erc20ContractsInfo[i];
+                    if (!erc20ContractInfo) {
+                      continue;
+                    }
+                    contractAddressToErc20ContractInfo.set(
+                      contractsAddress[i],
+                      erc20ContractInfo
+                    );
                   }
-                  contractAddressToErc20ContractInfo.set(
-                    contractsAddress[i],
-                    erc20ContractInfo
-                  );
                 }
                 _transaction.evmContractAddressToErc20ContractInfo =
                   contractAddressToErc20ContractInfo;
