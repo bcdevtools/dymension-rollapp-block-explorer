@@ -136,7 +136,7 @@ const getMessageLabel = function (
   const messages = Array.from(new Set(message_types.map(getMessageName)));
 
   return messages.map((i, idx) => (
-    <React.Fragment key={idx}>
+    <React.Fragment key={i}>
       <Chip label={i} color="default" variant="outlined" />
       {idx + 1 !== messages.length && <br />}
     </React.Fragment>
