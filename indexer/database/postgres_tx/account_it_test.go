@@ -8,7 +8,8 @@ import (
 func (suite *IntegrationTestSuite) Test_InsertOrUpdateRecordsAccount_IT() {
 	suite.InsertChainInfoRecords()
 
-	tx, _ := suite.TX()
+	tx, commitFunc := suite.TX()
+	defer commitFunc()
 
 	originalRowsCount := suite.CountRows2("account")
 

@@ -9,7 +9,8 @@ import (
 func (suite *IntegrationTestSuite) Test_InsertRecordTransactionsIfNotExists_IT() {
 	suite.InsertChainInfoRecords()
 
-	tx, _ := suite.TX()
+	tx, commitFunc := suite.TX()
+	defer commitFunc()
 
 	originalRowsCount := suite.CountRows(tx.Tx, "transaction")
 
