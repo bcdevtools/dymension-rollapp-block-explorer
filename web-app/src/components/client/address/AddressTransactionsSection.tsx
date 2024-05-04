@@ -40,7 +40,6 @@ export default function AddressTransactionsSection({
             href={`${pathname}?${new URLSearchParams({
               [AddressPageSearchParams.TX_TYPE]: value,
             }).toString()}`}
-            prefetch={true}
             scroll={false}
             key={value}
             label={label}

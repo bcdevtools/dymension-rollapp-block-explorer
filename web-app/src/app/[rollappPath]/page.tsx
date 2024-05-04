@@ -40,7 +40,6 @@ export default async function Overview({ params }: RollappOverviewProps) {
           <Button
             variant="outlined"
             component={Link}
-            prefetch={true}
             href={`${rollappInfo.path}${Path.BLOCKS}`}
             size="small">
             View All Blocks
@@ -55,7 +54,6 @@ export default async function Overview({ params }: RollappOverviewProps) {
           <Button
             variant="outlined"
             component={Link}
-            prefetch={true}
             href={`${rollappInfo.path}${Path.TRANSACTIONS}`}
             size="small">
             View All Transactions
