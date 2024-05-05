@@ -6,20 +6,24 @@ import { useThrowError } from './useThrowError';
 import { isAbortException } from '@/utils/common';
 import { RollappActionTypes } from '@/consts/actionTypes';
 
-export default function useDenomsMetadata(): [DenomsMetadata | null, boolean] {
+export default function useDenomsMetadata(
+  shouldThrowError: boolean = false
+): [DenomsMetadata, boolean] {
   const [{ denomsMetadata }, dispatch] = useRollappStore();
-  const [loading, setLoading] = useState(!denomsMetadata);
+  const existedData = Object.keys(denomsMetadata).length > 0;
+  const [loading, setLoading] = useState(!existedData);
   const [{ rpcService }] = useRollappStore();
   const throwError = useThrowError();
 
+  console.log('loading', loading);
+
   useEffect(() => {
     let ac: AbortController | null;
-    if (denomsMetadata) return;
-
-    if (!rpcService) throw new Error('Rpc Service is not available');
+    if (existedData) return;
 
     (async function () {
       try {
+        if (!rpcService) throw new Error('Rpc Service is not available');
         setLoading(true);
         const result = rpcService.getDenomsMetadata();
         ac = result[1];
@@ -29,8 +33,10 @@ export default function useDenomsMetadata(): [DenomsMetadata | null, boolean] {
         setLoading(false);
       } catch (e: any) {
         if (!isAbortException(e)) {
-          console.log(e);
-          throwError(new Error('Failed to fetch Denoms Metadata'));
+          if (shouldThrowError) {
+            console.log(e);
+            throwError(new Error('Failed to fetch Denoms Metadata'));
+          } else setLoading(false);
         }
       } finally {
         ac = null;
@@ -40,7 +46,14 @@ export default function useDenomsMetadata(): [DenomsMetadata | null, boolean] {
     return () => {
       if (ac) ac.abort();
     };
-  }, [denomsMetadata, dispatch, rpcService, throwError]);
+  }, [
+    denomsMetadata,
+    dispatch,
+    rpcService,
+    throwError,
+    shouldThrowError,
+    existedData,
+  ]);
 
   return [denomsMetadata, loading];
 }

@@ -20,7 +20,6 @@ export default function AddressStaking({
 
   const denomMetadata = useMemo(
     () =>
-      denomsMetadata &&
       denomsMetadata[
         (selectedRollappInfo!.denoms as JsonObject).bond as string
       ],
@@ -41,7 +40,7 @@ export default function AddressStaking({
     const rewardAmount = getAmountFromReward(accountStakingInfo.rewards);
     const rewardDenom = getDenomFromReward(accountStakingInfo.rewards);
 
-    if (!rewardDenom || !denomsMetadata)
+    if (!rewardDenom || !denomsMetadata[rewardDenom])
       return formatBlockchainAmount(rewardAmount);
     const rewardDenomMetadata = denomsMetadata[rewardDenom];
     return `${formatBlockchainAmount(

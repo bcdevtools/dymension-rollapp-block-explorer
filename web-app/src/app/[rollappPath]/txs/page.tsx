@@ -50,6 +50,7 @@ export default async function Transactions({
         totalTransactions={total}
         pageSize={pageSize}
         page={page}
+        includeValue
       />
     );
   } else {
