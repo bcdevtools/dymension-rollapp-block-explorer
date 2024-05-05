@@ -49,7 +49,8 @@ export default function BlockListTable({
 
   const [blocks, loading] = useBlockList(latestBlockNo, page, pageSize, false);
 
-  const rowKeys = blocks.map((b, idx) => latestBlockNo - idx);
+  const highestBlockNo = latestBlockNo - page * pageSize;
+  const rowKeys = blocks.map((b, idx) => highestBlockNo - idx);
 
   const body = blocks.map((b, idx) => {
     const height = rowKeys[idx];

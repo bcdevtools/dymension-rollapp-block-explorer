@@ -15,8 +15,6 @@ export default function useDenomsMetadata(
   const [{ rpcService }] = useRollappStore();
   const throwError = useThrowError();
 
-  console.log('loading', loading);
-
   useEffect(() => {
     let ac: AbortController | null;
     if (existedData) return;
