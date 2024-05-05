@@ -16,8 +16,7 @@ import { formatUnixTime } from '@/utils/datetime';
 import { getMessageName } from '@/utils/transaction';
 import Link from '@/components/commons/Link';
 import useDenomsMetadata from '@/hooks/useDenomsMetadata';
-import Box from '@mui/material/Box';
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import { formatBlockchainAmount } from '@/utils/number';
 
 export type TransactionFields = Required<{
