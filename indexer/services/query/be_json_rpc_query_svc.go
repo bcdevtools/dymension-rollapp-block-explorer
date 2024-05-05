@@ -233,7 +233,7 @@ func (d *defaultBeJsonRpcQueryService) doQuery(qb types.JsonRpcQueryBuilder, opt
 	var success bool
 
 	defer func() {
-		d.logger.Debug("end query Be Json-RPC", "success", success, "method", qb.Method(), payload, "endpoint", queryEndpoint)
+		d.logger.Debug("end query Be Json-RPC", "success", success, "method", qb.Method(), "endpoint", queryEndpoint)
 	}()
 
 	resp, err := httpClient.Post(queryEndpoint, "application/json", bytes.NewBuffer([]byte(payload)))
