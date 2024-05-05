@@ -9,11 +9,12 @@ const select: Prisma.transactionSelect = {
   message_types: true,
   tx_type: true,
   action: true,
+  value: true,
 };
 
 export type Transaction = Pick<
   transaction,
-  'hash' | 'height' | 'epoch' | 'message_types' | 'tx_type' | 'action'
+  'hash' | 'height' | 'epoch' | 'message_types' | 'tx_type' | 'action' | 'value'
 >;
 
 export const getTransactions = async function (
