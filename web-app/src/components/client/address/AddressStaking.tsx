@@ -29,12 +29,12 @@ export default function AddressStaking({
   const validators = Object.keys(accountStakingInfo.staking);
   const body = Object.keys(accountStakingInfo.staking).map(validator => [
     validator,
-    formatBlockchainAmount(
+    `${formatBlockchainAmount(
       accountStakingInfo.staking[
         validator as keyof AccountStakingInfo['staking']
       ],
       denomMetadata ? denomMetadata.highestExponent : 0
-    ) + denomMetadata?.symbol,
+    )} ${denomMetadata?.symbol}`,
   ]);
 
   const totalReward = useMemo(() => {
@@ -47,7 +47,7 @@ export default function AddressStaking({
     return `${formatBlockchainAmount(
       rewardAmount,
       rewardDenomMetadata.highestExponent
-    )}${rewardDenomMetadata.symbol}`;
+    )} ${rewardDenomMetadata.symbol}`;
   }, [accountStakingInfo.rewards, denomsMetadata]);
 
   return (
