@@ -52,7 +52,12 @@ export const getEvmChainInfo = function () {
 export const getChainInfoByPrefix = function (prefix: string) {
   return prisma.chain_info.findManyWithCache({
     select: { chain_id: true, name: true },
-    where: { bech32: { path: ['addr'], equals: prefix } },
+    where: {
+      OR: [
+        { bech32: { path: ['addr'], equals: prefix } },
+        { bech32: { path: ['val'], equals: prefix } },
+      ],
+    },
     cacheStrategy: { enabled: true },
   });
 };

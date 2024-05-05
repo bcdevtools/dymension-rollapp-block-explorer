@@ -54,17 +54,22 @@ function getFilterOptionsFromTxType(
 export default async function Address({ params, searchParams }: AddressProps) {
   const rollappInfo = (await getRollAppInfoByRollappPath(params.rollappPath))!;
 
-  const { address } = params;
-
-  const prefix = (rollappInfo.bech32 as JsonObject).addr as string;
-  const rollappAddress = RollappAddress.fromString(
-    address.toLowerCase(),
-    prefix,
-    rollappInfo.chain_type === ChainType.EVM
-  );
-  if (!rollappAddress) return redirect(`/${params.rollappPath}`);
+  let { address } = params;
+  address = address.toLowerCase();
 
   const isEVMChain = rollappInfo.chain_type === ChainType.EVM;
+
+  let isValidator = false;
+  let prefix = (rollappInfo.bech32 as JsonObject).addr as string;
+  let rollappAddress = RollappAddress.fromString(address, prefix, isEVMChain);
+  if (!rollappAddress) {
+    prefix = (rollappInfo.bech32 as JsonObject).val as string;
+    rollappAddress = RollappAddress.fromString(address, prefix, isEVMChain);
+    isValidator = true;
+  }
+
+  if (!rollappAddress) return redirect(`/${params.rollappPath}`);
+
   const bech32Address = rollappAddress.toBech32();
   const evmAddress = isEVMChain ? rollappAddress.toHex() : null;
 
