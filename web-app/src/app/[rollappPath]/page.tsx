@@ -61,6 +61,7 @@ export default async function Overview({ params }: RollappOverviewProps) {
         </Box>
         <TransactionListTable
           transactions={transactions}
+          includeValue
           enablePagination={false}
         />
       </Card>

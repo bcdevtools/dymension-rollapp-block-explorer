@@ -24,7 +24,7 @@ export default function AddressPageTitleAndSummary({
   const [denomsMetadata, denomsMetadataLoading] = useDenomsMetadata();
 
   const balancesWithMetadata = useMemo(() => {
-    return accountRpcData && denomsMetadata
+    return accountRpcData
       ? Object.keys(accountRpcData.balances).reduce<BalancesWithMetadata>(
           (final, denom) => {
             final[denom] = {

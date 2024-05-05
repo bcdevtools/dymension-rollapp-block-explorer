@@ -8,31 +8,53 @@ import {
   PAGE_PARAM_NAME,
   PAGE_SIZE_PARAM_NAME,
 } from '@/consts/setting';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import LinkToBlockNo from '../block/LinkToBlockNo';
 import Chip from '@mui/material/Chip';
 import { Path } from '@/consts/path';
 import { formatUnixTime } from '@/utils/datetime';
 import { getMessageName } from '@/utils/transaction';
 import Link from '@/components/commons/Link';
+import useDenomsMetadata from '@/hooks/useDenomsMetadata';
+import Box from '@mui/material/Box';
+import { Typography } from '@mui/material';
+import { formatBlockchainAmount } from '@/utils/number';
 
-type TransactionListTableProps = Readonly<{
-  transactions: Required<{
-    height: bigint | number;
-    hash: string;
-    epoch: bigint | number;
-    tx_type: string;
-    message_types: string[];
-    action: string | null;
-  }>[];
+export type TransactionFields = Required<{
+  height: bigint | number;
+  hash: string;
+  epoch: bigint | number;
+  tx_type: string;
+  message_types: string[];
+  action: string | null;
+}> &
+  Partial<{ value: string[] }>;
+
+export type TransactionListTableProps = Readonly<{
+  transactions: TransactionFields[];
   totalTransactions?: number;
   pageSize?: number;
   page?: number;
   enablePagination?: boolean;
   loading?: boolean;
+  includeValue?: boolean;
 }>;
 
-const headers = ['Transaction Hash', 'Messages', 'Block', 'Date Time'];
+export const enum TxTableHeader {
+  TRANSACTION_HASH = 'Transaction Hash',
+  MESSAGES = 'Messages',
+  VALUE = 'Value',
+  BLOCK = 'Block',
+  DATE_TIME = 'Date Time',
+}
+
+const ALL_HEADERS = [
+  TxTableHeader.TRANSACTION_HASH,
+  TxTableHeader.MESSAGES,
+  TxTableHeader.VALUE,
+  TxTableHeader.BLOCK,
+  TxTableHeader.DATE_TIME,
+];
 
 export default function TransactionListTable({
   transactions,
@@ -41,18 +63,20 @@ export default function TransactionListTable({
   page = 0,
   enablePagination = true,
   loading = false,
+  includeValue = false,
 }: TransactionListTableProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [_loading, setLoading] = useState(false);
+  const [denomsMetadata, denomsMetadataLoading] = useDenomsMetadata();
 
   useEffect(() => {
     setLoading(false);
   }, [transactions]);
 
   const body = transactions.map(
-    ({ hash, epoch, message_types, action, tx_type, height }) => {
+    ({ hash, epoch, message_types, action, tx_type, height, value }) => {
       const cells = [];
 
       // Transaction Hash
@@ -66,19 +90,59 @@ export default function TransactionListTable({
       );
 
       // Messages
-
       cells.push(getMessageLabel(hash, message_types, action, tx_type));
 
-      // Block height
+      // Value
+      if (includeValue) {
+        if (!value || !value.length) cells.push('-');
+        else {
+          let hasSomeToken = false;
+          const valueDisplay: React.ReactNode[] = [];
+          for (let i = 0; i < value.length; i++) {
+            const v = value[i];
+            const [amount, denom] = v.split(' ');
+            if (denomsMetadata[denom]) {
+              valueDisplay.push(
+                <Typography>{`${formatBlockchainAmount(
+                  amount,
+                  denomsMetadata[denom].highestExponent
+                )} ${denomsMetadata[denom].symbol}`}</Typography>
+              );
+            } else {
+              hasSomeToken = true;
+              continue;
+            }
+          }
+          if (hasSomeToken) {
+            valueDisplay.push(
+              <Typography
+                key={valueDisplay.length}
+                fontStyle="italic"
+                color="text.secondary">
+                some token
+              </Typography>
+            );
+          }
+          cells.push(valueDisplay);
+        }
+      }
 
+      // Block height
       cells.push(<LinkToBlockNo key={hash} blockNo={height.toString()} />);
 
       // Date Time
-
       cells.push(formatUnixTime(Number(epoch)));
 
       return cells;
     }
+  );
+
+  const headers = useMemo(
+    () =>
+      includeValue
+        ? ALL_HEADERS
+        : ALL_HEADERS.filter(i => i !== TxTableHeader.VALUE),
+    [includeValue]
   );
 
   return (
@@ -89,7 +153,7 @@ export default function TransactionListTable({
       total={totalTransactions}
       page={page}
       pageSize={pageSize}
-      loading={loading || _loading}
+      loading={loading || _loading || (includeValue && denomsMetadataLoading)}
       enablePagination={enablePagination}
       onPageChange={newPage => {
         setLoading(true);
