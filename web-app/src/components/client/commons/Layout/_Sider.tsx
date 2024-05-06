@@ -9,6 +9,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Summarize from '@mui/icons-material/Summarize';
 import Widgets from '@mui/icons-material/Widgets';
 import Receipt from '@mui/icons-material/Receipt';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
 import React from 'react';
@@ -44,6 +45,11 @@ const MENU_ITEMS = [
     path: Path.TRANSACTIONS,
     selectedPath: [Path.TRANSACTION],
     Icon: Receipt,
+  },
+  {
+    name: 'Validators',
+    path: Path.VALIDATORS,
+    Icon: FactCheckIcon,
   },
 ];
 
