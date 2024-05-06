@@ -47,7 +47,15 @@ export default function ValidatorList() {
   );
 
   const body = rowKeys.map(address => [
-    <AddressLink key={address} address={address} showCopyButton={false} />,
+    <AddressLink
+      key={address}
+      address={address}
+      display={`${validators[address].moniker} (${address.substring(
+        0,
+        17
+      )}...${address.substring(address.length - 6)})`}
+      showCopyButton={false}
+    />,
     <Typography key={`${address}_power`}>
       {formatBlockchainAmount(
         validators[address].tokens,
