@@ -13,6 +13,7 @@ export type RollappState = {
   selectedRollappInfo: RollappInfo | null;
   rpcService: RpcService | null;
   denomsMetadata: DenomsMetadata;
+  hasGottenDenomsMetadata: boolean;
 };
 
 export const defaultRollappState: RollappState = {
@@ -20,6 +21,7 @@ export const defaultRollappState: RollappState = {
   rollappInfos: [],
   rpcService: null,
   denomsMetadata: {},
+  hasGottenDenomsMetadata: false,
 };
 
 const actions = {
@@ -35,13 +37,18 @@ const actions = {
     const rpcService =
       getRpcServiceFromSelectedRollappInfo(selectedRollappInfo);
 
-    return { selectedRollappInfo, rpcService, denomsMetadata: {} };
+    return {
+      selectedRollappInfo,
+      rpcService,
+      denomsMetadata: {},
+      hasGottenDenomsMetadata: false,
+    };
   },
   [RollappActionTypes.UPDATE_DENOMS_METADATA]: (
     currentState: RollappState,
     denomsMetadata: DenomsMetadata
   ) => {
-    return { denomsMetadata };
+    return { denomsMetadata, hasGottenDenomsMetadata: true };
   },
 };
 
