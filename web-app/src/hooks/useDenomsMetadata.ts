@@ -9,15 +9,15 @@ import { RollappActionTypes } from '@/consts/actionTypes';
 export default function useDenomsMetadata(
   shouldThrowError: boolean = false
 ): [DenomsMetadata, boolean] {
-  const [{ denomsMetadata }, dispatch] = useRollappStore();
-  const existedData = Object.keys(denomsMetadata).length > 0;
-  const [loading, setLoading] = useState(!existedData);
+  const [{ denomsMetadata, hasGottenDenomsMetadata }, dispatch] =
+    useRollappStore();
+  const [loading, setLoading] = useState(!hasGottenDenomsMetadata);
   const [{ rpcService }] = useRollappStore();
   const throwError = useThrowError();
 
   useEffect(() => {
     let ac: AbortController | null;
-    if (existedData) return;
+    if (hasGottenDenomsMetadata) return;
 
     (async function () {
       try {
@@ -50,7 +50,7 @@ export default function useDenomsMetadata(
     rpcService,
     throwError,
     shouldThrowError,
-    existedData,
+    hasGottenDenomsMetadata,
   ]);
 
   return [denomsMetadata, loading];

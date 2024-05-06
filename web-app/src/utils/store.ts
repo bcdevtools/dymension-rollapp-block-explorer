@@ -35,5 +35,6 @@ export function getInitialRollappState(
     selectedRollappInfo,
     rpcService,
     denomsMetadata: {},
+    hasGottenDenomsMetadata: false,
   };
 }
