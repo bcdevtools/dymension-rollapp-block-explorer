@@ -255,5 +255,9 @@ export interface ValidatorList {
     pubKeyType: string;
     valAddress: string;
     votingPower: number;
+    moniker: string;
+    commission: string;
+    tokens: string;
+    tokensDecimals: number;
   };
 }

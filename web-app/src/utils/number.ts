@@ -30,7 +30,13 @@ export function divideAmountByDecimals(amount: Big | string, decimals: number) {
 
 export function formatBlockchainAmount(
   value: string | Big,
-  decimals: number = 0
+  decimals: number = 0,
+  fixed?: number
 ) {
-  return formatNumber(divideAmountByDecimals(value, decimals));
+  const result = divideAmountByDecimals(value, decimals);
+  return formatNumber(fixed === undefined ? result : result.round(fixed));
+}
+
+export function compareNumberString(a: string, b: string) {
+  return new Big(a).cmp(b);
 }

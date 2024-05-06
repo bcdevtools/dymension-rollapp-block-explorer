@@ -6,6 +6,11 @@ import AddressLink from './AddressLink';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 import { getPageAndPageSizeFromStringParam } from '@/utils/common';
+import { compareNumberString, formatBlockchainAmount } from '@/utils/number';
+import React, { useMemo } from 'react';
+import Big from 'big.js';
+import Box from '@mui/material/Box';
+import { Typography } from '@mui/material';
 
 export default function ValidatorList() {
   const [validators, loading] = useValidators();
@@ -13,8 +18,21 @@ export default function ValidatorList() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const validatorAddresses = Object.keys(validators).sort(
-    (a, b) => validators[b].votingPower - validators[a].votingPower
+  const validatorAddresses = useMemo(
+    () =>
+      Object.keys(validators).sort((a, b) =>
+        compareNumberString(validators[b].tokens, validators[a].tokens)
+      ),
+    [validators]
+  );
+
+  const totalTokens = useMemo(
+    () =>
+      Object.values(validators).reduce<Big>(
+        (acc, v) => new Big(v.tokens).add(acc),
+        new Big(0)
+      ),
+    [validators]
   );
 
   const [pageSize, page] = getPageAndPageSizeFromStringParam(
@@ -30,13 +48,29 @@ export default function ValidatorList() {
 
   const body = rowKeys.map(address => [
     <AddressLink key={address} address={address} showCopyButton={false} />,
-    validators[address].votingPower,
+    <Typography key={`${address}_power`}>
+      {formatBlockchainAmount(
+        validators[address].tokens,
+        validators[address].tokensDecimals
+      )}
+      {' ('}
+      <Typography display="inline" color="secondary">
+        {formatBlockchainAmount(
+          new Big(validators[address].tokens).div(totalTokens),
+          -2,
+          4
+        )}
+        %
+      </Typography>
+      {')'}
+    </Typography>,
+    `${formatBlockchainAmount(validators[address].commission, -2)}%`,
   ]);
 
   return (
     <DataTable
       loading={loading}
-      headers={['Address', 'Voting Power']}
+      headers={['Address', 'Voting Power', 'Commission']}
       rowKeys={validatorAddresses}
       body={body}
       total={validatorAddresses.length}
