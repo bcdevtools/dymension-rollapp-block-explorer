@@ -26,7 +26,7 @@ import {
 import TransactionListTable from '@/components/client/transaction/TransactionListTable';
 import AddressPageTitleAndSummary from '@/components/client/address/AddressPage';
 import { AddressPageTitle } from '@/components/client/address/AddressPageTitle';
-import Validator from '@/components/client/address/Validator';
+import ValidatorDetail from '@/components/client/address/ValidatorDetail';
 
 type AddressProps = Readonly<{
   params: { address: string; rollappPath: string };
@@ -117,7 +117,7 @@ export default async function Address({ params, searchParams }: AddressProps) {
           evmAddress={evmAddress}
           isValidator
         />
-        <Validator bech32Address={bech32Address} />
+        <ValidatorDetail bech32Address={bech32Address} />
       </>
     );
   }

@@ -59,7 +59,8 @@ export default function ValidatorList() {
     <Typography key={`${address}_power`}>
       {formatBlockchainAmount(
         validators[address].tokens,
-        validators[address].tokensDecimals
+        validators[address].tokensDecimals,
+        0
       )}
       {' ('}
       <Typography display="inline" color="secondary">
