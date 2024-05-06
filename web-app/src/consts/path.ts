@@ -15,4 +15,5 @@ export const BreadcrumbName = {
   [Path.TRANSACTIONS]: 'Transactions',
   [Path.TRANSACTION]: 'Transactions',
   [Path.ADDRESS]: 'Address',
+  [Path.VALIDATORS]: 'Validators',
 };
