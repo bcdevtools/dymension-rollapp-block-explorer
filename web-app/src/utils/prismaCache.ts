@@ -31,7 +31,7 @@ function queryWithCache<T, A, F extends Operation>(
   //@ts-ignore
   const { cacheStrategy, ...queryArgs } = args;
 
-  if (!cacheStrategy || !cacheStrategy.enabled) {
+  if (!cacheStrategy || /*!cacheStrategy.enabled*/ true) {
     return context[action](queryArgs);
   } else {
     const { revalidate = DEFAULT_CACHE_DURATION } = cacheStrategy;
