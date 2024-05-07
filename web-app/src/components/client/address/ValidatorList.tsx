@@ -50,11 +50,7 @@ export default function ValidatorList() {
     <AddressLink
       key={address}
       address={validators[address].valAddress}
-      display={`${validators[address].moniker} (${validators[
-        address
-      ].valAddress.substring(0, 17)}...${address.substring(
-        address.length - 6
-      )})`}
+      display={`${validators[address].moniker}`}
       showCopyButton={false}
     />,
     <Box key={`${address}_power`}>
@@ -80,7 +76,7 @@ export default function ValidatorList() {
   return (
     <DataTable
       loading={loading}
-      headers={['Address', 'Voting Power', 'Commission']}
+      headers={['Governor', 'Voting Power', 'Commission']}
       rowKeys={validatorAddresses}
       body={body}
       total={validatorAddresses.length}
