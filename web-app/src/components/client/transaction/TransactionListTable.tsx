@@ -13,7 +13,7 @@ import LinkToBlockNo from '../block/LinkToBlockNo';
 import Chip from '@mui/material/Chip';
 import { Path } from '@/consts/path';
 import { formatUnixTime } from '@/utils/datetime';
-import { getMessageName } from '@/utils/transaction';
+import { getMessageName, getShortTxHash } from '@/utils/transaction';
 import Link from '@/components/commons/Link';
 import useDenomsMetadata from '@/hooks/useDenomsMetadata';
 import Typography from '@mui/material/Typography';
@@ -84,7 +84,7 @@ export default function TransactionListTable({
         <Link
           key={hash}
           href={getNewPathByRollapp(pathname, `/${Path.TRANSACTION}/${hash}`)}>
-          {hash.substring(0, 6)}...{hash.substring(hash.length - 6)}
+          {getShortTxHash(hash)}
         </Link>
       );
 

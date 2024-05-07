@@ -60,6 +60,10 @@ export interface Block {
   height: number;
   timeEpochUTC: number;
   txs: TransactionInBlock[];
+  proposer: {
+    consensusAddress: string;
+    moniker: string;
+  };
 }
 
 export interface TransactionGas {

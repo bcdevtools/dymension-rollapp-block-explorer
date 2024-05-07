@@ -191,3 +191,7 @@ export function getTxHashesQueryValue(txHash: string) {
     ? [txHash.toLowerCase(), txHash.substring(2).toUpperCase()]
     : [`0x${txHash.toLowerCase()}`, txHash.toUpperCase()];
 }
+
+export function getShortTxHash(txHash: string) {
+  return `${txHash.substring(0, 6)}...${txHash.substring(txHash.length - 6)}`;
+}
