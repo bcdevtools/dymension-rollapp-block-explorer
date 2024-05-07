@@ -76,11 +76,13 @@ function getAccountSearchResult(
     return rollappAddress
       ? {
           account: searchText.toLowerCase(),
-          rollappInfos: allRollappInfos.filter(
-            i =>
-              ((i.bech32! as JsonObject).addr as string) ===
-              rollappAddress.prefix
-          ),
+          rollappInfos: allRollappInfos.filter(i => {
+            const bech32 = i.bech32 as JsonObject;
+            return (
+              (bech32.addr as string) === rollappAddress.prefix ||
+              (bech32.val as string) === rollappAddress.prefix
+            );
+          }),
         }
       : null;
   } else return null;

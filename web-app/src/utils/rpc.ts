@@ -112,6 +112,22 @@ export function getAccountParam(address: string): RpcCallParam {
   };
 }
 
+export function getValidatorParam(address: string): RpcCallParam {
+  return {
+    method: 'be_getValidatorAccount',
+    params: [address],
+    jsonrpc: '2.0',
+  };
+}
+
+export function getValidatorsParam(): RpcCallParam {
+  return {
+    method: 'be_getValidators',
+    params: [],
+    jsonrpc: '2.0',
+  };
+}
+
 export function getErc20BalanceParam(
   address: string,
   tokenAddresses: string[]

@@ -26,34 +26,22 @@ export function isTxHash(value: string) {
 }
 
 export class RollappAddress {
-  static fromBech32(bech32Address: string, prefix?: string) {
+  static fromBech32(bech32Address: string, prefix?: string, throwErr = true) {
     const decoded = bech32.decode(bech32Address);
 
-    if (prefix && decoded.prefix !== prefix) {
+    if (throwErr && prefix && decoded.prefix !== prefix) {
       throw new Error('Unmatched prefix');
     }
 
     return new RollappAddress(
       new Uint8Array(bech32.fromWords(decoded.words)),
-      decoded.prefix
+      prefix || decoded.prefix
     );
   }
 
   static fromHex(hex: string, prefix: string) {
     hex = hex.replace('0x', '');
     return new RollappAddress(Uint8Array.from(Buffer.from(hex, 'hex')), prefix);
-  }
-
-  static fromString(value: string, prefix: string, isEvmChain: boolean = true) {
-    if (isEvmChain && isEvmAddress(value))
-      return RollappAddress.fromHex(value, prefix);
-    else if (isCosmosAddress(value)) {
-      try {
-        return RollappAddress.fromBech32(value, prefix);
-      } catch (e) {
-        return null;
-      }
-    } else null;
   }
 
   constructor(

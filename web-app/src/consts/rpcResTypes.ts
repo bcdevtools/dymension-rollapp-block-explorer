@@ -163,9 +163,14 @@ export interface DenomMetadata {
 export interface DenomsMetadata {
   [denom: string]: DenomMetadata;
 }
+
+export interface Staking {
+  [validator: string]: string;
+}
+
 export interface AccountStaking {
   rewards: string;
-  staking: { [validator: string]: string } | {};
+  staking: Staking | {};
 }
 export interface Account {
   address: { cosmos: string; evm: string };
@@ -203,4 +208,56 @@ export interface Erc20Balances {
 export interface Cw20Balances {
   account: string;
   cw20Balances: Erc20Balance[];
+}
+
+export interface Validator {
+  address: {
+    consensusAddress: string;
+    validatorAddress: string;
+  };
+  staking: {
+    rewards: string;
+    staking: Staking;
+    validatorCommission: string;
+    validatorOutstandingRewards: string;
+  };
+  validator: {
+    commission: {
+      commission_rates: {
+        rate: string;
+        max_rate: string;
+        max_change_rate: string;
+      };
+      update_time: string;
+    };
+    consensusPubkey: { '@type': string; key: string };
+    delegatorShares: string;
+    description: {
+      details: string;
+      identity: string;
+      moniker: string;
+      securityContract: string;
+      website: string;
+    };
+    jailed: boolean;
+    minSelfDelegation: string;
+    status: string;
+    tokens: string;
+    unbondingHeight: number;
+    unbondingTime: string;
+    votingPower: number;
+  };
+}
+
+export interface ValidatorList {
+  [validator: string]: {
+    consAddress: string;
+    pubKeyType: string;
+    valAddress: string;
+    votingPower: number;
+    moniker: string;
+    commission: string;
+    tokens: string;
+    tokensDecimals: number;
+  };
 }

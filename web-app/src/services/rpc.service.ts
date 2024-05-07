@@ -10,6 +10,8 @@ import {
   LatestBlockNumber,
   RpcResponse,
   Transaction,
+  Validator,
+  ValidatorList,
 } from '@/consts/rpcResTypes';
 import {
   CallRpcOptions,
@@ -24,6 +26,8 @@ import {
   getErc20ContractInfo,
   getLatestBlockNumber,
   getTransactionByHashParam,
+  getValidatorParam,
+  getValidatorsParam,
 } from '@/utils/rpc';
 
 export function getResponseResult<T>(
@@ -164,6 +168,17 @@ export class RpcService {
       );
     else
       return this._rpcClient.callRpc(getAccountParam(address), callRpcOptions);
+  }
+
+  getValidator(
+    address: string,
+    callRpcOptions?: CallRpcOptions
+  ): RpcResult<Validator> {
+    return this._rpcClient.callRpc(getValidatorParam(address), callRpcOptions);
+  }
+
+  getValidators(callRpcOptions?: CallRpcOptions): RpcResult<ValidatorList> {
+    return this._rpcClient.callRpc(getValidatorsParam(), callRpcOptions);
   }
 
   getErc20Balance(

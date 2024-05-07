@@ -10,18 +10,26 @@ import { Account } from '@/consts/rpcResTypes';
 type AddressPageTypeProps = Readonly<{
   bech32Address: string;
   evmAddress: string | null;
-  account: Account | null;
+  account?: Account | null;
+  title?: string;
+  isValidator?: boolean;
 }>;
 
 export function AddressPageTitle({
   bech32Address,
   evmAddress,
   account,
+  isValidator = false,
+  title,
 }: AddressPageTypeProps) {
   const [prototype, setPrototype] = useState<React.ReactNode>(
-    <>
-      Account <CircularProgress size={'1.5rem'} />
-    </>
+    isValidator ? (
+      'Validator'
+    ) : (
+      <>
+        Account <CircularProgress size={'1.5rem'} />
+      </>
+    )
   );
 
   useEffect(() => {
@@ -32,7 +40,7 @@ export function AddressPageTitle({
 
   return (
     <PageTitle
-      title={prototype}
+      title={title || prototype}
       subtitle={
         <>
           <b>{bech32Address}</b>
