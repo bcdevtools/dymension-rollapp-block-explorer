@@ -29,7 +29,7 @@ export default function useValidator(
         } catch (e: any) {
           if (!isAbortException(e)) {
             console.log(e);
-            throwError(new Error('Failed to fetch Validator Account'));
+            throwError(new Error('Failed to fetch Governor'));
           }
         } finally {
           ac = null;

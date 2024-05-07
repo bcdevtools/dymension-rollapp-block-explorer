@@ -1,13 +1,13 @@
-import { ValidatorList } from '@/consts/rpcResTypes';
+import { ChainInfo } from '@/consts/rpcResTypes';
 import { getResponseResult } from '@/services/rpc.service';
 import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
 import { useThrowError } from './useThrowError';
 import { isAbortException } from '@/utils/common';
 
-export default function useValidators(): [ValidatorList, boolean] {
+export default function useChainInfo(): [ChainInfo | null, boolean] {
   const [loading, setLoading] = useState(true);
-  const [validatorList, setValidatorList] = useState<ValidatorList>({});
+  const [chainInfo, setChainInfo] = useState<ChainInfo | null>(null);
   const [{ rpcService }] = useRollappStore();
   const throwError = useThrowError();
 
@@ -18,15 +18,15 @@ export default function useValidators(): [ValidatorList, boolean] {
     (async function () {
       try {
         setLoading(true);
-        const result = rpcService.getValidators();
+        const result = rpcService.getChainInfo();
         ac = result[1];
-        const validator = await getResponseResult(result[0]);
-        setValidatorList(validator);
+        const _chainInfo = await getResponseResult(result[0]);
+        setChainInfo(_chainInfo);
         setLoading(false);
       } catch (e: any) {
         if (!isAbortException(e)) {
           console.log(e);
-          throwError(new Error('Failed to fetch Governors List'));
+          throwError(new Error('Failed to fetch Chain Info'));
         }
       } finally {
         ac = null;
@@ -38,5 +38,5 @@ export default function useValidators(): [ValidatorList, boolean] {
     };
   }, [rpcService, throwError]);
 
-  return [validatorList, loading];
+  return [chainInfo, loading];
 }

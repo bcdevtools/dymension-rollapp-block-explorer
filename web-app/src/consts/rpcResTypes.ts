@@ -35,7 +35,7 @@ export interface ChainInfo {
   bech32: Bech32;
   chainId: string;
   chainType: string;
-  denoms: object;
+  denoms: { [denom: string]: string };
   latestBlock: number;
   latestBlockTimeEpochUTC: number;
 }
