@@ -29,7 +29,7 @@ export function divideAmountByDecimals(amount: Big | string, decimals: number) {
 }
 
 export function formatBlockchainAmount(
-  value: string | Big,
+  value: string | Big = new Big(0),
   decimals: number = 0,
   fixed?: number
 ) {

@@ -218,12 +218,12 @@ export interface Validator {
   staking: {
     rewards: string;
     staking: Staking;
-    validatorComission: string;
+    validatorCommission: string;
     validatorOutstandingRewards: string;
   };
   validator: {
     commission: {
-      comission_rates: {
+      commission_rates: {
         rate: string;
         max_rate: string;
         max_change_rate: string;

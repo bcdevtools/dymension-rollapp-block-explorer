@@ -4,7 +4,7 @@ import {
   AddressTransactionType,
 } from '@/consts/addressPage';
 import { getRollAppInfoByRollappPath } from '@/services/chain.service';
-import { RollappAddress } from '@/utils/address';
+import { RollappAddress, isEvmAddress } from '@/utils/address';
 import {
   SearchParam,
   getOffsetFromPageAndPageSize,
@@ -25,7 +25,6 @@ import {
 } from '@/services/db/accounts';
 import TransactionListTable from '@/components/client/transaction/TransactionListTable';
 import AddressPageTitleAndSummary from '@/components/client/address/AddressPage';
-import { AddressPageTitle } from '@/components/client/address/AddressPageTitle';
 import ValidatorDetail from '@/components/client/address/ValidatorDetail';
 
 type AddressProps = Readonly<{
@@ -61,66 +60,78 @@ export default async function Address({ params, searchParams }: AddressProps) {
 
   const isEVMChain = rollappInfo.chain_type === ChainType.EVM;
 
-  let isValidator = false;
-  let prefix = (rollappInfo.bech32 as JsonObject).addr as string;
-  let rollappAddress = RollappAddress.fromString(address, prefix, isEVMChain);
-  if (!rollappAddress) {
-    prefix = (rollappInfo.bech32 as JsonObject).val as string;
-    rollappAddress = RollappAddress.fromString(address, prefix, isEVMChain);
-    isValidator = true;
+  let bech32 = rollappInfo.bech32 as JsonObject;
+  let prefix = bech32.addr as string;
+
+  let rollappAddress: RollappAddress | null;
+  let valAddress: RollappAddress | null = null;
+  if (isEVMChain && isEvmAddress(address)) {
+    rollappAddress = RollappAddress.fromHex(address, prefix);
+  } else {
+    const parsedAddress = RollappAddress.fromBech32(address);
+    let val = bech32.val as string;
+    let cons = bech32.cons as string;
+    switch (parsedAddress.prefix) {
+      case prefix:
+        rollappAddress = parsedAddress;
+        break;
+      case val:
+      case cons:
+        rollappAddress = RollappAddress.fromBech32(address, prefix, false);
+        valAddress = parsedAddress;
+        break;
+      default:
+        rollappAddress = null;
+    }
   }
 
   if (!rollappAddress) return redirect(`/${params.rollappPath}`);
 
-  const bech32Address = rollappAddress.toBech32();
+  const bech32Address = valAddress
+    ? valAddress.toBech32()
+    : rollappAddress.toBech32();
   const evmAddress = isEVMChain ? rollappAddress.toHex() : null;
+  if (valAddress) {
+    return (
+      <ValidatorDetail
+        bech32Address={bech32Address}
+        evmAddress={evmAddress}
+        bondDenom={(rollappInfo.denoms as JsonObject).bond as string}
+      />
+    );
+  }
 
   const [accountInfo, transactionResult] = await Promise.all([
     getAccount(rollappInfo.chain_id, bech32Address),
-    !isValidator
-      ? (async function () {
-          const filterOptions = getFilterOptionsFromTxType(
-            searchParams[AddressPageSearchParams.TX_TYPE]
-          );
-          const totalTransactions = await countAccountTransactions(
-            rollappInfo.chain_id,
-            bech32Address,
-            filterOptions
-          );
+    (async function () {
+      const filterOptions = getFilterOptionsFromTxType(
+        searchParams[AddressPageSearchParams.TX_TYPE]
+      );
+      const totalTransactions = await countAccountTransactions(
+        rollappInfo.chain_id,
+        bech32Address,
+        filterOptions
+      );
 
-          const [pageSize, page] = getPageAndPageSizeFromStringParam(
-            searchParams[PAGE_SIZE_PARAM_NAME],
-            searchParams[PAGE_PARAM_NAME],
-            totalTransactions
-          );
+      const [pageSize, page] = getPageAndPageSizeFromStringParam(
+        searchParams[PAGE_SIZE_PARAM_NAME],
+        searchParams[PAGE_PARAM_NAME],
+        totalTransactions
+      );
 
-          const accountTransactions = await getAccountTransactions(
-            rollappInfo.chain_id,
-            bech32Address,
-            filterOptions,
-            {
-              take: pageSize,
-              skip: getOffsetFromPageAndPageSize(page, pageSize),
-            }
-          );
+      const accountTransactions = await getAccountTransactions(
+        rollappInfo.chain_id,
+        bech32Address,
+        filterOptions,
+        {
+          take: pageSize,
+          skip: getOffsetFromPageAndPageSize(page, pageSize),
+        }
+      );
 
-          return { accountTransactions, totalTransactions, pageSize, page };
-        })()
-      : null,
+      return { accountTransactions, totalTransactions, pageSize, page };
+    })(),
   ]);
-
-  if (isValidator) {
-    return (
-      <>
-        <AddressPageTitle
-          bech32Address={bech32Address}
-          evmAddress={evmAddress}
-          isValidator
-        />
-        <ValidatorDetail bech32Address={bech32Address} />
-      </>
-    );
-  }
 
   const { accountTransactions, totalTransactions, pageSize, page } =
     transactionResult!;

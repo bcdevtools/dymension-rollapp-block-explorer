@@ -20,6 +20,7 @@ export function AddressPageTitle({
   evmAddress,
   account,
   isValidator = false,
+  title,
 }: AddressPageTypeProps) {
   const [prototype, setPrototype] = useState<React.ReactNode>(
     isValidator ? (
@@ -39,7 +40,7 @@ export function AddressPageTitle({
 
   return (
     <PageTitle
-      title={prototype}
+      title={title || prototype}
       subtitle={
         <>
           <b>{bech32Address}</b>

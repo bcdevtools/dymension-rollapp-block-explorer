@@ -10,7 +10,7 @@ import { compareNumberString, formatBlockchainAmount } from '@/utils/number';
 import React, { useMemo } from 'react';
 import Big from 'big.js';
 import Box from '@mui/material/Box';
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
 
 export default function ValidatorList() {
   const [validators, loading] = useValidators();
@@ -49,14 +49,15 @@ export default function ValidatorList() {
   const body = rowKeys.map(address => [
     <AddressLink
       key={address}
-      address={address}
-      display={`${validators[address].moniker} (${address.substring(
-        0,
-        17
-      )}...${address.substring(address.length - 6)})`}
+      address={validators[address].valAddress}
+      display={`${validators[address].moniker} (${validators[
+        address
+      ].valAddress.substring(0, 17)}...${address.substring(
+        address.length - 6
+      )})`}
       showCopyButton={false}
     />,
-    <Typography key={`${address}_power`}>
+    <Box key={`${address}_power`}>
       {formatBlockchainAmount(
         validators[address].tokens,
         validators[address].tokensDecimals,
@@ -72,7 +73,7 @@ export default function ValidatorList() {
         %
       </Typography>
       {')'}
-    </Typography>,
+    </Box>,
     `${formatBlockchainAmount(validators[address].commission, -2)}%`,
   ]);
 
