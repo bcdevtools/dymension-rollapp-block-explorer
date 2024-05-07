@@ -18,6 +18,9 @@ import {
 import { getAddress } from '@ethersproject/address';
 import { formatNumber } from '@/utils/number';
 import AddressLink from '@/components/client/address/AddressLink';
+import useChainInfo from '@/hooks/useChainInfo';
+import useDenomsMetadata from '@/hooks/useDenomsMetadata';
+import Skeleton from '@mui/material/Skeleton';
 
 export default function EvmDetails({
   transaction,
@@ -35,7 +38,7 @@ export default function EvmDetails({
   }
 
   if (transaction.mode === TxMode.EVM_GENERAL_TRANSFER) {
-    return EvmDetailsGeneralTransfer(evmTxInfo);
+    return <EvmDetailsGeneralTransfer evmTx={evmTxInfo} />;
   } else if (transaction.mode === TxMode.EVM_CONTRACT_CALL) {
     return EvmDetailsContractCall(
       evmTxInfo,
@@ -105,26 +108,59 @@ function EvmDetailsDeployContract(
   );
 }
 
-function EvmDetailsGeneralTransfer(evmTx: EvmTx) {
+function EvmDetailsGeneralTransfer({ evmTx }: { evmTx: EvmTx }) {
+  const [chainInfo, chainInfoLoading] = useChainInfo();
+  const [denomsMetadata, denomsMetadataLoading] = useDenomsMetadata();
+
+  const loading = chainInfoLoading || denomsMetadataLoading;
+
+  const denom = !chainInfoLoading ? chainInfo!.denoms.evm : null;
+
+  console.log('chainInfo', chainInfo);
+
   return (
     <ItemContainer>
       <RowItem
         label="Transfer"
-        value={fromHexStringToEthereumValue(evmTx.value!)}
+        value={
+          loading ? (
+            <Skeleton />
+          ) : (
+            `${fromHexStringToEthereumValue(evmTx.value!)} ${
+              denom ? denomsMetadata[denom].symbol : ''
+            }`
+          )
+        }
       />
       <RowItem
         label="From"
-        value={<AddressLink address={getAddress(evmTx.from)} />}
+        value={
+          loading ? (
+            <Skeleton />
+          ) : (
+            <AddressLink address={getAddress(evmTx.from)} />
+          )
+        }
       />
       <RowItem
         label="To"
-        value={evmTx.to && <AddressLink address={getAddress(evmTx.to)} />}
+        value={
+          loading ? (
+            <Skeleton />
+          ) : (
+            evmTx.to && <AddressLink address={getAddress(evmTx.to)} />
+          )
+        }
       />
       <RowItem
         label="Gas Price"
-        value={formatNumber(
-          fromHexStringToEthereumGasPriceValue(evmTx.gasPrice)
-        )}
+        value={
+          loading ? (
+            <Skeleton />
+          ) : (
+            formatNumber(fromHexStringToEthereumGasPriceValue(evmTx.gasPrice))
+          )
+        }
       />
     </ItemContainer>
   );
