@@ -13,6 +13,8 @@ import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import React from 'react';
 import LinkToBlockNo from '../LinkToBlockNo';
 import Skeleton from '@mui/material/Skeleton';
+import AddressLink from '../../address/AddressLink';
+import { getShortAddress } from '@/utils/address';
 
 type BlockListTableProps = Readonly<{
   latestBlockNo: number;
@@ -58,13 +60,22 @@ export default function BlockListTable({
     return [
       <LinkToBlockNo key={height} blockNo={height} />,
       isBlockInstance ? formatUnixTime(b.timeEpochUTC) : <Skeleton />,
+      isBlockInstance ? (
+        b.proposer ? (
+          b.proposer.moniker || getShortAddress(b.proposer.consensusAddress)
+        ) : (
+          '-'
+        )
+      ) : (
+        <Skeleton />
+      ),
       isBlockInstance ? getTxsDisplay(b, pathname) : <Skeleton />,
     ];
   });
 
   return (
     <DataTable
-      headers={['Block', 'Date Time', 'Txs']}
+      headers={['Block', 'Date Time', 'Proposer', 'Txs']}
       rowKeys={rowKeys}
       body={body}
       page={page}

@@ -133,3 +133,9 @@ export function getAccountType(account: Account) {
     return getPrototypeFromTypeUrl(account.typeUrl);
   } else return 'Account';
 }
+
+export function getShortAddress(address: string) {
+  return `${address.substring(0, 17)}...${address.substring(
+    address.length - 6
+  )}`;
+}
