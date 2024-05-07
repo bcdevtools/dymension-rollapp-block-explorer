@@ -117,6 +117,7 @@ export default function TransactionListTable({
               <Typography
                 key={valueDisplay.length}
                 fontStyle="italic"
+                fontSize="0.7rem"
                 color="text.secondary">
                 some token
               </Typography>
