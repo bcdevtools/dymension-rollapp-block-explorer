@@ -46,32 +46,35 @@ export default function ValidatorList() {
     (page + 1) * pageSize
   );
 
-  const body = rowKeys.map(address => [
-    <AddressLink
-      key={address}
-      address={validators[address].valAddress}
-      display={`${validators[address].moniker}`}
-      showCopyButton={false}
-    />,
-    <Box key={`${address}_power`}>
-      {formatBlockchainAmount(
-        validators[address].tokens,
-        validators[address].tokensDecimals,
-        0
-      )}
-      {' ('}
-      <Typography display="inline" color="secondary">
+  const body = rowKeys.map(address => {
+    const vpPercent = new Big(validators[address].tokens)
+      .div(totalTokens)
+      .times(100);
+    return [
+      <AddressLink
+        key={address}
+        address={validators[address].valAddress}
+        display={`${validators[address].moniker}`}
+        showCopyButton={false}
+      />,
+      <Box key={`${address}_power`}>
         {formatBlockchainAmount(
-          new Big(validators[address].tokens).div(totalTokens),
-          -2,
-          4
-        )}
-        %
-      </Typography>
-      {')'}
-    </Box>,
-    `${formatBlockchainAmount(validators[address].commission, -2)}%`,
-  ]);
+          validators[address].tokens,
+          validators[address].tokensDecimals,
+          0
+        )}{' '}
+        <Typography
+          display="inline"
+          fontSize="0.7rem"
+          color={
+            vpPercent.gt(33) ? 'red' : vpPercent.gt(10) ? 'orange' : 'grey'
+          }>
+          {formatBlockchainAmount(vpPercent, 0, 4)}%
+        </Typography>
+      </Box>,
+      `${formatBlockchainAmount(validators[address].commission, -2)}%`,
+    ];
+  });
 
   return (
     <DataTable

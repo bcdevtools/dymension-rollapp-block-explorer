@@ -68,7 +68,8 @@ export default function ValidatorDetail({
             label="Voting Power"
             value={formatBlockchainAmount(
               validator?.validator.tokens,
-              bondDecimals
+              bondDecimals,
+              0
             )}
             loading={loading}
           />
