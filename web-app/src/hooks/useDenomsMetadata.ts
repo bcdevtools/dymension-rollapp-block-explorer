@@ -17,7 +17,10 @@ export default function useDenomsMetadata(
 
   useEffect(() => {
     let ac: AbortController | null;
-    if (hasGottenDenomsMetadata) return;
+    if (hasGottenDenomsMetadata) {
+      if (loading) setLoading(false);
+      return;
+    }
 
     (async function () {
       try {
@@ -51,6 +54,7 @@ export default function useDenomsMetadata(
     throwError,
     shouldThrowError,
     hasGottenDenomsMetadata,
+    loading,
   ]);
 
   return [denomsMetadata, loading];
