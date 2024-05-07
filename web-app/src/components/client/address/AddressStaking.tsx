@@ -52,7 +52,7 @@ export default function AddressStaking({
   return (
     <>
       <DataTable
-        headers={['Validator', 'Delegated Amount']}
+        headers={['Governor', 'Delegated Amount']}
         body={body.slice(
           page * ADDRESS_SUMMARY_COINS_PAGE_SIZE,
           (page + 1) * ADDRESS_SUMMARY_COINS_PAGE_SIZE

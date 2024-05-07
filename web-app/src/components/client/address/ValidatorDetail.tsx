@@ -25,7 +25,6 @@ export default function ValidatorDetail({
 }: ValidatorProps) {
   const [validator, validatorLoading] = useValidator(bech32Address);
   const [denomsMetadata, denomsMetadataLoading] = useDenomsMetadata();
-  console.log('validator', validator);
 
   const bondDecimals = denomsMetadata[bondDenom]
     ? denomsMetadata[bondDenom].highestExponent
@@ -101,7 +100,7 @@ export default function ValidatorDetail({
             loading={loading}
           />
           <DetailItem
-            label="Validator Outstanding Rewards"
+            label="Governor Outstanding Rewards"
             value={`${formatBlockchainAmount(
               getAmountFromReward(
                 get(validator, 'staking.validatorOutstandingRewards', '0')
@@ -111,7 +110,7 @@ export default function ValidatorDetail({
             loading={loading}
           />
           <DetailItem
-            label="Validator Commission"
+            label="Governor Commission"
             value={`${formatBlockchainAmount(
               getAmountFromReward(
                 get(validator, 'staking.validatorCommission', '0')

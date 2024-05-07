@@ -47,7 +47,7 @@ const MENU_ITEMS = [
     Icon: Receipt,
   },
   {
-    name: 'Validators',
+    name: 'Governors',
     path: Path.VALIDATORS,
     Icon: FactCheckIcon,
   },

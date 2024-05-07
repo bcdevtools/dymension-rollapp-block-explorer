@@ -24,7 +24,7 @@ export function AddressPageTitle({
 }: AddressPageTypeProps) {
   const [prototype, setPrototype] = useState<React.ReactNode>(
     isValidator ? (
-      'Validator'
+      'Governor'
     ) : (
       <>
         Account <CircularProgress size={'1.5rem'} />

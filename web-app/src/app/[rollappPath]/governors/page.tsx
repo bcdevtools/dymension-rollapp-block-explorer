@@ -5,7 +5,7 @@ import PageTitle from '@/components/commons/PageTitle';
 export default async function Validators() {
   return (
     <>
-      <PageTitle title="Validators" />
+      <PageTitle title="Governors" />
       <Card>
         <ValidatorList />
       </Card>
