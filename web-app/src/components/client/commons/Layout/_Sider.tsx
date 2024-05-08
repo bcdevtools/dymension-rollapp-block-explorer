@@ -78,7 +78,7 @@ export default React.memo(function Sider({
           <RollappSelect
             fullWidth
             size="small"
-            value={selectedRollappInfo!.path}
+            value={selectedRollappInfo?.path || ''}
             onValueChange={e => {
               router.push(
                 isNotFoundPath(pathname)
