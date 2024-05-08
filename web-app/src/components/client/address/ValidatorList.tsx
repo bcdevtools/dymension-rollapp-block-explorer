@@ -29,7 +29,7 @@ export default function ValidatorList() {
   const totalTokens = useMemo(
     () =>
       Object.values(validators).reduce<Big>(
-        (acc, v) => new Big(v.tokens).add(acc),
+        (acc, v) => (v.tokens ? new Big(v.tokens).add(acc) : new Big(0)),
         new Big(0)
       ),
     [validators]
@@ -47,9 +47,9 @@ export default function ValidatorList() {
   );
 
   const body = rowKeys.map(address => {
-    const vpPercent = new Big(validators[address].tokens)
-      .div(totalTokens)
-      .times(100);
+    const vpPercent = validators[address].tokens
+      ? new Big(validators[address].tokens).div(totalTokens).times(100)
+      : new Big(100);
     return [
       <AddressLink
         key={address}
