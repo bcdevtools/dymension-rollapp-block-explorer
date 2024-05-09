@@ -15,11 +15,11 @@ type DataTableProps = Readonly<{
   headers: React.ReactNode[];
   body: React.ReactNode[][];
   rowKeys: string[] | number[];
-  total: number;
+  total?: number;
   page: number;
   pageSize: number;
   onPageChange: (page: number) => void;
-  onRowsPerPageChange: (pageSize: string) => void;
+  onRowsPerPageChange?: (pageSize: string) => void;
   loading?: boolean;
   enablePagination?: boolean;
   loadingItems?: number;
@@ -53,7 +53,9 @@ export default function DataTable({
       </Box>
     );
 
-  const showPagniation = enablePagination && total > pageSize;
+  const showPagniation =
+    enablePagination && (total === undefined || total > pageSize);
+
   return (
     <>
       <TableContainer sx={{ width: '100%' }}>
@@ -89,14 +91,17 @@ export default function DataTable({
       {showPagniation && (
         <TablePagination
           component="div"
-          rowsPerPageOptions={[10, 25, 50, 100]}
-          count={total}
+          rowsPerPageOptions={total !== undefined ? [10, 25, 50, 100] : []}
+          count={total ?? -1}
           rowsPerPage={pageSize}
           page={page}
           onPageChange={(e, newPage: number) => onPageChange(newPage)}
-          onRowsPerPageChange={e => onRowsPerPageChange(e.target.value)}
-          showFirstButton
-          showLastButton
+          onRowsPerPageChange={
+            onRowsPerPageChange && (e => onRowsPerPageChange(e.target.value))
+          }
+          showFirstButton={total !== undefined}
+          showLastButton={total !== undefined}
+          labelDisplayedRows={total === undefined ? () => null : undefined}
         />
       )}
     </>

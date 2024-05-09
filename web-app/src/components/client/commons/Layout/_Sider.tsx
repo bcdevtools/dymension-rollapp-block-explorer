@@ -20,6 +20,8 @@ import { getNewPathByRollapp, isNotFoundPath } from '@/utils/common';
 import RollappSelect from '../RollappSelect';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
+import FeedIcon from '@mui/icons-material/Feed';
+import Divider from '@mui/material/Divider';
 
 type SiderProps = Readonly<{
   menuOpen: boolean;
@@ -46,10 +48,16 @@ const MENU_ITEMS = [
     selectedPath: [Path.TRANSACTION],
     Icon: Receipt,
   },
+  null,
   {
     name: 'Governors',
     path: Path.VALIDATORS,
     Icon: FactCheckIcon,
+  },
+  {
+    name: 'Governance',
+    path: Path.GOVERNANCE,
+    Icon: FeedIcon,
   },
 ];
 
@@ -89,6 +97,7 @@ export default React.memo(function Sider({
           />
         </ListItem>
         {MENU_ITEMS.map((menuItem, index) => {
+          if (!menuItem) return <Divider key={index} />;
           const isSelected = checkSelected(
             menuItem.path,
             menuItem.selectedPath

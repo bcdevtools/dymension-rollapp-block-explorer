@@ -128,6 +128,14 @@ export function getValidatorsParam(): RpcCallParam {
   };
 }
 
+export function getGovProposalsParam(page: number): RpcCallParam {
+  return {
+    method: 'be_getGovProposals',
+    params: [page],
+    jsonrpc: '2.0',
+  };
+}
+
 export function getErc20BalanceParam(
   address: string,
   tokenAddresses: string[]

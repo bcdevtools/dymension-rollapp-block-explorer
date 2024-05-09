@@ -116,8 +116,6 @@ function EvmDetailsGeneralTransfer({ evmTx }: { evmTx: EvmTx }) {
 
   const denom = !chainInfoLoading ? chainInfo!.denoms.evm : null;
 
-  console.log('chainInfo', chainInfo);
-
   return (
     <ItemContainer>
       <RowItem

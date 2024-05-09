@@ -7,6 +7,7 @@ import {
   DenomsMetadata,
   Erc20Balances,
   Erc20ContractInfo,
+  GovProposals,
   LatestBlockNumber,
   RpcResponse,
   Transaction,
@@ -24,6 +25,7 @@ import {
   getDenomsMetadataParam,
   getErc20BalanceParam,
   getErc20ContractInfo,
+  getGovProposalsParam,
   getLatestBlockNumber,
   getTransactionByHashParam,
   getValidatorParam,
@@ -179,6 +181,13 @@ export class RpcService {
 
   getValidators(callRpcOptions?: CallRpcOptions): RpcResult<ValidatorList> {
     return this._rpcClient.callRpc(getValidatorsParam(), callRpcOptions);
+  }
+
+  getGovProposals(
+    page: number,
+    callRpcOptions?: CallRpcOptions
+  ): RpcResult<GovProposals> {
+    return this._rpcClient.callRpc(getGovProposalsParam(page), callRpcOptions);
   }
 
   getErc20Balance(
