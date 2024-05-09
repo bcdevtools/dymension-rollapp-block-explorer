@@ -102,7 +102,8 @@ export default function TransactionListTable({
             const [amount, denom] = v.split(' ');
             if (denomsMetadata[denom]) {
               valueDisplay.push(
-                <Typography>{`${formatBlockchainAmount(
+                <Typography
+                  key={valueDisplay.length}>{`${formatBlockchainAmount(
                   amount,
                   denomsMetadata[denom].highestExponent
                 )} ${denomsMetadata[denom].symbol}`}</Typography>
