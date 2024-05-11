@@ -254,7 +254,9 @@ func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
 
 				for _, msgType := range tx.MessagesType {
 					switch msgType {
-					case "/ibc.core.channel.v1.MsgAcknowledgement", "/ibc.core.channel.v1.MsgRecvPacket":
+					case "/ibc.core.channel.v1.MsgAcknowledgement",
+						"/ibc.core.channel.v1.MsgRecvPacket",
+						"/ibc.core.channel.v1.MsgTimeout":
 						systemMessagesType = append(systemMessagesType, msgType)
 					default:
 						normalMessagesType = append(normalMessagesType, msgType)
