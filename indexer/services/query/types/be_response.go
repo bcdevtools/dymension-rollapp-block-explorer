@@ -246,9 +246,32 @@ func (r ResponseBeTransactionsInBlockRange) ValidateBasic() error {
 			if len(tx.MessagesType) < 1 {
 				return fmt.Errorf("missing messages type for tx at %d [%s]", i, heightStr)
 			}
-			if countMsgs := len(tx.MessagesType); countMsgs > constants.RpcTxMaximumMessagesPerTxAllowed {
-				return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many messages per tx %d, maximum allowed %d [%s]", countMsgs, constants.RpcTxMaximumMessagesPerTxAllowed, heightStr)
+			if len(tx.MessagesType) > constants.RpcTxMaximumMessagesPerTxAllowed {
+				// when possible to violate the rule, let split into smaller parts to validate
+
+				normalMessagesType := make([]string, 0)
+				systemMessagesType := make([]string, 0)
+
+				for _, msgType := range tx.MessagesType {
+					switch msgType {
+					case "/ibc.core.channel.v1.MsgAcknowledgement",
+						"/ibc.core.channel.v1.MsgRecvPacket",
+						"/ibc.core.channel.v1.MsgTimeout":
+						systemMessagesType = append(systemMessagesType, msgType)
+					default:
+						normalMessagesType = append(normalMessagesType, msgType)
+					}
+				}
+
+				if countMsgs := len(normalMessagesType); countMsgs > constants.RpcTxMaximumMessagesPerTxAllowed {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many messages per tx %d, maximum allowed %d [%s]", countMsgs, constants.RpcTxMaximumMessagesPerTxAllowed, heightStr)
+				}
+
+				if countSystemMsgs := len(systemMessagesType); countSystemMsgs > constants.RpcTxMaximumSystemMessagesPerTxAllowed {
+					return errors.Wrapf(ErrBlackListDueToMalformedResponse, "too many system messages per tx %d, maximum allowed %d [%s]", countSystemMsgs, constants.RpcTxMaximumSystemMessagesPerTxAllowed, heightStr)
+				}
 			}
+
 			for _, msgType := range tx.MessagesType {
 				if msgType == "" {
 					return fmt.Errorf("message type can not be empty")
