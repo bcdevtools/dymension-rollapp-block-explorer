@@ -6,6 +6,8 @@ export const enum Path {
   TRANSACTION = '/tx',
   ADDRESS = '/address',
   VALIDATORS = '/governors',
+  PROPOSALS = '/proposals',
+  PROPOSAL = '/proposal',
 }
 
 export const BreadcrumbName = {
@@ -16,4 +18,6 @@ export const BreadcrumbName = {
   [Path.TRANSACTION]: 'Transactions',
   [Path.ADDRESS]: 'Address',
   [Path.VALIDATORS]: 'Governors',
+  [Path.PROPOSALS]: 'Proposals',
+  [Path.PROPOSAL]: 'Proposal',
 };

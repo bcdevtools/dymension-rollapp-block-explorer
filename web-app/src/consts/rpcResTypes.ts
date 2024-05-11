@@ -265,3 +265,42 @@ export interface ValidatorList {
     tokensDecimals: number;
   };
 }
+
+export interface GovProposal {
+  depositEndTimeEpochUTC: number;
+  finalTallyResult: {
+    abstain: string;
+    no: string;
+    noWithVeto: string;
+    yes: string;
+  };
+  id: number;
+  messages: {
+    protoContent: {
+      '@type': string;
+      authority: string;
+      plan: {
+        height: string;
+        info: string;
+        name: string;
+        time: string;
+        upgraded_client_state: null;
+      };
+    };
+    type: string;
+  }[];
+  metadata: string;
+  status: string;
+  submitTimeEpochUTC: number;
+  totalDeposit: { [denom: string]: string };
+  votingEndTimeEpochUTC: number;
+  votingStartTimeEpochUTC: number;
+}
+
+export interface GovProposals {
+  pageNo: number;
+  pageSize: number;
+  proposals: {
+    [key: number]: GovProposal;
+  };
+}

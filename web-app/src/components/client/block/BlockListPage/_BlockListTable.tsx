@@ -13,7 +13,6 @@ import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import React from 'react';
 import LinkToBlockNo from '../LinkToBlockNo';
 import Skeleton from '@mui/material/Skeleton';
-import AddressLink from '../../address/AddressLink';
 import { getShortAddress } from '@/utils/address';
 
 type BlockListTableProps = Readonly<{

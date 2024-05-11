@@ -82,7 +82,7 @@ export default function TransactionListTable({
 
       cells.push(
         <Link
-          key={hash}
+          key={`${hash}_txHash`}
           href={getNewPathByRollapp(pathname, `/${Path.TRANSACTION}/${hash}`)}>
           {getShortTxHash(hash)}
         </Link>
@@ -129,7 +129,9 @@ export default function TransactionListTable({
       }
 
       // Block height
-      cells.push(<LinkToBlockNo key={hash} blockNo={height.toString()} />);
+      cells.push(
+        <LinkToBlockNo key={`${hash}_height`} blockNo={height.toString()} />
+      );
 
       // Date Time
       cells.push(formatUnixTime(Number(epoch)));
@@ -188,11 +190,21 @@ const getMessageLabel = function (
     if (label) {
       if (tx_type === 'evm') {
         return (
-          <Chip key={hash} label={label} color="info" variant="outlined" />
+          <Chip
+            key={`${hash}_message`}
+            label={label}
+            color="info"
+            variant="outlined"
+          />
         );
       } else if (tx_type === 'wasm') {
         return (
-          <Chip key={hash} label={label} color="secondary" variant="outlined" />
+          <Chip
+            key={`${hash}_message`}
+            label={label}
+            color="secondary"
+            variant="outlined"
+          />
         );
       }
     }

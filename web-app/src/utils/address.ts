@@ -6,6 +6,7 @@ import {
 import { bech32 } from 'bech32';
 import { getAddress } from '@ethersproject/address';
 import { Account, DenomMetadata } from '@/consts/rpcResTypes';
+import { getPrototypeFromTypeUrl } from './common';
 
 export type BalanceWithMetadata = { balance: string; metadata?: DenomMetadata };
 
@@ -112,16 +113,6 @@ export function toSortedDenoms(accountBalances: BalancesWithMetadata) {
       getSymbolToDisplay(b, accountBalances)
     );
   });
-}
-
-function addSpaceBetweenWords(word: string) {
-  return word.replace(/\B(?=[A-Z])/g, ' ');
-}
-
-function getPrototypeFromTypeUrl(typeUrl: string) {
-  const matched = typeUrl.match(/(?<=\.)[^\.]+$/);
-  if (!matched) return addSpaceBetweenWords(typeUrl);
-  else return addSpaceBetweenWords(matched[0]);
 }
 
 export function getAccountType(account: Account) {

@@ -38,6 +38,7 @@ export function useBlockList<T extends boolean>(
           );
           ac = result[1];
           const _blocks = await getResponseResult(result[0], shouldThrowError);
+
           setBlocks(_blocks);
           setLoading(false);
         } catch (e: any) {

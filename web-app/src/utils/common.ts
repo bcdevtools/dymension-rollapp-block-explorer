@@ -67,3 +67,12 @@ export function getDenomFromReward(reward: string) {
   const matched = reward.match(/[a-z]+$/);
   return matched ? matched[0] : null;
 }
+function addSpaceBetweenWords(word: string) {
+  return word.replace(/\B(?=[A-Z])/g, ' ');
+}
+
+export function getPrototypeFromTypeUrl(typeUrl: string) {
+  const matched = typeUrl.match(/(?<=\.)[^\.]+$/);
+  if (!matched) return addSpaceBetweenWords(typeUrl);
+  else return addSpaceBetweenWords(matched[0]);
+}
