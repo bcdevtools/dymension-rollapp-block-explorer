@@ -28,8 +28,8 @@ export default function TransactionListByBlockNo({
               hash: tx.hash,
               epoch: block.timeEpochUTC,
               tx_type: tx.type,
-              action: null,
               message_types: tx.messages,
+              action: tx.evmTx?.action || null,
             }))
       }
       loading={loading}
