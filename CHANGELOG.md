@@ -100,6 +100,7 @@ Templates for Unreleased:
 - (sql) [#74](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/74) Add helper method to list prune-able partitioned tables of `transaction` table
 - (sql) [#108](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/108) Add new constraint `transaction_to_chain_info_fkey`
 - (indexing) [#110](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/110) Do not retry Be queries if result does not pass validation
+- (indexing) [#137](https://github.com/bcdevtools/dymension-rollapp-block-explorer/pull/137) Validation rule of msgs per tx for system messages
 
 ### Bug Fixes
 
