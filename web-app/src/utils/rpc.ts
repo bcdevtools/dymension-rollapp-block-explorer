@@ -136,6 +136,14 @@ export function getGovProposalsParam(page: number): RpcCallParam {
   };
 }
 
+export function getGovProposalParam(id: number): RpcCallParam {
+  return {
+    method: 'be_getGovProposal',
+    params: [id],
+    jsonrpc: '2.0',
+  };
+}
+
 export function getErc20BalanceParam(
   address: string,
   tokenAddresses: string[]

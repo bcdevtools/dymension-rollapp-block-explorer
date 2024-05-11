@@ -3,9 +3,7 @@
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
-import CircularProgress from '@mui/material/CircularProgress';
 import { GovProposal } from '@/consts/rpcResTypes';
-import { ProposalStatus, PROPOSAL_STATUS_DISPLAY } from '@/consts/proposal';
 import Chip from '@mui/material/Chip';
 import { getPrototypeFromTypeUrl } from '@/utils/common';
 import CardActionArea from '@mui/material/CardActionArea';
@@ -16,6 +14,12 @@ import LinearProgress, {
 import Big from 'big.js';
 import React from 'react';
 import Skeleton from '@mui/material/Skeleton';
+import { styled } from '@mui/material/styles';
+import ProposalStatusText from './ProposalStatusText';
+
+const StyledSpan = styled('span')(({ theme }) => ({
+  color: theme.palette.text.primary,
+}));
 
 function getLinearGradientPercent(proposal: GovProposal): string[] {
   let { yes, no, noWithVeto, abstain } = proposal.finalTallyResult;
@@ -38,27 +42,6 @@ export default React.memo(function ProposalItem({
   proposal,
   idx,
 }: Readonly<{ proposal: GovProposal; idx: number }>) {
-  let statusColor: string;
-  switch (proposal.status) {
-    case ProposalStatus.PROPOSAL_STATUS_REJECTED:
-      statusColor = 'error.main';
-      break;
-    case ProposalStatus.PROPOSAL_STATUS_PASSED:
-      statusColor = 'success.main';
-      break;
-    case ProposalStatus.PROPOSAL_STATUS_FAILED:
-      statusColor = 'grey';
-      break;
-    case ProposalStatus.PROPOSAL_STATUS_VOTING_PERIOD:
-      statusColor = 'info.main';
-      break;
-    case ProposalStatus.PROPOSAL_STATUS_DEPOSIT_PERIOD:
-      statusColor = 'warning.main';
-      break;
-    default:
-      statusColor = 'text.primary';
-  }
-
   const vp = getLinearGradientPercent(proposal);
 
   return (
@@ -66,21 +49,7 @@ export default React.memo(function ProposalItem({
       <Paper sx={{ p: 1 }}>
         <Grid container spacing={2}>
           <Grid item xs={6} px={1}>
-            <Typography variant="subtitle2" color={statusColor}>
-              {proposal.status ===
-                ProposalStatus.PROPOSAL_STATUS_VOTING_PERIOD && (
-                <>
-                  <CircularProgress
-                    size="0.875rem"
-                    color="info"
-                    disableShrink
-                  />{' '}
-                </>
-              )}
-              {PROPOSAL_STATUS_DISPLAY[
-                proposal.status as keyof typeof PROPOSAL_STATUS_DISPLAY
-              ].toUpperCase()}
-            </Typography>
+            <ProposalStatusText status={proposal.status} />
           </Grid>
           <Grid display="flex" item justifyContent="end" xs={6} px={1}>
             <Typography variant="subtitle2">
@@ -111,12 +80,9 @@ export default React.memo(function ProposalItem({
             px={1}>
             <Typography color="text.secondary" variant="subtitle2">
               Voting end on{' '}
-              <Typography
-                display="inline"
-                color="text.primary"
-                variant="subtitle2">
+              <StyledSpan>
                 {formatUnixTime(proposal.votingEndTimeEpochUTC)}
-              </Typography>
+              </StyledSpan>
             </Typography>
           </Grid>
           <Grid item xs={12}>

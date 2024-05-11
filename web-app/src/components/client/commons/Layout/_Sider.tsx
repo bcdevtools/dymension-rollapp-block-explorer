@@ -55,8 +55,8 @@ const MENU_ITEMS = [
     Icon: FactCheckIcon,
   },
   {
-    name: 'Governance',
-    path: Path.GOVERNANCE,
+    name: 'Proposals',
+    path: Path.PROPOSALS,
     Icon: FeedIcon,
   },
 ];

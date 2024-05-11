@@ -44,7 +44,7 @@ export default function GovernanceList() {
   return (
     <>
       <Card>
-        <Typography variant="h6" mb={2}>
+        <Typography variant="h6" gutterBottom>
           Live Proposal
         </Typography>
         {loading ? (
@@ -62,7 +62,7 @@ export default function GovernanceList() {
         )}
       </Card>
       <Card sx={{ mt: 1 }}>
-        <Typography variant="h6" mb={2}>
+        <Typography variant="h6" gutterBottom>
           Proposals
         </Typography>
         {loading ? (
