@@ -12,7 +12,7 @@ import Receipt from '@mui/icons-material/Receipt';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
 import { useRollappStore } from '@/stores/rollappStore';
@@ -22,61 +22,81 @@ import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import FeedIcon from '@mui/icons-material/Feed';
 import Divider from '@mui/material/Divider';
+import LayoutContext from '@/contexts/LayoutContext';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import Collapse from '@mui/material/Collapse';
+import AssuredWorkloadIcon from '@mui/icons-material/AssuredWorkload';
 
 type SiderProps = Readonly<{
   menuOpen: boolean;
   width: number;
-  handleMenuClose: () => void;
   handleDrawerTransitionEnd: () => void;
 }>;
 
-const MENU_ITEMS = [
-  {
-    name: 'Overview',
-    path: Path.OVERVIEW,
-    Icon: Summarize,
-  },
-  {
-    name: 'Blocks',
-    path: Path.BLOCKS,
-    selectedPath: [Path.BLOCK],
-    Icon: Widgets,
-  },
-  {
-    name: 'Transactions',
-    path: Path.TRANSACTIONS,
-    selectedPath: [Path.TRANSACTION],
-    Icon: Receipt,
-  },
-  null,
-  {
-    name: 'Governors',
-    path: Path.VALIDATORS,
-    Icon: FactCheckIcon,
-  },
-  {
-    name: 'Proposals',
-    path: Path.PROPOSALS,
-    Icon: FeedIcon,
-  },
-];
-
-export default React.memo(function Sider({
-  width,
-  menuOpen,
-  handleMenuClose,
-  handleDrawerTransitionEnd,
-}: SiderProps) {
-  const router = useRouter();
+const MenuItem = React.memo(function _MenuItem({
+  path,
+  selectedPath = [],
+  name,
+  Icon,
+  isNested = false,
+}: Readonly<{
+  path: string;
+  selectedPath?: string[];
+  name: string;
+  Icon: React.ElementType;
+  isNested?: boolean;
+}>) {
   const pathname = usePathname();
-  const [{ selectedRollappInfo }] = useRollappStore(true);
-
   const checkSelected = (path: string, selectedPaths: string[] = []) => {
     const splittedPath = pathname.split('/');
     if (path === '/' && splittedPath.length === 2) return true;
     const pathToCheck = `/${splittedPath[2]}`;
     return pathToCheck === path || selectedPaths.includes(pathToCheck);
   };
+
+  const isSelected = checkSelected(path, selectedPath);
+
+  return (
+    <LayoutContext.Consumer>
+      {({ handleMenuClose }) => (
+        <ListItem disablePadding>
+          <ListItemButton
+            href={getNewPathByRollapp(pathname, path)}
+            component={Link}
+            onClick={() => handleMenuClose()}
+            selected={isSelected}
+            sx={isNested ? { pl: 4 } : {}}>
+            <ListItemIcon>
+              <Icon color={isSelected ? 'primary' : 'inherit'} />
+            </ListItemIcon>
+            <ListItemText
+              primary={
+                isSelected ? (
+                  <Typography>
+                    <strong>{name}</strong>
+                  </Typography>
+                ) : (
+                  <Typography color="text.secondary">{name}</Typography>
+                )
+              }
+            />
+          </ListItemButton>
+        </ListItem>
+      )}
+    </LayoutContext.Consumer>
+  );
+});
+
+export default React.memo(function Sider({
+  width,
+  menuOpen,
+  handleDrawerTransitionEnd,
+}: SiderProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [{ selectedRollappInfo }] = useRollappStore(true);
+  const [governanceOpen, setGovernanceOpen] = useState(true);
 
   const drawer = (
     <>
@@ -96,40 +116,45 @@ export default React.memo(function Sider({
             }}
           />
         </ListItem>
-        {MENU_ITEMS.map((menuItem, index) => {
-          if (!menuItem) return <Divider key={index} />;
-          const isSelected = checkSelected(
-            menuItem.path,
-            menuItem.selectedPath
-          );
-          const { Icon } = menuItem;
-          return (
-            <ListItem key={index} disablePadding>
-              <ListItemButton
-                href={getNewPathByRollapp(pathname, menuItem.path)}
-                component={Link}
-                onClick={() => handleMenuClose()}
-                selected={isSelected}>
-                <ListItemIcon>
-                  <Icon color={isSelected ? 'primary' : 'inherit'} />
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    isSelected ? (
-                      <Typography>
-                        <strong>{menuItem.name}</strong>
-                      </Typography>
-                    ) : (
-                      <Typography color="text.secondary">
-                        {menuItem.name}
-                      </Typography>
-                    )
-                  }
-                />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
+        <MenuItem name="Overview" path={Path.OVERVIEW} Icon={Summarize} />
+        <MenuItem
+          name="Blocks"
+          path={Path.BLOCKS}
+          Icon={Widgets}
+          selectedPath={[Path.BLOCK]}
+        />
+        <MenuItem
+          name="Transactions"
+          path={Path.TRANSACTIONS}
+          Icon={Receipt}
+          selectedPath={[Path.TRANSACTION]}
+        />
+        <Divider />
+
+        <ListItemButton onClick={() => setGovernanceOpen(!governanceOpen)}>
+          <ListItemIcon>
+            <AssuredWorkloadIcon />
+          </ListItemIcon>
+          <ListItemText primary="Governance" />
+          {governanceOpen ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+        <Collapse in={governanceOpen} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            <MenuItem
+              name="Governors"
+              path={Path.VALIDATORS}
+              Icon={FactCheckIcon}
+              isNested
+            />
+            <MenuItem
+              name="Proposals"
+              path={Path.PROPOSALS}
+              Icon={FeedIcon}
+              selectedPath={[Path.PROPOSAL]}
+              isNested
+            />
+          </List>
+        </Collapse>
       </List>
     </>
   );
@@ -138,32 +163,38 @@ export default React.memo(function Sider({
     typeof window !== 'undefined' ? () => window.document.body : undefined;
 
   return (
-    <Box component="nav" sx={{ width: { md: width }, flexShrink: { md: 0 } }}>
-      {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-      <Drawer
-        container={container}
-        variant="temporary"
-        open={menuOpen}
-        onTransitionEnd={handleDrawerTransitionEnd}
-        onClose={handleMenuClose}
-        ModalProps={{
-          keepMounted: true, // Better open performance on mobile.
-        }}
-        sx={{
-          display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width },
-        }}>
-        {drawer}
-      </Drawer>
-      <Drawer
-        variant="permanent"
-        sx={{
-          display: { xs: 'none', md: 'block' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width },
-        }}
-        open>
-        {drawer}
-      </Drawer>
-    </Box>
+    <LayoutContext.Consumer>
+      {({ handleMenuClose }) => (
+        <Box
+          component="nav"
+          sx={{ width: { md: width }, flexShrink: { md: 0 } }}>
+          {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
+          <Drawer
+            container={container}
+            variant="temporary"
+            open={menuOpen}
+            onTransitionEnd={handleDrawerTransitionEnd}
+            onClose={handleMenuClose}
+            ModalProps={{
+              keepMounted: true, // Better open performance on mobile.
+            }}
+            sx={{
+              display: { xs: 'block', md: 'none' },
+              '& .MuiDrawer-paper': { boxSizing: 'border-box', width },
+            }}>
+            {drawer}
+          </Drawer>
+          <Drawer
+            variant="permanent"
+            sx={{
+              display: { xs: 'none', md: 'block' },
+              '& .MuiDrawer-paper': { boxSizing: 'border-box', width },
+            }}
+            open>
+            {drawer}
+          </Drawer>
+        </Box>
+      )}
+    </LayoutContext.Consumer>
   );
 });

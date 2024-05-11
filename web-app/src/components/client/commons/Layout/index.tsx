@@ -10,6 +10,7 @@ import { useRollappStore } from '@/stores/rollappStore';
 import { RollappActionTypes } from '@/consts/actionTypes';
 import SearchModal from '../../search/SearchModal';
 import { getRollappPathFromPathname } from '@/utils/common';
+import LayoutContext from '@/contexts/LayoutContext';
 
 type LayoutProps = Readonly<{
   children: React.ReactNode;
@@ -48,12 +49,13 @@ export default function Layout({ children }: LayoutProps) {
         handleMenuToggle={handleMenuToggle}
         openSearch={() => setSearchOpen(true)}
       />
-      <Sider
-        width={SIDER_WIDTH}
-        menuOpen={menuOpen}
-        handleMenuClose={handleMenuClose}
-        handleDrawerTransitionEnd={handleDrawerTransitionEnd}
-      />
+      <LayoutContext.Provider value={{ handleMenuClose }}>
+        <Sider
+          width={SIDER_WIDTH}
+          menuOpen={menuOpen}
+          handleDrawerTransitionEnd={handleDrawerTransitionEnd}
+        />
+      </LayoutContext.Provider>
       <SearchModal
         open={isSearchOpen}
         handleClose={() => setSearchOpen(false)}

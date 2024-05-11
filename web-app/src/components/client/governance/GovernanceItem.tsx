@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import { GovProposal } from '@/consts/rpcResTypes';
 import Chip from '@mui/material/Chip';
-import { getPrototypeFromTypeUrl } from '@/utils/common';
+import { getNewPathByRollapp, getPrototypeFromTypeUrl } from '@/utils/common';
 import CardActionArea from '@mui/material/CardActionArea';
 import { formatUnixTime } from '@/utils/datetime';
 import LinearProgress, {
@@ -16,6 +16,9 @@ import React from 'react';
 import Skeleton from '@mui/material/Skeleton';
 import { styled } from '@mui/material/styles';
 import ProposalStatusText from './ProposalStatusText';
+import Link from 'next/link';
+import { Path } from '@/consts/path';
+import { usePathname } from 'next/navigation';
 
 const StyledSpan = styled('span')(({ theme }) => ({
   color: theme.palette.text.primary,
@@ -42,10 +45,16 @@ export default React.memo(function ProposalItem({
   proposal,
   idx,
 }: Readonly<{ proposal: GovProposal; idx: number }>) {
+  const pathname = usePathname();
   const vp = getLinearGradientPercent(proposal);
 
   return (
-    <CardActionArea key={proposal.id} sx={{ mt: idx ? 1 : 0 }} disabled>
+    <CardActionArea
+      key={proposal.id}
+      sx={{ mt: idx ? 1 : 0 }}
+      component={Link}
+      href={`${getNewPathByRollapp(pathname, Path.PROPOSAL)}/${proposal.id}`}
+      prefetch={false}>
       <Paper sx={{ p: 1 }}>
         <Grid container spacing={2}>
           <Grid item xs={6} px={1}>

@@ -140,7 +140,7 @@ export default function GovernanceDetail() {
     <>
       <PageTitle title={`#${id}${proposalTitle && '. ' + proposalTitle}`} />
       <Card>
-        <Grid container spacing={1}>
+        <Grid container spacing={2}>
           <DetailItem
             label="Status"
             value={
