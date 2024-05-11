@@ -53,6 +53,10 @@ export interface TransactionInBlock {
   hash: string;
   messages: string[];
   type: string;
+  evmTx?: {
+    action: string;
+    sig: string;
+  };
 }
 
 export interface Block {

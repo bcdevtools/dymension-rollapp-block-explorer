@@ -90,12 +90,7 @@ export default function Search({
         }}
       />
       {loading || !searchResult ? (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          height="100%"
-          p={2}>
+        <Box display="flex" justifyContent="center" alignItems="center" p={2}>
           <CircularProgress />
         </Box>
       ) : (
