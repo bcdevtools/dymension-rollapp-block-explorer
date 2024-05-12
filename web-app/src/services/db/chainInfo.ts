@@ -33,7 +33,7 @@ export const getChainInfos = cache(function (): Promise<ChainInfo[]> {
 
 export const getChainNamesByChainIds = function (chainIds: string[]) {
   const where: Prisma.chain_infoWhereInput = {};
-  if (chainIds.length) where.chain_id = { in: chainIds };
+  if (chainIds.length) where.chain_id = { in: chainIds.sort() };
   return prisma.chain_info.findManyWithCache({
     select: { chain_id: true, name: true },
     cacheStrategy: { enabled: true },
