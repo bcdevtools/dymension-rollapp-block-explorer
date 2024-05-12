@@ -54,6 +54,6 @@ export const getTxHashAndChainInfoByTxHashes = async function (
       chain_info: { select: { name: true, chain_id: true } },
       hash: true,
     },
-    where: { hash: { in: txHashes } },
+    where: { hash: { in: txHashes.sort() } },
   });
 };

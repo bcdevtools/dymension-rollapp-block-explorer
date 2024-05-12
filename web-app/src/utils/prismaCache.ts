@@ -1,6 +1,6 @@
 import { DEFAULT_CACHE_DURATION } from '@/consts/setting';
 import { Prisma } from '@prisma/client';
-import { unstable_cache } from 'next/cache';
+import { cache } from './cache';
 
 type CustomCacheStrategy = {
   readonly cacheStrategy?: {
@@ -31,19 +31,17 @@ function queryWithCache<T, A, F extends Operation>(
   //@ts-ignore
   const { cacheStrategy, ...queryArgs } = args;
 
-  if (!cacheStrategy || /*!cacheStrategy.enabled*/ true) {
+  if (!cacheStrategy || !cacheStrategy.enabled) {
     return context[action](queryArgs);
   } else {
     const { revalidate = DEFAULT_CACHE_DURATION } = cacheStrategy;
-    return unstable_cache(
-      actionQuery => {
+    return cache(
+      (actionQuery: any) => {
         const context = Prisma.getExtensionContext(this) as any;
         return context[action](actionQuery);
       },
-      cacheStrategy.key
-        ? [cacheStrategy.key]
-        : ['prisma', (this as any).name, action],
-      { revalidate, tags: ['db'] }
+      ['prisma', (this as any).name, action].join(),
+      revalidate
     )(queryArgs);
   }
 }
