@@ -64,9 +64,13 @@ export default function DataTable({
             <TableRow>
               {headers.map((header, idx) => (
                 <TableCell key={idx}>
-                  <Typography color="text.secondary">
-                    <b>{header}</b>
-                  </Typography>
+                  {typeof header === 'string' ? (
+                    <Typography color="text.secondary">
+                      <b>{header}</b>
+                    </Typography>
+                  ) : (
+                    header
+                  )}
                 </TableCell>
               ))}
             </TableRow>
