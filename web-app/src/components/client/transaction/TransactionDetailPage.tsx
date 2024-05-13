@@ -44,13 +44,21 @@ export default function TransactionDetailPage() {
             label="Transaction Hash"
             value={
               transactionDetail && (
-                <Typography sx={{ wordBreak: 'break-word' }}>
-                  {transactionDetail.hash}{' '}
-                  <CopyButton
-                    size="small"
-                    textToCopy={transactionDetail.hash}
-                  />
-                </Typography>
+                <>
+                  <Typography sx={{ wordBreak: 'break-word' }}>
+                    {transactionDetail.hash}{' '}
+                    <CopyButton
+                      size="small"
+                      textToCopy={transactionDetail.hash}
+                    />
+                  </Typography>
+                  {params.txHash !== transactionDetail.hash && (
+                    <Typography sx={{ wordBreak: 'break-word' }}>
+                      {params.txHash}{' '}
+                      <CopyButton size="small" textToCopy={params.txHash} />
+                    </Typography>
+                  )}
+                </>
               )
             }
             loading={loading}
