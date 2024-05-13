@@ -24,8 +24,7 @@ export default function CosmosEventLogs({
         <Grid container spacing={1}>
           {event.attributes.map((attr, idx) => {
             const isAmount = attr.key === 'amount' || attr.key === 'fee';
-            const value =
-              attr.key === 'amount' || attr.key === 'fee'
+            const value = isAmount
                 ? formatRpcAmount(attr.value, denomsMetadata)
                 : attr.value;
             return (
