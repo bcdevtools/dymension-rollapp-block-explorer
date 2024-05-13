@@ -28,7 +28,6 @@ export default function useTransactionDetail(
           ac = result[1];
 
           let _transaction = await getResponseResult(result[0]);
-          console.log('Transaction Detail:', _transaction);
 
           if (get(_transaction, 'msgs[0].type', null) === EVM_TX_TYPE) {
             const evmTxHash = get(
