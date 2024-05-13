@@ -9,7 +9,7 @@ import Link from '@/components/commons/Link';
 import Divider from '@mui/material/Divider';
 import { formatBlockchainAmount } from '@/utils/number';
 import useDenomsMetadata from '@/hooks/useDenomsMetadata';
-import { getAmountFromReward } from '@/utils/common';
+import { getAmount } from '@/utils/common';
 import get from 'lodash/get';
 
 type ValidatorProps = Readonly<{
@@ -95,7 +95,7 @@ export default function ValidatorDetail({
           <DetailItem
             label="Rewards"
             value={`${formatBlockchainAmount(
-              getAmountFromReward(get(validator, 'staking.rewards', '0')),
+              getAmount(get(validator, 'staking.rewards', '0')),
               bondDecimals
             )} ${bondSymbol}`}
             loading={loading}
@@ -103,7 +103,7 @@ export default function ValidatorDetail({
           <DetailItem
             label="Governor Outstanding Rewards"
             value={`${formatBlockchainAmount(
-              getAmountFromReward(
+              getAmount(
                 get(validator, 'staking.validatorOutstandingRewards', '0')
               ),
               bondDecimals
@@ -113,9 +113,7 @@ export default function ValidatorDetail({
           <DetailItem
             label="Governor Commission"
             value={`${formatBlockchainAmount(
-              getAmountFromReward(
-                get(validator, 'staking.validatorCommission', '0')
-              ),
+              getAmount(get(validator, 'staking.validatorCommission', '0')),
               bondDecimals
             )} ${bondSymbol}`}
             loading={loading}

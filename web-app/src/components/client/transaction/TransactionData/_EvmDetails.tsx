@@ -125,7 +125,7 @@ function EvmDetailsGeneralTransfer({ evmTx }: { evmTx: EvmTx }) {
             <Skeleton />
           ) : (
             `${fromHexStringToEthereumValue(evmTx.value!)} ${
-              denom ? denomsMetadata[denom].symbol : ''
+              denom && denomsMetadata[denom] ? denomsMetadata[denom].symbol : ''
             }`
           )
         }
