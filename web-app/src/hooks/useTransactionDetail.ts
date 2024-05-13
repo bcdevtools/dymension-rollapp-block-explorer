@@ -4,6 +4,9 @@ import { useRollappStore } from '@/stores/rollappStore';
 import { useEffect, useState } from 'react';
 import { useThrowError } from './useThrowError';
 import { isAbortException } from '@/utils/common';
+import get from 'lodash/get';
+
+const EVM_TX_TYPE = 'ethermint.evm.v1.MsgEthereumTx';
 
 export default function useTransactionDetail(
   txHash: string
@@ -24,7 +27,22 @@ export default function useTransactionDetail(
           const result = rpcService.getTransactionByHash(txHash);
           ac = result[1];
 
-          const _transaction = await getResponseResult(result[0]);
+          let _transaction = await getResponseResult(result[0]);
+          console.log('Transaction Detail:', _transaction);
+
+          if (get(_transaction, 'msgs[0].type', null) === EVM_TX_TYPE) {
+            const evmTxHash = get(
+              _transaction,
+              'msgs[0].protoContent.hash',
+              null
+            );
+            if (evmTxHash) {
+              const result = rpcService.getTransactionByHash(evmTxHash);
+              ac = result[1];
+              _transaction = await getResponseResult(result[0]);
+            }
+          }
+
           if (_transaction) {
             _transaction.mode = TxMode.COSMOS;
 
