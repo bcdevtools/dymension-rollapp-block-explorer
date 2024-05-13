@@ -31,6 +31,14 @@ export const getChainInfos = cache(function (): Promise<ChainInfo[]> {
   });
 });
 
+export const getChainNameByChainId = function (chain_id: string) {
+  return prisma.chain_info.findUniqueWithCache({
+    select: { chain_id: true, name: true },
+    cacheStrategy: { enabled: true },
+    where: { chain_id },
+  });
+};
+
 export const getChainNamesByChainIds = function (chainIds: string[]) {
   const where: Prisma.chain_infoWhereInput = {};
   if (chainIds.length) where.chain_id = { in: chainIds.sort() };

@@ -8,15 +8,19 @@ export interface RollappInfoMap {
   [chainId: string]: RollappInfo;
 }
 
+export function getRollappPathByName(name: string) {
+  return `/${name
+    .toLowerCase()
+    .replace(/[^a-z0-9-\s]/g, '')
+    .trim()
+    .replace(/\s/g, '-')}`;
+}
+
 export function normalizeRollappsInfo(chainInfos: ChainInfo[]): RollappInfo[] {
   return chainInfos
     .map(chainInfo => ({
       ...chainInfo,
-      path: `/${chainInfo.name
-        .toLowerCase()
-        .replace(/[^a-z0-9-\s]/g, '')
-        .trim()
-        .replace(/\s/g, '-')}`,
+      path: getRollappPathByName(chainInfo.name),
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
