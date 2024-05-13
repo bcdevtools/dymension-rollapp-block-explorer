@@ -23,6 +23,7 @@ export default function CosmosEventLogs({
       <AccordionDetails>
         <Grid container spacing={1}>
           {event.attributes.map((attr, idx) => {
+            const isAmount = attr.key === 'amount' || attr.key === 'fee';
             const value =
               attr.key === 'amount' || attr.key === 'fee'
                 ? formatRpcAmount(attr.value, denomsMetadata)
@@ -34,6 +35,14 @@ export default function CosmosEventLogs({
                 </Grid>
                 <Grid item xs={12} lg={9}>
                   <Typography>{value}</Typography>
+                  {isAmount && (
+                    <Typography
+                      fontStyle="italic"
+                      fontSize="0.7rem"
+                      color="text.secondary">
+                      {attr.value}
+                    </Typography>
+                  )}
                 </Grid>
               </Grid>
             );
