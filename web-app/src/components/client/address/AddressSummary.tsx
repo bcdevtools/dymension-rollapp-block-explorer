@@ -71,7 +71,7 @@ export default React.memo(function AddressSummary({
         {accountInfo && accountInfo.balance_on_nft_contracts.length && (
           <Tab value={AccountSummaryTab.NFTS} label={AccountSummaryTab.NFTS} />
         )}
-        {accountRpcData &&
+        {accountRpcData && accountRpcData.staking &&
           (accountRpcData.staking.rewards ||
             Object.keys(accountRpcData.staking.staking).length) && (
             <Tab
