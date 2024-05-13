@@ -1,4 +1,6 @@
+import { DenomsMetadata } from '@/consts/rpcResTypes';
 import { DEFAULT_PAGINATION_SIZE, MAX_PAGINATION_SIZE } from '@/consts/setting';
+import { formatBlockchainAmount } from './number';
 
 export type SearchParam = string | undefined | null;
 
@@ -58,13 +60,13 @@ export function isAbortException(e: Error) {
   return e instanceof DOMException && e.name === 'AbortError';
 }
 
-export function getAmountFromReward(reward: string) {
-  const matched = reward.match(/^\d+/);
+export function getAmount(rpcAmountStr: string) {
+  const matched = rpcAmountStr.match(/^\d+/);
   return matched ? matched[0] : '0';
 }
 
-export function getDenomFromReward(reward: string) {
-  const matched = reward.match(/[a-z]+$/);
+export function getDenom(rpcAmountStr: string) {
+  const matched = rpcAmountStr.match(/[a-z]+$/);
   return matched ? matched[0] : null;
 }
 function addSpaceBetweenWords(word: string) {
@@ -75,4 +77,22 @@ export function getPrototypeFromTypeUrl(typeUrl: string) {
   const matched = typeUrl.match(/(?<=\.)[^\.]+$/);
   if (!matched) return addSpaceBetweenWords(typeUrl);
   else return addSpaceBetweenWords(matched[0]);
+}
+
+export function formatRpcAmount(
+  amountStr: string,
+  denomsMetadata: DenomsMetadata
+) {
+  const amount = getAmount(amountStr);
+  const denom = getDenom(amountStr);
+
+  if (!denom || !denomsMetadata[denom]) {
+    const denomDisplay = denom ? ` ${denom.toUpperCase()}` : '';
+    return `${formatBlockchainAmount(amount)}${denomDisplay}`;
+  }
+  const rewardDenomMetadata = denomsMetadata[denom];
+  return `${formatBlockchainAmount(
+    amount,
+    rewardDenomMetadata.highestExponent
+  )} ${rewardDenomMetadata.symbol}`;
 }
