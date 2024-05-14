@@ -6,12 +6,20 @@ import React from 'react';
 export default React.memo(function DateWithTooltip({
   showDateTime,
   unixTimestamp,
-}: Readonly<{ showDateTime: boolean; unixTimestamp: number }>) {
+  onClick,
+}: Readonly<{
+  showDateTime: boolean;
+  unixTimestamp: number;
+  onClick: () => void;
+}>) {
   const timeUtc = formatUnixTime(unixTimestamp);
   const age = getTimeDurationDisplay(dayjs.unix(unixTimestamp));
   return (
-    <Tooltip title={!showDateTime ? timeUtc : age} placement="top">
-      <span>{showDateTime ? timeUtc : age}</span>
+    <Tooltip
+      title={!showDateTime ? timeUtc : age}
+      placement="top"
+      onClick={onClick}>
+      <span style={{ cursor: 'pointer' }}>{showDateTime ? timeUtc : age}</span>
     </Tooltip>
   );
 });

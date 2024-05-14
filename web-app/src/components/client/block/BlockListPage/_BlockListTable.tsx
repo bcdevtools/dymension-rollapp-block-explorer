@@ -57,6 +57,7 @@ export default function BlockListTable({
         key={`${height}_time`}
         showDateTime={showDateTime}
         unixTimestamp={b.timeEpochUTC}
+        onClick={() => setShowDateTime(s => !s)}
       />,
       b.proposer
         ? b.proposer.moniker || getShortAddress(b.proposer.consensusAddress)
