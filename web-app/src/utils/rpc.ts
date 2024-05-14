@@ -184,3 +184,11 @@ export function getErc20ContractInfo(contractAddress: string): RpcCallParam {
     jsonrpc: '2.0',
   };
 }
+
+export function getModuleParamsParam(module: string): RpcCallParam {
+  return {
+    method: 'be_getModuleParams',
+    params: [module],
+    jsonrpc: '2.0',
+  };
+}
