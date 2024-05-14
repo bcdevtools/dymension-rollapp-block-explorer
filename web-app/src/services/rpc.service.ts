@@ -30,6 +30,7 @@ import {
   getGovProposalParam,
   getGovProposalsParam,
   getLatestBlockNumber,
+  getModuleParamsParam,
   getRecentBlocksParam,
   getTransactionByHashParam,
   getValidatorParam,
@@ -231,6 +232,16 @@ export class RpcService {
     return this._rpcClient.callRpc(
       getCw20BalanceParam(address, tokenAddresses),
       fetchOptions
+    );
+  }
+
+  getModuleParams(
+    module: string,
+    callRpcOptions?: CallRpcOptions
+  ): RpcResult<any> {
+    return this._rpcClient.callRpc(
+      getModuleParamsParam(module),
+      callRpcOptions
     );
   }
 }

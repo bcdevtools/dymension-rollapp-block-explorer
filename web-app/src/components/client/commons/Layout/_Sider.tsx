@@ -27,6 +27,8 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import Collapse from '@mui/material/Collapse';
 import AssuredWorkloadIcon from '@mui/icons-material/AssuredWorkload';
+import TuneIcon from '@mui/icons-material/Tune';
+import { MODULES } from '@/consts/params';
 
 type SiderProps = Readonly<{
   menuOpen: boolean;
@@ -155,6 +157,13 @@ export default React.memo(function Sider({
             />
           </List>
         </Collapse>
+        <Divider />
+        <MenuItem
+          name="Params"
+          path={`${Path.PARAMS}/${MODULES[0]}`}
+          selectedPath={[Path.PARAMS]}
+          Icon={TuneIcon}
+        />
       </List>
     </>
   );
