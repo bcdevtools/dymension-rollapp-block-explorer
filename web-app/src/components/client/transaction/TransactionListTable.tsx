@@ -12,12 +12,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import LinkToBlockNo from '../block/LinkToBlockNo';
 import Chip from '@mui/material/Chip';
 import { Path } from '@/consts/path';
-import { formatUnixTime } from '@/utils/datetime';
 import { getMessageName, getShortTxHash } from '@/utils/transaction';
 import Link from '@/components/commons/Link';
 import useDenomsMetadata from '@/hooks/useDenomsMetadata';
 import Typography from '@mui/material/Typography';
 import { formatBlockchainAmount } from '@/utils/number';
+import DateWithTooltip from '@/components/commons/DateWithTooltip';
+import MuiLink from '@mui/material/Link';
 
 export type TransactionFields = Required<{
   height: bigint | number;
@@ -45,15 +46,8 @@ export const enum TxTableHeader {
   VALUE = 'Value',
   BLOCK = 'Block',
   DATE_TIME = 'Date Time',
+  Age = 'Age',
 }
-
-const ALL_HEADERS = [
-  TxTableHeader.TRANSACTION_HASH,
-  TxTableHeader.MESSAGES,
-  TxTableHeader.VALUE,
-  TxTableHeader.BLOCK,
-  TxTableHeader.DATE_TIME,
-];
 
 export default function TransactionListTable({
   transactions,
@@ -68,6 +62,7 @@ export default function TransactionListTable({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [_loading, setLoading] = useState(false);
+  const [showDateTime, setShowDateTime] = useState(true);
   const [denomsMetadata, denomsMetadataLoading] = useDenomsMetadata();
 
   useEffect(() => {
@@ -134,19 +129,37 @@ export default function TransactionListTable({
       );
 
       // Date Time
-      cells.push(formatUnixTime(Number(epoch)));
+
+      cells.push(
+        <DateWithTooltip
+          key={`${hash}_time`}
+          showDateTime={showDateTime}
+          unixTimestamp={Number(epoch)}
+        />
+      );
 
       return cells;
     }
   );
 
-  const headers = useMemo(
-    () =>
-      includeValue
-        ? ALL_HEADERS
-        : ALL_HEADERS.filter(i => i !== TxTableHeader.VALUE),
-    [includeValue]
-  );
+  const headers = useMemo(() => {
+    const headers = [];
+    headers.push(TxTableHeader.TRANSACTION_HASH);
+    headers.push(TxTableHeader.MESSAGES);
+    if (includeValue) headers.push(TxTableHeader.VALUE);
+    headers.push(TxTableHeader.BLOCK);
+    headers.push(
+      <MuiLink
+        key="mui-link"
+        component="button"
+        underline="none"
+        onClick={() => setShowDateTime(s => !s)}>
+        {showDateTime ? TxTableHeader.DATE_TIME : TxTableHeader.Age}
+      </MuiLink>
+    );
+
+    return headers;
+  }, [includeValue, showDateTime]);
 
   return (
     <DataTable
