@@ -8,7 +8,11 @@ import React from 'react';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { ItemContainer, RowItem } from './_Common';
-import { translateEvmLogIfPossible } from '@/utils/transaction';
+import {
+  EventTopicType,
+  TranslateType,
+  translateEvmLogIfPossible,
+} from '@/utils/transaction';
 import { getAddress } from '@ethersproject/address';
 import AddressLink from '@/components/client/address/AddressLink';
 
@@ -22,6 +26,7 @@ export default function EvmEventLogs({
       transaction.evmContractAddressToErc20ContractInfo?.get(event.address)
         ?.name || getAddress(event.address);
     const logIndex = Number(event.logIndex);
+
     return (
       <Accordion key={idx} defaultExpanded={idx <= 10}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -57,13 +62,13 @@ export default function EvmEventLogs({
 
 function getShortenedTopic(topic: string) {
   switch (topic) {
-    case '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef':
+    case EventTopicType.TRANSFER:
       return 'Transfer';
-    case '0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925':
+    case EventTopicType.APPROVAL:
       return 'Approval';
-    case '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62':
+    case EventTopicType.TRANSFER_SINGLE:
       return 'TransferSingle';
-    case '0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb':
+    case EventTopicType.TRANSFER_BATCH:
       return 'TransferBatch';
     default:
       return topic.substring(0, 10) + '...';
@@ -76,65 +81,69 @@ function renderTopicsAndData(
   emitter: string,
   contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined
 ) {
-  const translatedOrNull = translateEvmLogIfPossible(
+  const translated = translateEvmLogIfPossible(
     topics,
     data,
     emitter,
     contractAddressToErc20ContractInfo
   );
-  if (translatedOrNull && translatedOrNull?.type == 'Erc20TransferEvent') {
+  if (!translated)
     return (
       <>
-        <RowItem label="Action" value="Transfer (ERC-20)" />
+        {topics.map((topic, idx) => (
+          <Grid key={idx} container item xs={12}>
+            <Grid item xs={12} lg={3}>
+              <Typography color="text.secondary">{`topic${idx}`}</Typography>
+            </Grid>
+            <Grid item xs={12} lg={9}>
+              <Typography>{topic}</Typography>
+            </Grid>
+          </Grid>
+        ))}
         <RowItem
-          label="From"
-          value={<AddressLink address={getAddress(translatedOrNull.from)} />}
-        />
-        <RowItem
-          label="To"
-          value={<AddressLink address={getAddress(translatedOrNull.to)} />}
-        />
-        <RowItem
-          label="Amount"
+          label="Data"
           value={
-            translatedOrNull.rawAmount ? (
-              <>(Raw) {translatedOrNull.amount}</>
-            ) : (
-              <>
-                {translatedOrNull.amount}{' '}
-                {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''}
-              </>
-            )
+            <TextField
+              value={data}
+              multiline
+              sx={{ width: '100%', fontStyle: 'italic' }}
+              size="small"
+              maxRows={12}
+            />
           }
         />
       </>
     );
-  }
 
-  return (
-    <>
-      {topics.map((topic, idx) => (
-        <Grid key={idx} container item xs={12}>
-          <Grid item xs={12} lg={3}>
-            <Typography color="text.secondary">{`topic${idx}`}</Typography>
-          </Grid>
-          <Grid item xs={12} lg={9}>
-            <Typography>{topic}</Typography>
-          </Grid>
-        </Grid>
-      ))}
-      <RowItem
-        label="Data"
-        value={
-          <TextField
-            value={data}
-            multiline
-            sx={{ width: '100%', fontStyle: 'italic' }}
-            size="small"
-            maxRows={12}
+  switch (translated.type) {
+    case TranslateType.ERC20_TRANSFER:
+    case TranslateType.ERC20_APPROVAL:
+      return (
+        <>
+          <RowItem label="Action" value={translated.action} />
+          <RowItem
+            label="From"
+            value={<AddressLink address={getAddress(translated.from)} />}
           />
-        }
-      />
-    </>
-  );
+          <RowItem
+            label="To"
+            value={<AddressLink address={getAddress(translated.to)} />}
+          />
+          <RowItem
+            label="Amount"
+            value={
+              translated.isRawAmount ? (
+                <>(Raw) {translated.amount}</>
+              ) : (
+                <>
+                  {translated.amount}{' '}
+                  {contractAddressToErc20ContractInfo?.get(emitter)?.symbol ||
+                    ''}
+                </>
+              )
+            }
+          />
+        </>
+      );
+  }
 }

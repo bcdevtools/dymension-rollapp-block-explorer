@@ -11,6 +11,7 @@ import {
 import TextField from '@mui/material/TextField';
 import { ItemContainer, RowItem } from './_Common';
 import {
+  TranslateType,
   fromHexStringToEthereumGasPriceValue,
   fromHexStringToEthereumValue,
   translateEvmLogIfPossible,
@@ -254,37 +255,60 @@ function renderEvmTxAction(
     | undefined,
   key: number
 ) {
-  const translatedOrNull = translateEvmLogIfPossible(
+  const translated = translateEvmLogIfPossible(
     topics,
     data,
     emitter,
     contractAddressToErc20ContractInfo
   );
-  if (translatedOrNull && translatedOrNull?.type == 'Erc20TransferEvent') {
-    return (
-      <RowItem
-        key={key}
-        label="Action"
-        value={
-          <>
-            Transfer {translatedOrNull.rawAmount && `(Raw) `}{' '}
-            {translatedOrNull.amount}{' '}
-            {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''}{' '}
-            from{' '}
-            <AddressLink
-              address={translatedOrNull.from}
-              display={getAddress(translatedOrNull.from)}
-            />{' '}
-            to{' '}
-            <AddressLink
-              address={translatedOrNull.to}
-              display={getAddress(translatedOrNull.to)}
-            />
-          </>
-        }
-      />
-    );
-  } else {
-    return null;
+  if (!translated) return null;
+
+  switch (translated.type) {
+    case TranslateType.ERC20_TRANSFER:
+      return (
+        <RowItem
+          key={key}
+          label="Action"
+          value={
+            <>
+              Transfer {translated.isRawAmount && `(Raw) `} {translated.amount}{' '}
+              {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''}{' '}
+              from{' '}
+              <AddressLink
+                address={translated.from}
+                display={getAddress(translated.from)}
+              />{' '}
+              to{' '}
+              <AddressLink
+                address={translated.to}
+                display={getAddress(translated.to)}
+              />
+            </>
+          }
+        />
+      );
+    case TranslateType.ERC20_APPROVAL:
+      return (
+        <RowItem
+          key={key}
+          label="Action"
+          value={
+            <>
+              Approve {translated.isRawAmount && `(Raw) `} {translated.amount}{' '}
+              {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''}{' '}
+              from{' '}
+              <AddressLink
+                address={translated.from}
+                display={getAddress(translated.from)}
+              />{' '}
+              to{' '}
+              <AddressLink
+                address={translated.to}
+                display={getAddress(translated.to)}
+              />
+            </>
+          }
+        />
+      );
   }
 }

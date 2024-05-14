@@ -2,6 +2,18 @@ import { Erc20ContractInfo, Transaction, TxMode } from '@/consts/rpcResTypes';
 import { TransactionType } from '@/consts/transaction';
 import { divideAmountByDecimals, hexToDec } from './number';
 
+export const enum EventTopicType {
+  TRANSFER = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
+  APPROVAL = '0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925',
+  TRANSFER_SINGLE = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62',
+  TRANSFER_BATCH = '0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb',
+}
+
+export const enum TranslateType {
+  ERC20_TRANSFER,
+  ERC20_APPROVAL,
+}
+
 export function getMessageName(messageType: string) {
   if (/^([a-z\d]+\.)+Msg/.test(messageType)) {
     messageType = '/' + messageType;
@@ -141,7 +153,7 @@ export function fromHexStringToEthereumGasPriceValue(hexStr: string) {
 }
 
 export interface Erc20TransferEvent {
-  type: 'Erc20TransferEvent';
+  type: TranslateType;
   emiter: 'Transfer (ERC-20)';
   from: string;
   to: string;
@@ -157,8 +169,7 @@ export function translateEvmLogIfPossible(
 ) {
   if (
     topics.length === 3 &&
-    topics[0] ===
-      '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef' &&
+    topics[0] === EventTopicType.TRANSFER &&
     isTopicEvmAddress(topics[1]) &&
     isTopicEvmAddress(topics[2]) &&
     data.length === 66
@@ -168,7 +179,7 @@ export function translateEvmLogIfPossible(
     const erc20ContractInfo = contractAddressToErc20ContractInfo?.get(emitter);
     const decimals = erc20ContractInfo?.decimals;
     return {
-      type: 'Erc20TransferEvent',
+      type: TranslateType.ERC20_TRANSFER,
       action: 'Transfer (ERC-20)',
       from: from,
       to: to,
@@ -176,7 +187,29 @@ export function translateEvmLogIfPossible(
         erc20ContractInfo && decimals
           ? divideAmountByDecimals(hexToDec(data), decimals).toString()
           : data,
-      rawAmount: !decimals,
+      isRawAmount: decimals === undefined,
+    };
+  } else if (
+    topics.length === 3 &&
+    topics[0] === EventTopicType.APPROVAL &&
+    isTopicEvmAddress(topics[1]) &&
+    isTopicEvmAddress(topics[2]) &&
+    data.length === 66
+  ) {
+    const from = '0x' + topics[1].substring(26);
+    const to = '0x' + topics[2].substring(26);
+    const erc20ContractInfo = contractAddressToErc20ContractInfo?.get(emitter);
+    const decimals = erc20ContractInfo?.decimals;
+    return {
+      type: TranslateType.ERC20_APPROVAL,
+      action: 'Approve (ERC-20)',
+      from: from,
+      to: to,
+      amount:
+        erc20ContractInfo && decimals
+          ? divideAmountByDecimals(hexToDec(data), decimals).toString()
+          : data,
+      isRawAmount: decimals === undefined,
     };
   }
   return null;
