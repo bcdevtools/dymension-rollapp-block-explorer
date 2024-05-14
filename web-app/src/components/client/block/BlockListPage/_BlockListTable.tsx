@@ -46,7 +46,7 @@ export default function BlockListTable({
   const [showDateTime, setShowDateTime] = useState(false);
 
   const blocks = useMemo(
-    () => recentBlocks?.blocks.sort((a, b) => b.height - a.height) || [],
+    () => (recentBlocks ? [...recentBlocks.blocks].reverse() : []),
     [recentBlocks]
   );
 

@@ -1,6 +1,5 @@
 'use client';
 
-import { useLatestBlock } from '@/hooks/useLatestBlock';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
@@ -38,22 +37,21 @@ function getBlockLoading() {
 }
 
 export default function BlockOverview() {
-  const [latestBlockNo, latestBlockLoading] = useLatestBlock(false, false);
   const [recentBlocks, recentBlocksLoading] = useRecentBlocks(
     0,
     DEFAULT_BLOCK_OVERVIEW_SIZE
   );
 
   const loading =
-    (recentBlocksLoading || latestBlockLoading) &&
-    !get(recentBlocks, 'blocks', []).length;
+    recentBlocksLoading && !get(recentBlocks, 'blocks', []).length;
+  recentBlocks?.blocks.reverse();
 
   return (
     <Grid container spacing={2}>
       {loading
         ? getBlockLoading()
-        : recentBlocks!.blocks.map((recentBlock, idx) => {
-            const height = latestBlockNo - idx;
+        : [...recentBlocks!.blocks].reverse().map(recentBlock => {
+            const { height } = recentBlock;
             return (
               <Grid key={height} item xs={12} md={6} xl={3}>
                 <StyledPaper elevation={4}>
