@@ -10,6 +10,7 @@ import {
   GovProposal,
   GovProposals,
   LatestBlockNumber,
+  RecentBlocks,
   RpcResponse,
   Transaction,
   Validator,
@@ -29,6 +30,7 @@ import {
   getGovProposalParam,
   getGovProposalsParam,
   getLatestBlockNumber,
+  getRecentBlocksParam,
   getTransactionByHashParam,
   getValidatorParam,
   getValidatorsParam,
@@ -104,6 +106,17 @@ export class RpcService {
         getBlockByNumberParam(blockNumbers),
         callRpcOptions
       );
+  }
+
+  getRecentBlocks(
+    page: number,
+    pageSize: number,
+    callRpcOptions?: CallRpcOptions
+  ): RpcResult<RecentBlocks> {
+    return this._rpcClient.callRpc(
+      getRecentBlocksParam(page, pageSize),
+      callRpcOptions
+    );
   }
 
   getErc20ContractInfo(

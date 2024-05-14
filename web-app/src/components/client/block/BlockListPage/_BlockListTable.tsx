@@ -1,85 +1,66 @@
 import DataTable from '@/components/commons/DataTable';
 import Link from '@/components/commons/Link';
 import { Path } from '@/consts/path';
-import { Block } from '@/consts/rpcResTypes';
+import { RecentBlock, RecentBlocks } from '@/consts/rpcResTypes';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
-import { isBlock, useBlockList } from '@/hooks/useBlockList';
-import {
-  getNewPathByRollapp,
-  getPageAndPageSizeFromStringParam,
-} from '@/utils/common';
+import { getNewPathByRollapp } from '@/utils/common';
 import { formatUnixTime, getTimeDurationDisplay } from '@/utils/datetime';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import LinkToBlockNo from '../LinkToBlockNo';
-import Skeleton from '@mui/material/Skeleton';
 import { getShortAddress } from '@/utils/address';
 import MuiLink from '@mui/material/Link';
 import dayjs from 'dayjs';
 
 type BlockListTableProps = Readonly<{
-  latestBlockNo: number;
-  loadingBlockNo: boolean;
+  recentBlocks: RecentBlocks | null;
+  recentBlocksLoading: boolean;
+  page: number;
+  pageSize: number;
 }>;
 
-function getTxsDisplay(blockDetail: Block, pathname: string) {
-  const txCount = blockDetail.txs.length;
-  return !txCount ? (
+function getTxsDisplay(blockDetail: RecentBlock, pathname: string) {
+  const { txsCount } = blockDetail;
+  return !txsCount ? (
     0
   ) : (
     <Link
       href={`${getNewPathByRollapp(pathname, Path.TRANSACTIONS)}?block=${
         blockDetail.height
       }`}>
-      {txCount}
+      {txsCount}
     </Link>
   );
 }
 
 export default function BlockListTable({
-  latestBlockNo,
-  loadingBlockNo,
+  recentBlocks,
+  recentBlocksLoading,
+  page,
+  pageSize,
 }: BlockListTableProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
   const router = useRouter();
   const [showDateTime, setShowDateTime] = useState(false);
 
-  const [pageSize, page] = getPageAndPageSizeFromStringParam(
-    searchParams.get(PAGE_SIZE_PARAM_NAME),
-    searchParams.get(PAGE_PARAM_NAME),
-    latestBlockNo
+  const blocks = useMemo(
+    () => recentBlocks?.blocks.sort((a, b) => b.height - a.height) || [],
+    [recentBlocks]
   );
 
-  const [blocks, loading] = useBlockList(latestBlockNo, page, pageSize, false);
-
-  const highestBlockNo = latestBlockNo - page * pageSize;
-  const rowKeys = blocks.map((b, idx) => highestBlockNo - idx);
-
-  const body = blocks.map((b, idx) => {
-    const height = rowKeys[idx];
-    const isBlockInstance = isBlock(b);
+  const body = blocks.map(b => {
+    const { height } = b;
     return [
       <LinkToBlockNo key={height} blockNo={height} />,
-      isBlockInstance ? (
-        showDateTime ? (
-          formatUnixTime(b.timeEpochUTC)
-        ) : (
-          getTimeDurationDisplay(dayjs.unix(b.timeEpochUTC))
-        )
-      ) : (
-        <Skeleton />
-      ),
-      isBlockInstance ? (
-        b.proposer ? (
-          b.proposer.moniker || getShortAddress(b.proposer.consensusAddress)
-        ) : (
-          '-'
-        )
-      ) : (
-        <Skeleton />
-      ),
-      isBlockInstance ? getTxsDisplay(b, pathname) : <Skeleton />,
+      showDateTime
+        ? formatUnixTime(b.timeEpochUTC)
+        : getTimeDurationDisplay(dayjs.unix(b.timeEpochUTC)),
+      b.proposer
+        ? b.proposer.moniker || getShortAddress(b.proposer.consensusAddress)
+        : '-',
+      getTxsDisplay(b, pathname),
     ];
   });
 
@@ -97,11 +78,11 @@ export default function BlockListTable({
         'Proposer',
         'Txs',
       ]}
-      rowKeys={rowKeys}
+      rowKeys={recentBlocks?.blocks.map(b => b.height) || []}
       body={body}
       page={page}
       pageSize={pageSize}
-      loading={loading || loadingBlockNo}
+      loading={recentBlocksLoading}
       onPageChange={newPage => {
         const newSearchParams = new URLSearchParams(searchParams);
         newSearchParams.set(PAGE_PARAM_NAME, newPage.toString());
@@ -116,7 +97,7 @@ export default function BlockListTable({
           scroll: false,
         });
       }}
-      total={latestBlockNo}
+      total={recentBlocks?.latestBlock}
     />
   );
 }

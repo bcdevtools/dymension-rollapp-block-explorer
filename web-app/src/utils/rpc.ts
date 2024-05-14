@@ -80,6 +80,17 @@ export function getBlockByNumberParam(blockNo: number): RpcCallParam {
   };
 }
 
+export function getRecentBlocksParam(
+  page: number,
+  pageSize: number
+): RpcCallParam {
+  return {
+    method: 'be_getRecentBlocks',
+    params: [page, pageSize],
+    jsonrpc: '2.0',
+  };
+}
+
 export function getTransactionByHashParam(txHash: string): RpcCallParam {
   return {
     method: 'be_getTransactionByHash',
