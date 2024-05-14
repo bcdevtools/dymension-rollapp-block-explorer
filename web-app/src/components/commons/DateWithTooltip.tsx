@@ -1,8 +1,9 @@
 import { formatUnixTime, getTimeDurationDisplay } from '@/utils/datetime';
 import Tooltip from '@mui/material/Tooltip';
 import dayjs from 'dayjs';
+import React from 'react';
 
-export default function DateWithTooltip({
+export default React.memo(function DateWithTooltip({
   showDateTime,
   unixTimestamp,
 }: Readonly<{ showDateTime: boolean; unixTimestamp: number }>) {
@@ -13,4 +14,4 @@ export default function DateWithTooltip({
       <span>{showDateTime ? timeUtc : age}</span>
     </Tooltip>
   );
-}
+});
