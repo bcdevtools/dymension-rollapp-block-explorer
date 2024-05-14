@@ -1,7 +1,7 @@
 import DataTable from '@/components/commons/DataTable';
 import Link from '@/components/commons/Link';
 import { Path } from '@/consts/path';
-import { RecentBlock, RecentBlocks } from '@/consts/rpcResTypes';
+import { RecentBlock } from '@/consts/rpcResTypes';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
@@ -10,9 +10,10 @@ import LinkToBlockNo from '../LinkToBlockNo';
 import { getShortAddress } from '@/utils/address';
 import MuiLink from '@mui/material/Link';
 import DateWithTooltip from '@/components/commons/DateWithTooltip';
+import { RecentBlocksHookResult } from '@/hooks/useRecentBlocks';
 
 type BlockListTableProps = Readonly<{
-  recentBlocks: RecentBlocks | null;
+  recentBlocks: RecentBlocksHookResult | null;
   recentBlocksLoading: boolean;
   page: number;
   pageSize: number;
