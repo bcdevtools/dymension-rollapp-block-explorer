@@ -39,7 +39,8 @@ function getBlockLoading() {
 export default function BlockOverview() {
   const [recentBlocks, recentBlocksLoading] = useRecentBlocks(
     0,
-    DEFAULT_BLOCK_OVERVIEW_SIZE
+    DEFAULT_BLOCK_OVERVIEW_SIZE,
+    { useFallback: true }
   );
 
   const loading =

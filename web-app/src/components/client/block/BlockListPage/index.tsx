@@ -42,7 +42,9 @@ export default function BlockListPage() {
     searchParams.get(PAGE_SIZE_PARAM_NAME),
     searchParams.get(PAGE_PARAM_NAME)
   );
-  const [recentBlocks, loading] = useRecentBlocks(page, pageSize);
+  const [recentBlocks, loading] = useRecentBlocks(page, pageSize, {
+    useFallback: true,
+  });
 
   return (
     <>
