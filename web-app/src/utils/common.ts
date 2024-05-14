@@ -31,15 +31,16 @@ export function getValidPageSize(pageSize: number) {
   return Math.min(pageSize, MAX_PAGINATION_SIZE);
 }
 
-export function getValidPage(page: number, pageSize: number, total: number) {
+export function getValidPage(page: number, pageSize: number, total?: number) {
   if (isNaN(page) || page <= 0) return 0;
+  if (total === undefined) return page;
   return Math.min(total === 0 ? 0 : Math.ceil(total / pageSize) - 1, page);
 }
 
 export function getPageAndPageSizeFromStringParam(
   pageSizeParam: SearchParam,
   pageParam: SearchParam,
-  total: number
+  total?: number
 ): [number, number] {
   const pageSize = getValidPageSize(getNumberFromStringParam(pageSizeParam));
   const page = getValidPage(

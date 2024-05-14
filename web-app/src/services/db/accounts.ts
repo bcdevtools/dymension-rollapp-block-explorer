@@ -1,4 +1,4 @@
-import { Prisma, account, ref_account_to_recent_tx } from '@prisma/client';
+import { Prisma, account } from '@prisma/client';
 import prisma from '../../utils/prisma';
 import { QueryPaginationOption } from '@/utils/db';
 

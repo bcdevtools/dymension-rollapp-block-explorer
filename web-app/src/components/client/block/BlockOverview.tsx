@@ -1,6 +1,5 @@
 'use client';
 
-import { isBlock, useBlockList } from '@/hooks/useBlockList';
 import { useLatestBlock } from '@/hooks/useLatestBlock';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
@@ -11,6 +10,8 @@ import { getTimeDurationDisplay } from '@/utils/datetime';
 import dayjs from 'dayjs';
 import Skeleton from '@mui/material/Skeleton';
 import LinkToBlockNo from './LinkToBlockNo';
+import { useRecentBlocks } from '@/hooks/useRecentBlocks';
+import get from 'lodash/get';
 
 const DEFAULT_BLOCK_OVERVIEW_SIZE = 4;
 
@@ -38,20 +39,20 @@ function getBlockLoading() {
 
 export default function BlockOverview() {
   const [latestBlockNo, latestBlockLoading] = useLatestBlock(false, false);
-  const [blocks, blockListLoading] = useBlockList(
-    latestBlockNo,
+  const [recentBlocks, recentBlocksLoading] = useRecentBlocks(
     0,
-    DEFAULT_BLOCK_OVERVIEW_SIZE,
-    false
+    DEFAULT_BLOCK_OVERVIEW_SIZE
   );
 
-  const loading = (blockListLoading || latestBlockLoading) && !blocks.length;
+  const loading =
+    (recentBlocksLoading || latestBlockLoading) &&
+    !get(recentBlocks, 'blocks', []).length;
 
   return (
     <Grid container spacing={2}>
       {loading
         ? getBlockLoading()
-        : blocks.map((block, idx) => {
+        : recentBlocks!.blocks.map((recentBlock, idx) => {
             const height = latestBlockNo - idx;
             return (
               <Grid key={height} item xs={12} md={6} xl={3}>
@@ -59,12 +60,12 @@ export default function BlockOverview() {
                   <Typography variant="h6">
                     <LinkToBlockNo blockNo={height} />
                   </Typography>
-                  {isBlock(block) && (
-                    <Typography color="text.secondary">
-                      {block.txs.length} Transactions{' • '}
-                      {getTimeDurationDisplay(dayjs.unix(block.timeEpochUTC))}
-                    </Typography>
-                  )}
+                  <Typography color="text.secondary">
+                    {recentBlock.txsCount} Transactions{' • '}
+                    {getTimeDurationDisplay(
+                      dayjs.unix(recentBlock.timeEpochUTC)
+                    )}
+                  </Typography>
                 </StyledPaper>
               </Grid>
             );

@@ -4,10 +4,13 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Skeleton from '@mui/material/Skeleton';
-import { useLatestBlock } from '@/hooks/useLatestBlock';
 import BlockListTable from './_BlockListTable';
 import Box from '@mui/material/Box';
 import Card from '@/components/commons/Card';
+import { getPageAndPageSizeFromStringParam } from '@/utils/common';
+import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
+import { useSearchParams } from 'next/navigation';
+import { useRecentBlocks } from '@/hooks/useRecentBlocks';
 
 function BlockSummaryCard({
   label,
@@ -34,14 +37,19 @@ function BlockSummaryCard({
 }
 
 export default function BlockListPage() {
-  const [latestBlockNo, loading] = useLatestBlock(false, false);
+  const searchParams = useSearchParams();
+  const [pageSize, page] = getPageAndPageSizeFromStringParam(
+    searchParams.get(PAGE_SIZE_PARAM_NAME),
+    searchParams.get(PAGE_PARAM_NAME)
+  );
+  const [recentBlocks, loading] = useRecentBlocks(page, pageSize);
 
   return (
     <>
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <BlockSummaryCard label="Block Height" loading={loading}>
           <Typography variant="h6">
-            <strong>{latestBlockNo}</strong>
+            <strong>{recentBlocks?.latestBlock}</strong>
           </Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Block Count (Last 24H)" loading={loading}>
@@ -62,8 +70,10 @@ export default function BlockListPage() {
       </Grid>
       <Card>
         <BlockListTable
-          latestBlockNo={latestBlockNo}
-          loadingBlockNo={loading}
+          recentBlocks={recentBlocks}
+          recentBlocksLoading={loading}
+          page={page}
+          pageSize={pageSize}
         />
       </Card>
     </>

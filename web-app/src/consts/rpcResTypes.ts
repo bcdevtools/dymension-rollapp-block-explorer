@@ -70,6 +70,25 @@ export interface Block {
   };
 }
 
+export interface RecentBlock {
+  hash: string;
+  height: number;
+  timeEpochUTC: number;
+  txsCount: number;
+  proposer: {
+    consensusAddress: string;
+    moniker: string;
+  };
+}
+
+export interface RecentBlocks {
+  blocks: RecentBlock[];
+  latestBlock: number;
+  latesetBlockTimeEpochUTC: number;
+  pageNumber: number;
+  pageSize: number;
+}
+
 export interface TransactionGas {
   limit: number;
   used: number;
