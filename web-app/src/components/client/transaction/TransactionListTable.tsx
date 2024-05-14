@@ -135,6 +135,7 @@ export default function TransactionListTable({
           key={`${hash}_time`}
           showDateTime={showDateTime}
           unixTimestamp={Number(epoch)}
+          onClick={() => setShowDateTime(s => !s)}
         />
       );
 
