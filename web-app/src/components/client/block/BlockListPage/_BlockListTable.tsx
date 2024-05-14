@@ -4,13 +4,12 @@ import { Path } from '@/consts/path';
 import { RecentBlock, RecentBlocks } from '@/consts/rpcResTypes';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 import { getNewPathByRollapp } from '@/utils/common';
-import { formatUnixTime, getTimeDurationDisplay } from '@/utils/datetime';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import React, { useMemo, useState } from 'react';
 import LinkToBlockNo from '../LinkToBlockNo';
 import { getShortAddress } from '@/utils/address';
 import MuiLink from '@mui/material/Link';
-import dayjs from 'dayjs';
+import DateWithTooltip from '@/components/commons/DateWithTooltip';
 
 type BlockListTableProps = Readonly<{
   recentBlocks: RecentBlocks | null;
@@ -54,9 +53,11 @@ export default function BlockListTable({
     const { height } = b;
     return [
       <LinkToBlockNo key={height} blockNo={height} />,
-      showDateTime
-        ? formatUnixTime(b.timeEpochUTC)
-        : getTimeDurationDisplay(dayjs.unix(b.timeEpochUTC)),
+      <DateWithTooltip
+        key={`${height}_time`}
+        showDateTime={showDateTime}
+        unixTimestamp={b.timeEpochUTC}
+      />,
       b.proposer
         ? b.proposer.moniker || getShortAddress(b.proposer.consensusAddress)
         : '-',
