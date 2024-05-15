@@ -10,6 +10,7 @@ import TablePagination from '@mui/material/TablePagination';
 import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
+import React from 'react';
 
 type DataTableProps = Readonly<{
   headers: React.ReactNode[];
@@ -26,7 +27,7 @@ type DataTableProps = Readonly<{
   summaryRows?: React.ReactNode;
 }>;
 
-export default function DataTable({
+export default React.memo(function DataTable({
   headers,
   body,
   rowKeys,
@@ -53,11 +54,29 @@ export default function DataTable({
       </Box>
     );
 
-  const showPagniation =
+  const showPagination =
     enablePagination && (total === undefined || total > pageSize);
+
+  const pagination = showPagination && (
+    <TablePagination
+      component="div"
+      rowsPerPageOptions={total !== undefined ? [10, 25, 50, 100] : []}
+      count={total ?? -1}
+      rowsPerPage={pageSize}
+      page={page}
+      onPageChange={(e, newPage: number) => onPageChange(newPage)}
+      onRowsPerPageChange={
+        onRowsPerPageChange && (e => onRowsPerPageChange(e.target.value))
+      }
+      showFirstButton={total !== undefined}
+      showLastButton={total !== undefined}
+      labelDisplayedRows={total === undefined ? () => null : undefined}
+    />
+  );
 
   return (
     <>
+      {pagination}
       <TableContainer sx={{ width: '100%' }}>
         <Table sx={{ overflowX: 'scroll' }}>
           <TableHead>
@@ -77,7 +96,7 @@ export default function DataTable({
           </TableHead>
           <TableBody
             sx={
-              !showPagniation
+              !showPagination
                 ? { '&:last-child td, &:last-child th': { border: 0 } }
                 : {}
             }>
@@ -92,22 +111,7 @@ export default function DataTable({
           </TableBody>
         </Table>
       </TableContainer>
-      {showPagniation && (
-        <TablePagination
-          component="div"
-          rowsPerPageOptions={total !== undefined ? [10, 25, 50, 100] : []}
-          count={total ?? -1}
-          rowsPerPage={pageSize}
-          page={page}
-          onPageChange={(e, newPage: number) => onPageChange(newPage)}
-          onRowsPerPageChange={
-            onRowsPerPageChange && (e => onRowsPerPageChange(e.target.value))
-          }
-          showFirstButton={total !== undefined}
-          showLastButton={total !== undefined}
-          labelDisplayedRows={total === undefined ? () => null : undefined}
-        />
-      )}
+      {pagination}
     </>
   );
-}
+});
