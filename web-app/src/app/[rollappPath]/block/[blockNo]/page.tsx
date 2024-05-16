@@ -1,6 +1,7 @@
 import BlockDetailPage from '@/components/client/block/BlockDetailPage';
 import Card from '@/components/commons/Card';
 import PageTitle from '@/components/commons/PageTitle';
+import { isBlockNo } from '@/utils/common';
 import { redirect } from 'next/navigation';
 
 type BlockProps = Readonly<{
@@ -8,8 +9,7 @@ type BlockProps = Readonly<{
 }>;
 
 export default function Block({ params }: BlockProps) {
-  if (!/^\d+$|^(0x)?[\da-fA-F]+$/.test(params.blockNo))
-    return redirect(`/${params.rollappPath}`);
+  if (!isBlockNo(params.blockNo)) return redirect(`/${params.rollappPath}`);
 
   return (
     <>

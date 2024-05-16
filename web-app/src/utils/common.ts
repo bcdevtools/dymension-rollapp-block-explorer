@@ -97,3 +97,7 @@ export function formatRpcAmount(
     rewardDenomMetadata.highestExponent
   )} ${rewardDenomMetadata.symbol}`;
 }
+
+export function isBlockNo(valueToCheck: string) {
+  return /^\d+$|^(0x)?[\da-fA-F]+$/.test(valueToCheck);
+}

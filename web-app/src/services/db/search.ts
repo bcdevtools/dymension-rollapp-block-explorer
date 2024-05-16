@@ -5,17 +5,11 @@ import {
   isEvmAddress,
   isTxHash,
 } from '@/utils/address';
-import prisma from '@/utils/prisma';
 import {
   getChainInfoByPrefix,
   getEvmChainInfo,
   searchChainInfoByMultipleFields,
 } from './chainInfo';
-
-export function searchBlock(value: string) {
-  if (!/^\d+$/.test(value)) return [];
-  return prisma.chain_info.findMany({});
-}
 
 export const handleGlobalSearchOnServer = async function (value: string) {
   if (isTxHash(value)) {
