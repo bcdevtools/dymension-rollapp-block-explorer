@@ -11,10 +11,18 @@ export default function AddressTokens({
   evmAddress,
 }: Readonly<{ accountInfo: Account; evmAddress: string | null }>) {
   const [page, setPage] = useState(0);
+  const slicedErc20Contract = useMemo(
+    () =>
+      accountInfo.balance_on_erc20_contracts.slice(
+        page * ADDRESS_SUMMARY_COINS_PAGE_SIZE,
+        (page + 1) * ADDRESS_SUMMARY_COINS_PAGE_SIZE
+      ),
+    [page, accountInfo.balance_on_erc20_contracts]
+  );
 
   const [tokenBalances, loading] = useTokenBalances(
     evmAddress || accountInfo.bech32_address,
-    accountInfo.balance_on_erc20_contracts
+    slicedErc20Contract
   );
 
   const [rowKeys, body] = useMemo((): [
@@ -22,33 +30,25 @@ export default function AddressTokens({
     [React.ReactNode, string][]
   ] => {
     if (!tokenBalances) return [[], []];
-    const sortedTokenBalances = [...tokenBalances].sort((a, b) =>
-      a.display.localeCompare(b.display)
-    );
-    const _rowKeys = sortedTokenBalances.map<string>(
+    const _rowKeys = tokenBalances.map<string>(
       tokenBalance => tokenBalance.contract
     );
-    const _body = sortedTokenBalances.map<[React.ReactNode, string]>(
-      tokenBalance => [
-        <AddressLink
-          key={tokenBalance.contract}
-          address={tokenBalance.contract}
-          display={tokenBalance.display}
-          showCopyButton={false}
-        />,
-        formatBlockchainAmount(tokenBalance.balance, tokenBalance.decimals),
-      ]
-    );
+    const _body = tokenBalances.map<[React.ReactNode, string]>(tokenBalance => [
+      <AddressLink
+        key={tokenBalance.contract}
+        address={tokenBalance.contract}
+        display={tokenBalance.display}
+        showCopyButton={false}
+      />,
+      formatBlockchainAmount(tokenBalance.balance, tokenBalance.decimals),
+    ]);
     return [_rowKeys, _body];
   }, [tokenBalances]);
 
   return (
     <DataTable
       headers={['Token', 'Balance']}
-      body={body.slice(
-        page * ADDRESS_SUMMARY_COINS_PAGE_SIZE,
-        (page + 1) * ADDRESS_SUMMARY_COINS_PAGE_SIZE
-      )}
+      body={body}
       rowKeys={rowKeys}
       total={rowKeys.length}
       page={page}
