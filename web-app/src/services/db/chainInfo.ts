@@ -2,6 +2,7 @@ import { cache } from 'react';
 import prisma from '../../utils/prisma';
 import { Prisma, chain_info } from '@prisma/client';
 import { ChainType } from '@/consts/setting';
+import { isBlockNo } from '@/utils/common';
 
 export type ChainInfo = Pick<
   chain_info,
@@ -75,7 +76,7 @@ export const searchChainInfoByMultipleFields = function (searchValue: string) {
     { chain_id: { contains: searchValue } },
     { name: { contains: searchValue } },
   ];
-  if (/^\d+$/.test(searchValue))
+  if (isBlockNo(searchValue))
     OR.push({ latest_indexed_block: { gte: parseInt(searchValue) } });
   return prisma.chain_info.findMany({
     select: { chain_id: true, name: true, latest_indexed_block: true },

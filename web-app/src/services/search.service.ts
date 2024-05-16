@@ -6,6 +6,7 @@ import {
   isEvmAddress,
   isTxHash,
 } from '@/utils/address';
+import { isBlockNo } from '@/utils/common';
 import { RollappInfoMap, rollappInfosToObject } from '@/utils/rollapp';
 import { RollappInfo } from '@/utils/rollapp';
 import { getAddress } from '@ethersproject/address';
@@ -37,13 +38,15 @@ function getBlockSearchResult(
   searchText: string,
   allRollappInfos: RollappInfo[]
 ): BlockSearchResult | null {
-  if (!/^\d+$/.test(searchText)) return null;
+  if (!isBlockNo(searchText)) return null;
+  const blockNo = parseInt(searchText);
+
   const rollappInfos = allRollappInfos.filter(
-    i => i.latest_indexed_block >= +searchText
+    i => i.latest_indexed_block >= blockNo
   );
   return rollappInfos.length
     ? {
-        block: +searchText,
+        block: blockNo,
         rollappInfos,
       }
     : null;
