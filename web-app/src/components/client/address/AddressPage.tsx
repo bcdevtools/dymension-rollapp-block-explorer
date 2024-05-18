@@ -9,6 +9,7 @@ import { BalancesWithMetadata } from '@/utils/address';
 import AccountContext from '@/contexts/AccountContext';
 import { Account } from '@/services/db/accounts';
 import { notFound } from 'next/navigation';
+import TokenSummary from './TokenSummary';
 
 type AddressPageProps = Readonly<{
   bech32Address: string;
@@ -25,6 +26,14 @@ export default function AddressPageTitleAndSummary({
 }: AddressPageProps) {
   const [accountRpcData, accountLoading] = useAccount(bech32Address);
   const [denomsMetadata, denomsMetadataLoading] = useDenomsMetadata();
+
+  const isToken = useMemo(
+    () =>
+      accountRpcData &&
+      accountRpcData.contract &&
+      Object.keys(accountRpcData.contract).length,
+    [accountRpcData]
+  );
 
   useEffect(() => {
     if (
@@ -57,6 +66,12 @@ export default function AddressPageTitleAndSummary({
         evmAddress={evmAddress}
         account={accountRpcData}
       />
+      {isToken && (
+        <TokenSummary
+          contract={accountRpcData!.contract!}
+          loading={accountLoading}
+        />
+      )}
       <AccountContext.Provider
         value={{
           balancesWithMetadata,
