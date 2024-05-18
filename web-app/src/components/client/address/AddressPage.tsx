@@ -4,24 +4,36 @@ import AddressSummary from '@/components/client/address/AddressSummary';
 import { AddressPageTitle } from '@/components/client/address/AddressPageTitle';
 import useAccount from '@/hooks/useAccount';
 import useDenomsMetadata from '@/hooks/useDenomsMetadata';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { BalancesWithMetadata } from '@/utils/address';
 import AccountContext from '@/contexts/AccountContext';
 import { Account } from '@/services/db/accounts';
+import { notFound } from 'next/navigation';
 
 type AddressPageProps = Readonly<{
   bech32Address: string;
   evmAddress: string | null;
   accountInfo: Account | null;
+  tokenMode: boolean;
 }>;
 
 export default function AddressPageTitleAndSummary({
   bech32Address,
   accountInfo,
   evmAddress,
+  tokenMode,
 }: AddressPageProps) {
   const [accountRpcData, accountLoading] = useAccount(bech32Address);
   const [denomsMetadata, denomsMetadataLoading] = useDenomsMetadata();
+
+  useEffect(() => {
+    if (
+      tokenMode &&
+      accountRpcData &&
+      (!accountRpcData.contract || !Object.keys(accountRpcData.contract).length)
+    )
+      notFound();
+  }, [accountRpcData, tokenMode]);
 
   const balancesWithMetadata = useMemo(() => {
     return accountRpcData

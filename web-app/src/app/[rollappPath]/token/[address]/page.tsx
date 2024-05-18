@@ -1,3 +1,5 @@
 import Address from '@/app/[rollappPath]/address/[address]/page';
 
-export default Address;
+export default function Token(props: any) {
+  return <Address {...props} tokenMode />;
+}

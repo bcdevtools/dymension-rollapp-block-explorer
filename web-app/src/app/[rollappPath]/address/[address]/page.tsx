@@ -34,6 +34,7 @@ type AddressProps = Readonly<{
     [PAGE_PARAM_NAME]: SearchParam;
     [AddressPageSearchParams.TX_TYPE]: SearchParam;
   };
+  tokenMode: boolean;
 }>;
 
 function getFilterOptionsFromTxType(
@@ -52,7 +53,11 @@ function getFilterOptionsFromTxType(
   }
 }
 
-export default async function Address({ params, searchParams }: AddressProps) {
+export default async function Address({
+  params,
+  searchParams,
+  tokenMode = false,
+}: AddressProps) {
   const rollappInfo = (await getRollAppInfoByRollappPath(params.rollappPath))!;
 
   let { address } = params;
@@ -142,6 +147,7 @@ export default async function Address({ params, searchParams }: AddressProps) {
         bech32Address={bech32Address}
         evmAddress={evmAddress}
         accountInfo={accountInfo}
+        tokenMode={tokenMode}
       />
       <AddressTransactionsSection
         txType={searchParams.txType as AddressTransactionType}>
