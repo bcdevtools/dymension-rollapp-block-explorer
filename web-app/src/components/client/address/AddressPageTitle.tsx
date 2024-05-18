@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { getAccountType } from '@/utils/address';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Account } from '@/consts/rpcResTypes';
+import QRCodeButton from '../commons/QRCodeButton';
 
 type AddressPageTypeProps = Readonly<{
   bech32Address: string;
@@ -45,11 +46,13 @@ export function AddressPageTitle({
         <>
           <b>{bech32Address}</b>
           <CopyButton size="small" textToCopy={bech32Address} />
+          <QRCodeButton value={bech32Address} />
           {evmAddress && (
             <>
               <br />
               <b>{evmAddress}</b>
-              <CopyButton size="small" textToCopy={evmAddress!} />
+              <CopyButton size="small" textToCopy={evmAddress} />
+              <QRCodeButton value={evmAddress} />
             </>
           )}
         </>
