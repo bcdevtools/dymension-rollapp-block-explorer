@@ -294,14 +294,14 @@ function renderEvmTxAction(
           label="Action"
           value={
             <>
-              Approve {translated.isRawAmount && `(Raw) `} {translated.amount}{' '}
+              Granted spend up to {translated.isRawAmount && `(Raw) `} {translated.amount}{' '}
               {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''}{' '}
               from{' '}
               <AddressLink
                 address={translated.from}
                 display={getAddress(translated.from)}
-              />{' '}
-              to{' '}
+              />{', '}
+              grant to{' '}
               <AddressLink
                 address={translated.to}
                 display={getAddress(translated.to)}
