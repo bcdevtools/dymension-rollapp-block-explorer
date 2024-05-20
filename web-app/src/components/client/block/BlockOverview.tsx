@@ -11,6 +11,8 @@ import Skeleton from '@mui/material/Skeleton';
 import LinkToBlockNo from './LinkToBlockNo';
 import { useRecentBlocks } from '@/hooks/useRecentBlocks';
 import get from 'lodash/get';
+import { getShortAddress } from '@/utils/address';
+import { useEffect, useState } from 'react';
 
 const DEFAULT_BLOCK_OVERVIEW_SIZE = 4;
 
@@ -37,21 +39,35 @@ function getBlockLoading() {
 }
 
 export default function BlockOverview() {
+  const [timeDisplay, setTimeDisplay] = useState<string[]>([]);
   const [recentBlocks, recentBlocksLoading] = useRecentBlocks(
     0,
     DEFAULT_BLOCK_OVERVIEW_SIZE,
-    { useFallback: true }
+    { useFallback: true, autoRefresh: true }
   );
+
+  useEffect(() => {
+    const getTimeDisplay = function () {
+      if (recentBlocks) {
+        const _timeDisplay = recentBlocks.blocks.map(recentBlock =>
+          getTimeDurationDisplay(dayjs.unix(recentBlock.timeEpochUTC))
+        );
+        setTimeDisplay(_timeDisplay);
+      }
+    };
+    getTimeDisplay();
+    const intervalId = setInterval(getTimeDisplay, 1000);
+    return () => clearInterval(intervalId);
+  }, [recentBlocks]);
 
   const loading =
     recentBlocksLoading && !get(recentBlocks, 'blocks', []).length;
-  recentBlocks?.blocks.reverse();
 
   return (
     <Grid container spacing={2}>
       {loading
         ? getBlockLoading()
-        : [...recentBlocks!.blocks].reverse().map(recentBlock => {
+        : recentBlocks!.blocks.map((recentBlock, idx) => {
             const { height } = recentBlock;
             return (
               <Grid key={height} item xs={12} md={6} xl={3}>
@@ -59,12 +75,21 @@ export default function BlockOverview() {
                   <Typography variant="h6">
                     <LinkToBlockNo blockNo={height} />
                   </Typography>
-                  <Typography color="text.secondary">
-                    {recentBlock.txsCount} Transactions{' • '}
-                    {getTimeDurationDisplay(
-                      dayjs.unix(recentBlock.timeEpochUTC)
-                    )}
-                  </Typography>
+                  <Box>
+                    <Typography color="text.secondary">
+                      {recentBlock.txsCount} Transactions{' • '}
+                      {timeDisplay[idx]}
+                    </Typography>
+                    <Typography color="text.secondary" display="inline">
+                      Proposer{' '}
+                    </Typography>
+                    <span>
+                      {recentBlock.proposer
+                        ? recentBlock.proposer.moniker ||
+                          getShortAddress(recentBlock.proposer.consensusAddress)
+                        : '-'}
+                    </span>
+                  </Box>
                 </StyledPaper>
               </Grid>
             );

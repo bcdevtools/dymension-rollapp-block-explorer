@@ -69,6 +69,12 @@ export default function TransactionListTable({
     setLoading(false);
   }, [transactions]);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => router.refresh(), 10000);
+
+    return () => clearInterval(intervalId);
+  }, [router]);
+
   const body = transactions.map(
     ({ hash, epoch, message_types, action, tx_type, height, value }) => {
       const cells = [];

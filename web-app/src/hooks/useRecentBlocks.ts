@@ -13,7 +13,10 @@ export type RecentBlocksHookResult = Required<{
 export function useRecentBlocks(
   page: number,
   pageSize: number,
-  { useFallback }: { useFallback: boolean } = { useFallback: false }
+  {
+    useFallback = false,
+    autoRefresh = false,
+  }: { useFallback?: boolean; autoRefresh?: boolean; reverse?: boolean } = {}
 ): [RecentBlocksHookResult | null, boolean] {
   const [loading, setLoading] = useState(true);
   const [recentBlocks, setRecentBlocks] =
@@ -25,7 +28,7 @@ export function useRecentBlocks(
     let ac: AbortController | null;
     if (!rpcService) throw new Error('Rpc Service is not available');
 
-    (async function () {
+    const fetchRecentBlocks = async function () {
       setLoading(true);
 
       try {
@@ -33,7 +36,10 @@ export function useRecentBlocks(
         ac = result[1];
         const _recentBlocks = await getResponseResult(result[0]);
 
-        setRecentBlocks(_recentBlocks);
+        setRecentBlocks({
+          ..._recentBlocks,
+          blocks: [..._recentBlocks.blocks].reverse(),
+        });
         setLoading(false);
 
         return;
@@ -69,7 +75,9 @@ export function useRecentBlocks(
         const _blocks = await getResponseResult(getBlockByNumberResult[0]);
 
         setRecentBlocks({
-          blocks: _blocks.map(b => ({ ...b, txsCount: b.txs.length })),
+          blocks: [..._blocks]
+            .reverse()
+            .map(b => ({ ...b, txsCount: b.txs.length })),
           latestBlock,
         });
 
@@ -82,12 +90,20 @@ export function useRecentBlocks(
       } finally {
         ac = null;
       }
-    })();
+    };
+
+    if (autoRefresh) {
+      const intervalId = setInterval(() => fetchRecentBlocks(), 10000);
+      return () => {
+        if (ac) ac.abort();
+        clearInterval(intervalId);
+      };
+    } else fetchRecentBlocks();
 
     return () => {
       if (ac) ac.abort();
     };
-  }, [rpcService, page, pageSize, throwError, useFallback]);
+  }, [rpcService, page, pageSize, throwError, useFallback, autoRefresh]);
 
   return [recentBlocks, loading];
 }
