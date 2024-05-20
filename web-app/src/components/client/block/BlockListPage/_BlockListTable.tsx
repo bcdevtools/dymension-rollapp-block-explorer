@@ -45,10 +45,7 @@ export default function BlockListTable({
   const router = useRouter();
   const [showDateTime, setShowDateTime] = useState(false);
 
-  const blocks = useMemo(
-    () => (recentBlocks ? [...recentBlocks.blocks].reverse() : []),
-    [recentBlocks]
-  );
+  const blocks = recentBlocks?.blocks || [];
 
   const body = blocks.map(b => {
     const { height } = b;
