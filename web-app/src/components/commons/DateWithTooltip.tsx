@@ -1,7 +1,7 @@
 import { formatUnixTime, getTimeDurationDisplay } from '@/utils/datetime';
 import Tooltip from '@mui/material/Tooltip';
 import dayjs from 'dayjs';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 export default React.memo(function DateWithTooltip({
   showDateTime,
@@ -13,7 +13,21 @@ export default React.memo(function DateWithTooltip({
   onClick: () => void;
 }>) {
   const timeUtc = formatUnixTime(unixTimestamp);
-  const age = getTimeDurationDisplay(dayjs.unix(unixTimestamp));
+  const [age, setAge] = useState(
+    getTimeDurationDisplay(dayjs.unix(unixTimestamp))
+  );
+
+  useEffect(() => {
+    if (!showDateTime) {
+      const getAge = function () {
+        setAge(getTimeDurationDisplay(dayjs.unix(unixTimestamp)));
+      };
+      getAge();
+      const intervalId = setInterval(getAge, 1000);
+      return () => clearInterval(intervalId);
+    }
+  }, [unixTimestamp, showDateTime]);
+
   return (
     <Tooltip
       title={!showDateTime ? timeUtc : age}

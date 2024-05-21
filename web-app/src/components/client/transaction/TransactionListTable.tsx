@@ -38,6 +38,7 @@ export type TransactionListTableProps = Readonly<{
   enablePagination?: boolean;
   loading?: boolean;
   includeValue?: boolean;
+  autoRefresh?: boolean;
 }>;
 
 export const enum TxTableHeader {
@@ -57,6 +58,7 @@ export default function TransactionListTable({
   enablePagination = true,
   loading = false,
   includeValue = false,
+  autoRefresh = false,
 }: TransactionListTableProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -70,10 +72,12 @@ export default function TransactionListTable({
   }, [transactions]);
 
   useEffect(() => {
-    const intervalId = setInterval(() => router.refresh(), 10000);
+    if (autoRefresh) {
+      const intervalId = setInterval(() => router.refresh(), 10000);
 
-    return () => clearInterval(intervalId);
-  }, [router]);
+      return () => clearInterval(intervalId);
+    }
+  }, [router, autoRefresh]);
 
   const body = transactions.map(
     ({ hash, epoch, message_types, action, tx_type, height, value }) => {
@@ -135,7 +139,6 @@ export default function TransactionListTable({
       );
 
       // Date Time
-
       cells.push(
         <DateWithTooltip
           key={`${hash}_time`}
