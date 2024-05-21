@@ -63,6 +63,7 @@ export default async function Overview({ params }: RollappOverviewProps) {
           transactions={transactions}
           includeValue
           enablePagination={false}
+          autoRefresh
         />
       </Card>
     </>

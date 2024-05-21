@@ -5,7 +5,7 @@ import { RecentBlock } from '@/consts/rpcResTypes';
 import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import LinkToBlockNo from '../LinkToBlockNo';
 import { getShortAddress } from '@/utils/address';
 import MuiLink from '@mui/material/Link';
