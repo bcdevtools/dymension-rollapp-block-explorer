@@ -8,7 +8,8 @@ import { getPageAndPageSizeFromStringParam } from '@/utils/common';
 
 export default function TransactionListByBlockNo({
   blockNo,
-}: Readonly<{ blockNo: number }>) {
+  showPaginationOnTop = true,
+}: Readonly<{ blockNo: number; showPaginationOnTop?: boolean }>) {
   const [block, loading] = useBlockDetail(blockNo);
   const searchParams = useSearchParams();
 
@@ -36,6 +37,7 @@ export default function TransactionListByBlockNo({
       totalTransactions={block?.txs.length}
       pageSize={pageSize}
       page={page}
+      showPaginationOnTop={showPaginationOnTop}
     />
   );
 }

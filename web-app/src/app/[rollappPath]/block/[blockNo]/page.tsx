@@ -1,4 +1,5 @@
 import BlockDetailPage from '@/components/client/block/BlockDetailPage';
+import TransactionListByBlockNo from '@/components/client/transaction/TransactionListByBlockNo';
 import Card from '@/components/commons/Card';
 import PageTitle from '@/components/commons/PageTitle';
 import { isBlockNo } from '@/utils/common';
@@ -14,8 +15,14 @@ export default function Block({ params }: BlockProps) {
   return (
     <>
       <PageTitle title="Block detail" />
-      <Card>
+      <Card sx={{ mb: 3 }}>
         <BlockDetailPage />
+      </Card>
+      <Card>
+        <TransactionListByBlockNo
+          blockNo={+params.blockNo}
+          showPaginationOnTop={false}
+        />
       </Card>
     </>
   );

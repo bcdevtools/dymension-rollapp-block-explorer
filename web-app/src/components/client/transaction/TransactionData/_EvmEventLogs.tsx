@@ -15,6 +15,7 @@ import {
 } from '@/utils/transaction';
 import { getAddress } from '@ethersproject/address';
 import AddressLink from '@/components/client/address/AddressLink';
+import Tooltip from '@mui/material/Tooltip';
 
 export default function EvmEventLogs({
   transaction,
@@ -71,7 +72,11 @@ function getShortenedTopic(topic: string) {
     case EventTopicType.TRANSFER_BATCH:
       return 'TransferBatch';
     default:
-      return topic.substring(0, 10) + '...';
+      return (
+        <Tooltip title={topic} arrow>
+          <span>{topic.substring(0, 10) + '...'}</span>
+        </Tooltip>
+      );
   }
 }
 
