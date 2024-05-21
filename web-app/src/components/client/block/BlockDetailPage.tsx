@@ -5,11 +5,11 @@ import { getNewPathByRollapp } from '@/utils/common';
 import { Block } from '@/consts/rpcResTypes';
 import { notFound, useParams, usePathname } from 'next/navigation';
 import { Path } from '@/consts/path';
-import { formatUnixTime, getTimeDurationDisplay } from '@/utils/datetime';
+import { formatUnixTime } from '@/utils/datetime';
 import { DetailItem } from '@/components/commons/DetailItem';
 import Grid from '@mui/material/Grid';
 import Link from '@/components/commons/Link';
-import dayjs from 'dayjs';
+import DateWithTooltip from '@/components/commons/DateWithTooltip';
 
 function getTxsDisplay(blockDetail: Block | null, pathname: string) {
   const txCount = blockDetail ? blockDetail.txs.length : 0;
@@ -39,10 +39,12 @@ export default function BlockDetailPage() {
       <DetailItem
         label="Date Time"
         value={
-          blockDetail &&
-          `${getTimeDurationDisplay(
-            dayjs.unix(blockDetail.timeEpochUTC)
-          )} (${formatUnixTime(blockDetail.timeEpochUTC)})`
+          blockDetail && (
+            <>
+              <DateWithTooltip unixTimestamp={blockDetail.timeEpochUTC} /> (
+              {formatUnixTime(blockDetail.timeEpochUTC)})
+            </>
+          )
         }
         loading={loading}
       />
