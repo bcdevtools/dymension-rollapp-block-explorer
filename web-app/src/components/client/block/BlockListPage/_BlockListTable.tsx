@@ -7,10 +7,10 @@ import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import LinkToBlockNo from '../LinkToBlockNo';
-import { getShortAddress } from '@/utils/address';
 import MuiLink from '@mui/material/Link';
 import DateWithTooltip from '@/components/commons/DateWithTooltip';
 import { RecentBlocksHookResult } from '@/hooks/useRecentBlocks';
+import ShortAddress from '@/components/commons/ShortAddress';
 
 type BlockListTableProps = Readonly<{
   recentBlocks: RecentBlocksHookResult | null;
@@ -58,7 +58,9 @@ export default function BlockListTable({
         onClick={() => setShowDateTime(s => !s)}
       />,
       b.proposer
-        ? b.proposer.moniker || getShortAddress(b.proposer.consensusAddress)
+        ? b.proposer.moniker || (
+            <ShortAddress address={b.proposer.consensusAddress} />
+          )
         : '-',
       getTxsDisplay(b, pathname),
     ];

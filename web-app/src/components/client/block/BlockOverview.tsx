@@ -11,8 +11,8 @@ import Skeleton from '@mui/material/Skeleton';
 import LinkToBlockNo from './LinkToBlockNo';
 import { useRecentBlocks } from '@/hooks/useRecentBlocks';
 import get from 'lodash/get';
-import { getShortAddress } from '@/utils/address';
 import { useEffect, useState } from 'react';
+import ShortAddress from '@/components/commons/ShortAddress';
 
 const DEFAULT_BLOCK_OVERVIEW_SIZE = 4;
 
@@ -75,18 +75,24 @@ export default function BlockOverview() {
                   <Typography variant="h6">
                     <LinkToBlockNo blockNo={height} />
                   </Typography>
-                  <Box>
-                    <Typography color="text.secondary">
+                  <Box fontSize="0.85rem">
+                    <Typography color="text.secondary" fontSize="inherit">
                       {recentBlock.txsCount} Transactions{' • '}
                       {timeDisplay[idx]}
                     </Typography>
-                    <Typography color="text.secondary" display="inline">
+                    <Typography
+                      color="text.secondary"
+                      display="inline"
+                      fontSize="inherit">
                       Proposer{' '}
                     </Typography>
                     <span>
                       {recentBlock.proposer
-                        ? recentBlock.proposer.moniker ||
-                          getShortAddress(recentBlock.proposer.consensusAddress)
+                        ? recentBlock.proposer.moniker || (
+                            <ShortAddress
+                              address={recentBlock.proposer.consensusAddress}
+                            />
+                          )
                         : '-'}
                     </span>
                   </Box>

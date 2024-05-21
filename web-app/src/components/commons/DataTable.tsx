@@ -25,6 +25,8 @@ type DataTableProps = Readonly<{
   enablePagination?: boolean;
   loadingItems?: number;
   summaryRows?: React.ReactNode;
+  showPaginationOnTop?: boolean;
+  noDataTitle?: string;
 }>;
 
 export default React.memo(function DataTable({
@@ -40,6 +42,8 @@ export default React.memo(function DataTable({
   loadingItems,
   enablePagination = true,
   summaryRows,
+  showPaginationOnTop = true,
+  noDataTitle = 'No data',
 }: DataTableProps) {
   const _body: React.ReactNode[][] = loading
     ? Array(loadingItems || pageSize).fill(
@@ -50,7 +54,7 @@ export default React.memo(function DataTable({
   if (!_body.length)
     return (
       <Box display="flex" justifyContent="center" padding={5}>
-        No data
+        {noDataTitle}
       </Box>
     );
 
@@ -76,7 +80,7 @@ export default React.memo(function DataTable({
 
   return (
     <>
-      {pagination}
+      {showPaginationOnTop && pagination}
       <TableContainer sx={{ width: '100%' }}>
         <Table sx={{ overflowX: 'scroll' }}>
           <TableHead>

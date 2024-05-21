@@ -12,13 +12,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import LinkToBlockNo from '../block/LinkToBlockNo';
 import Chip from '@mui/material/Chip';
 import { Path } from '@/consts/path';
-import { getMessageName, getShortTxHash } from '@/utils/transaction';
+import { getMessageName } from '@/utils/transaction';
 import Link from '@/components/commons/Link';
 import useDenomsMetadata from '@/hooks/useDenomsMetadata';
 import Typography from '@mui/material/Typography';
 import { formatBlockchainAmount } from '@/utils/number';
 import DateWithTooltip from '@/components/commons/DateWithTooltip';
 import MuiLink from '@mui/material/Link';
+import ShortTxHash from '@/components/commons/ShortTxHash';
 
 export type TransactionFields = Required<{
   height: bigint | number;
@@ -39,6 +40,7 @@ export type TransactionListTableProps = Readonly<{
   loading?: boolean;
   includeValue?: boolean;
   autoRefresh?: boolean;
+  showPaginationOnTop?: boolean;
 }>;
 
 export const enum TxTableHeader {
@@ -59,6 +61,7 @@ export default function TransactionListTable({
   loading = false,
   includeValue = false,
   autoRefresh = false,
+  showPaginationOnTop = true,
 }: TransactionListTableProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -89,7 +92,7 @@ export default function TransactionListTable({
         <Link
           key={`${hash}_txHash`}
           href={getNewPathByRollapp(pathname, `/${Path.TRANSACTION}/${hash}`)}>
-          {getShortTxHash(hash)}
+          <ShortTxHash txHash={hash} />
         </Link>
       );
 
@@ -197,6 +200,8 @@ export default function TransactionListTable({
           scroll: false,
         });
       }}
+      showPaginationOnTop={showPaginationOnTop}
+      noDataTitle="No transaction"
     />
   );
 }
