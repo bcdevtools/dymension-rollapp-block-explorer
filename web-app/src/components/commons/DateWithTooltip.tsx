@@ -4,18 +4,16 @@ import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 
 export default React.memo(function DateWithTooltip({
-  showDateTime,
+  showDateTime = false,
   unixTimestamp,
-  onClick,
+  onClick = () => {},
 }: Readonly<{
-  showDateTime: boolean;
+  showDateTime?: boolean;
   unixTimestamp: number;
-  onClick: () => void;
+  onClick?: () => void;
 }>) {
   const timeUtc = formatUnixTime(unixTimestamp);
-  const [age, setAge] = useState(
-    getTimeDurationDisplay(dayjs.unix(unixTimestamp))
-  );
+  const [age, setAge] = useState<string>('-');
 
   useEffect(() => {
     if (!showDateTime) {
