@@ -2,6 +2,8 @@ import { DEFAULT_CACHE_DURATION } from '@/consts/setting';
 import prisma from '@/utils/prisma';
 import { cache } from '@/utils/cache';
 
+export const dynamic = 'force-dynamic';
+
 type IndexingFallbehindChains = Required<{ epoch_diff: number }>;
 
 // const getIndexingFallBehindChains = cache(
