@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "analyze": "ANALYZE=true next build",
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.tsx\" --config ./.prettierrc.yml",
     "start": "next start --hostname 0.0.0.0",
     "lint": "next lint",
     "prisma:pull": "prisma db pull",
@@ -38,10 +39,11 @@
     "@types/big.js": "^6.2.2",
     "@types/lodash": "^4.17.4",
     "@types/node": "^20.12.12",
-    "@types/react": "^18.3.2",
+    "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.3",
+    "prettier": "^3.2.5",
     "prisma": "^5.14.0",
     "typescript": "^5.4.5"
   }

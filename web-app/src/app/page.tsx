@@ -8,12 +8,7 @@ const { BASE_PATH = '' } = process.env;
 
 export default async function Home() {
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-      flexDirection="column"
-      marginTop={5}
-      width="100vw">
+    <Box display="flex" alignItems="center" flexDirection="column" marginTop={5} width="100vw">
       <Typography
         variant="h4"
         display="flex"
@@ -25,12 +20,7 @@ export default async function Home() {
           letterSpacing: '.3rem',
         }}>
         <Box display="flex" marginRight={1}>
-          <Image
-            src={`${BASE_PATH}/logo.svg`}
-            alt="logo"
-            width={45}
-            height={45}
-          />
+          <Image src={`${BASE_PATH}/logo.svg`} alt="logo" width={45} height={45} />
         </Box>
         {APP_NAME}
       </Typography>

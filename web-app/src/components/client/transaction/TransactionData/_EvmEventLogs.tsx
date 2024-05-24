@@ -8,11 +8,7 @@ import React from 'react';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { ItemContainer, RowItem } from './_Common';
-import {
-  EventTopicType,
-  TranslateType,
-  translateEvmLogIfPossible,
-} from '@/utils/transaction';
+import { EventTopicType, TranslateType, translateEvmLogIfPossible } from '@/utils/transaction';
 import { getAddress } from '@ethersproject/address';
 import AddressLink from '@/components/client/address/AddressLink';
 import Tooltip from '@mui/material/Tooltip';
@@ -24,34 +20,27 @@ export default function EvmEventLogs({
 }>) {
   return transaction.evmReceipt?.logs.map((event, idx) => {
     const contractNameOrAddress =
-      transaction.evmContractAddressToErc20ContractInfo?.get(event.address)
-        ?.name || getAddress(event.address);
+      transaction.evmContractAddressToErc20ContractInfo?.get(event.address)?.name || getAddress(event.address);
     const logIndex = Number(event.logIndex);
 
     return (
       <Accordion key={idx} defaultExpanded={idx <= 10}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <b>
-            [{logIndex}] {contractNameOrAddress} emits{' '}
-            {getShortenedTopic(event.topics[0])}
+            [{logIndex}] {contractNameOrAddress} emits {getShortenedTopic(event.topics[0])}
           </b>
         </AccordionSummary>
         <AccordionDetails>
           <ItemContainer>
             <RowItem
               label="Contract"
-              value={
-                <AddressLink
-                  address={getAddress(event.address)}
-                  display={contractNameOrAddress}
-                />
-              }
+              value={<AddressLink address={getAddress(event.address)} display={contractNameOrAddress} />}
             />
             {renderTopicsAndData(
               event.topics,
               event.data,
               event.address,
-              transaction.evmContractAddressToErc20ContractInfo
+              transaction.evmContractAddressToErc20ContractInfo,
             )}
             <RowItem label="Log Index" value={logIndex} />
           </ItemContainer>
@@ -84,14 +73,9 @@ function renderTopicsAndData(
   topics: string[],
   data: string,
   emitter: string,
-  contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined
+  contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined,
 ) {
-  const translated = translateEvmLogIfPossible(
-    topics,
-    data,
-    emitter,
-    contractAddressToErc20ContractInfo
-  );
+  const translated = translateEvmLogIfPossible(topics, data, emitter, contractAddressToErc20ContractInfo);
   if (!translated)
     return (
       <>
@@ -108,13 +92,7 @@ function renderTopicsAndData(
         <RowItem
           label="Data"
           value={
-            <TextField
-              value={data}
-              multiline
-              sx={{ width: '100%', fontStyle: 'italic' }}
-              size="small"
-              maxRows={12}
-            />
+            <TextField value={data} multiline sx={{ width: '100%', fontStyle: 'italic' }} size="small" maxRows={12} />
           }
         />
       </>
@@ -126,14 +104,8 @@ function renderTopicsAndData(
       return (
         <>
           <RowItem label="Action" value={translated.action} />
-          <RowItem
-            label="From"
-            value={<AddressLink address={getAddress(translated.from)} />}
-          />
-          <RowItem
-            label="To"
-            value={<AddressLink address={getAddress(translated.to)} />}
-          />
+          <RowItem label="From" value={<AddressLink address={getAddress(translated.from)} />} />
+          <RowItem label="To" value={<AddressLink address={getAddress(translated.to)} />} />
           <RowItem
             label="Amount"
             value={
@@ -141,9 +113,7 @@ function renderTopicsAndData(
                 <>(Raw) {translated.amount}</>
               ) : (
                 <>
-                  {translated.amount}{' '}
-                  {contractAddressToErc20ContractInfo?.get(emitter)?.symbol ||
-                    ''}
+                  {translated.amount} {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''}
                 </>
               )
             }

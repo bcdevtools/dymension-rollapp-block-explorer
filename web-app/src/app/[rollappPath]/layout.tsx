@@ -20,18 +20,12 @@ export async function generateMetadata({ params }: RollappLayoutProps) {
   };
 }
 
-export default async function RollappLayout({
-  children,
-  params,
-}: RollappLayoutProps) {
+export default async function RollappLayout({ children, params }: RollappLayoutProps) {
   const rollappInfo = await getRollAppInfoByRollappPath(params.rollappPath);
   if (!rollappInfo) return redirect('/');
   return (
     <Layout>
-      <Box
-        width={{ xs: '100vw', md: `calc(100vw - ${SIDER_WIDTH}px)` }}
-        component="main"
-        flexGrow={1}>
+      <Box width={{ xs: '100vw', md: `calc(100vw - ${SIDER_WIDTH}px)` }} component="main" flexGrow={1}>
         <CustomToolbar />
         <Container sx={{ py: 1 }}>{children}</Container>
       </Box>

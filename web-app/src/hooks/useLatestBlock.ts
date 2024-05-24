@@ -4,10 +4,7 @@ import { getResponseResult } from '@/services/rpc.service';
 import { useThrowError } from './useThrowError';
 import { isAbortException } from '@/utils/common';
 
-export function useLatestBlock(
-  autoRefresh: boolean = false,
-  shouldThrowError: boolean = true
-): [number, boolean] {
+export function useLatestBlock(autoRefresh: boolean = false, shouldThrowError: boolean = true): [number, boolean] {
   const [latestBlockNo, setLatestBlockNo] = useState(0);
   const [loading, setLoading] = useState(true);
   const [{ rpcService, selectedRollappInfo }] = useRollappStore(true);
@@ -30,10 +27,8 @@ export function useLatestBlock(
       } catch (e: any) {
         if (!isAbortException(e)) {
           console.log(e);
-          if (shouldThrowError)
-            throwError(new Error('Failed to fetch Latest Block'));
-          else
-            setLatestBlockNo(Number(selectedRollappInfo!.latest_indexed_block));
+          if (shouldThrowError) throwError(new Error('Failed to fetch Latest Block'));
+          else setLatestBlockNo(Number(selectedRollappInfo!.latest_indexed_block));
         }
       } finally {
         ac = null;
@@ -48,13 +43,7 @@ export function useLatestBlock(
       if (ac) ac.abort();
       if (intervalId) clearInterval(intervalId);
     };
-  }, [
-    autoRefresh,
-    rpcService,
-    throwError,
-    shouldThrowError,
-    selectedRollappInfo,
-  ]);
+  }, [autoRefresh, rpcService, throwError, shouldThrowError, selectedRollappInfo]);
 
   return [latestBlockNo, loading];
 }

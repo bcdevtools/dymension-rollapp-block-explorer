@@ -19,7 +19,7 @@ export type Transaction = Pick<
 
 export const getTransactions = async function (
   chain_id: string,
-  paginationOptions: QueryPaginationOption = {}
+  paginationOptions: QueryPaginationOption = {},
 ): Promise<Transaction[]> {
   return prisma.transaction.findManyWithCache({
     select,
@@ -37,18 +37,14 @@ export const countTransactions = async function (chain_id: string) {
   });
 };
 
-export const getChainIdAndTxHashByTxHashes = async function (
-  txHashes: string[]
-) {
+export const getChainIdAndTxHashByTxHashes = async function (txHashes: string[]) {
   return prisma.transaction.findMany({
     select: { chain_id: true, hash: true },
     where: { hash: { in: txHashes.sort() } },
   });
 };
 
-export const getTxHashAndChainInfoByTxHashes = async function (
-  txHashes: string[]
-) {
+export const getTxHashAndChainInfoByTxHashes = async function (txHashes: string[]) {
   return prisma.transaction.findMany({
     select: {
       chain_info: { select: { name: true, chain_id: true } },

@@ -1,11 +1,7 @@
 'use client';
 
 import { Roboto } from 'next/font/google';
-import {
-  ThemeOptions,
-  createTheme,
-  ThemeProvider as _ThemeProvider,
-} from '@mui/material/styles';
+import { ThemeOptions, createTheme, ThemeProvider as _ThemeProvider } from '@mui/material/styles';
 import { THEME_COOKIE_NAME, ThemeMode } from '@/consts/theme';
 import { forwardRef, useState } from 'react';
 import Link from 'next/link';
@@ -55,15 +51,11 @@ type ThemeProviderProps = Readonly<{
   children: React.ReactNode;
 }>;
 
-export default function ThemeProvider({
-  initialThemeMode,
-  children,
-}: ThemeProviderProps) {
+export default function ThemeProvider({ initialThemeMode, children }: ThemeProviderProps) {
   const [theme, setTheme] = useState(initialThemeMode);
 
   const handleThemeToggle = () => {
-    const newTheme =
-      theme === ThemeMode.LIGHT ? ThemeMode.DARK : ThemeMode.LIGHT;
+    const newTheme = theme === ThemeMode.LIGHT ? ThemeMode.DARK : ThemeMode.LIGHT;
     setTheme(newTheme);
     document.cookie = `${THEME_COOKIE_NAME}=${newTheme}; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/`;
   };

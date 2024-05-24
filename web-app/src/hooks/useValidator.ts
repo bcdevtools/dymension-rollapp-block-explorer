@@ -5,9 +5,7 @@ import { useEffect, useState } from 'react';
 import { useThrowError } from './useThrowError';
 import { isAbortException } from '@/utils/common';
 
-export default function useValidator(
-  address: string
-): [Validator | null, boolean] {
+export default function useValidator(address: string): [Validator | null, boolean] {
   const [loading, setLoading] = useState(true);
   const [validator, setValidator] = useState<Validator | null>(null);
   const [{ rpcService }] = useRollappStore();

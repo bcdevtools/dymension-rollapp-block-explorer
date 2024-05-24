@@ -3,10 +3,7 @@
 import Card from '@/components/commons/Card';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import {
-  AddressPageSearchParams,
-  AddressTransactionType,
-} from '@/consts/addressPage';
+import { AddressPageSearchParams, AddressTransactionType } from '@/consts/addressPage';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 

@@ -16,9 +16,7 @@ export function StoreProvider({ children, initialState }: StoreProviderProps) {
   const hasInitStore = useRef(false);
   const pathname = usePathname();
   if (!hasInitStore.current) {
-    initRollappStore(
-      getInitialRollappState(initialState.rollappInfos, pathname)
-    );
+    initRollappStore(getInitialRollappState(initialState.rollappInfos, pathname));
     hasInitStore.current = true;
   }
   return children;

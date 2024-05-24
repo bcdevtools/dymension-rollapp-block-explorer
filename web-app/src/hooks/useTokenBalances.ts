@@ -5,10 +5,7 @@ import { useEffect, useState } from 'react';
 import { useThrowError } from './useThrowError';
 import { isAbortException } from '@/utils/common';
 
-export default function useTokenBalances(
-  address: string,
-  tokenAddresses: string[]
-): [Erc20Balance[], boolean] {
+export default function useTokenBalances(address: string, tokenAddresses: string[]): [Erc20Balance[], boolean] {
   const [loading, setLoading] = useState(true);
   const [tokenBalances, setTokenBalances] = useState<Erc20Balance[]>([]);
   const [{ rpcService }] = useRollappStore();

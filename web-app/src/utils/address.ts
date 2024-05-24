@@ -1,8 +1,4 @@
-import {
-  COSMOS_ADDRESS_REGEX,
-  EVM_ADDRESS_REGEX,
-  TX_HASH_ADDRESS_REGEX,
-} from '@/consts/address';
+import { COSMOS_ADDRESS_REGEX, EVM_ADDRESS_REGEX, TX_HASH_ADDRESS_REGEX } from '@/consts/address';
 import { bech32 } from 'bech32';
 import { getAddress } from '@ethersproject/address';
 import { Account, DenomMetadata } from '@/consts/rpcResTypes';
@@ -34,10 +30,7 @@ export class RollappAddress {
       throw new Error('Unmatched prefix');
     }
 
-    return new RollappAddress(
-      new Uint8Array(bech32.fromWords(decoded.words)),
-      prefix || decoded.prefix
-    );
+    return new RollappAddress(new Uint8Array(bech32.fromWords(decoded.words)), prefix || decoded.prefix);
   }
 
   static fromHex(hex: string, prefix: string) {
@@ -47,7 +40,7 @@ export class RollappAddress {
 
   constructor(
     public readonly address: Uint8Array,
-    public readonly prefix: string
+    public readonly prefix: string,
   ) {}
 
   toBech32() {
@@ -84,34 +77,25 @@ export function getDefaultBech32Config(
   validatorPrefix: string = 'val',
   consensusPrefix: string = 'cons',
   publicPrefix: string = 'pub',
-  operatorPrefix: string = 'oper'
+  operatorPrefix: string = 'oper',
 ): Bech32Config {
   return {
     bech32PrefixAccAddr: mainPrefix,
     bech32PrefixAccPub: mainPrefix + publicPrefix,
     bech32PrefixValAddr: mainPrefix + validatorPrefix + operatorPrefix,
-    bech32PrefixValPub:
-      mainPrefix + validatorPrefix + operatorPrefix + publicPrefix,
+    bech32PrefixValPub: mainPrefix + validatorPrefix + operatorPrefix + publicPrefix,
     bech32PrefixConsAddr: mainPrefix + validatorPrefix + consensusPrefix,
-    bech32PrefixConsPub:
-      mainPrefix + validatorPrefix + consensusPrefix + publicPrefix,
+    bech32PrefixConsPub: mainPrefix + validatorPrefix + consensusPrefix + publicPrefix,
   };
 }
 
-export function getSymbolToDisplay(
-  denom: string,
-  accountBalances: BalancesWithMetadata
-) {
-  return accountBalances[denom].metadata
-    ? accountBalances[denom].metadata!.symbol
-    : denom;
+export function getSymbolToDisplay(denom: string, accountBalances: BalancesWithMetadata) {
+  return accountBalances[denom].metadata ? accountBalances[denom].metadata!.symbol : denom;
 }
 
 export function toSortedDenoms(accountBalances: BalancesWithMetadata) {
   return Object.keys(accountBalances).sort((a, b) => {
-    return getSymbolToDisplay(a, accountBalances).localeCompare(
-      getSymbolToDisplay(b, accountBalances)
-    );
+    return getSymbolToDisplay(a, accountBalances).localeCompare(getSymbolToDisplay(b, accountBalances));
   });
 }
 
@@ -126,7 +110,5 @@ export function getAccountType(account: Account) {
 }
 
 export function getShortAddress(address: string) {
-  return `${address.substring(0, 17)}...${address.substring(
-    address.length - 6
-  )}`;
+  return `${address.substring(0, 17)}...${address.substring(address.length - 6)}`;
 }

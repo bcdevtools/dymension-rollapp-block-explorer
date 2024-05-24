@@ -30,7 +30,7 @@ export function AddressPageTitle({
       <>
         Account <CircularProgress size={'1.5rem'} />
       </>
-    )
+    ),
   );
 
   useEffect(() => {

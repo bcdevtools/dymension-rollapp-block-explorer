@@ -2,9 +2,7 @@ import Grid from '@mui/material/Grid';
 import React from 'react';
 import Typography from '@mui/material/Typography';
 
-export function ItemContainer({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export function ItemContainer({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <Grid container spacing={2}>
       {children}
@@ -12,10 +10,7 @@ export function ItemContainer({
   );
 }
 
-export function RowItem({
-  label,
-  value,
-}: Readonly<{ label: string; value: React.ReactNode | string }>) {
+export function RowItem({ label, value }: Readonly<{ label: string; value: React.ReactNode | string }>) {
   return (
     <Grid container item>
       <Grid item xs={12} lg={3}>

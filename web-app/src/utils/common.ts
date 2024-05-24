@@ -40,14 +40,10 @@ export function getValidPage(page: number, pageSize: number, total?: number) {
 export function getPageAndPageSizeFromStringParam(
   pageSizeParam: SearchParam,
   pageParam: SearchParam,
-  total?: number
+  total?: number,
 ): [number, number] {
   const pageSize = getValidPageSize(getNumberFromStringParam(pageSizeParam));
-  const page = getValidPage(
-    getNumberFromStringParam(pageParam),
-    pageSize,
-    total
-  );
+  const page = getValidPage(getNumberFromStringParam(pageParam), pageSize, total);
 
   return [pageSize, page];
 }
@@ -80,10 +76,7 @@ export function getPrototypeFromTypeUrl(typeUrl: string) {
   else return addSpaceBetweenWords(matched[0]);
 }
 
-export function formatRpcAmount(
-  amountStr: string,
-  denomsMetadata: DenomsMetadata
-) {
+export function formatRpcAmount(amountStr: string, denomsMetadata: DenomsMetadata) {
   const amount = getAmount(amountStr);
   const denom = getDenom(amountStr);
 
@@ -92,10 +85,7 @@ export function formatRpcAmount(
     return `${formatBlockchainAmount(amount)}${denomDisplay}`;
   }
   const rewardDenomMetadata = denomsMetadata[denom];
-  return `${formatBlockchainAmount(
-    amount,
-    rewardDenomMetadata.highestExponent
-  )} ${rewardDenomMetadata.symbol}`;
+  return `${formatBlockchainAmount(amount, rewardDenomMetadata.highestExponent)} ${rewardDenomMetadata.symbol}`;
 }
 
 export function isBlockNo(valueToCheck: string) {

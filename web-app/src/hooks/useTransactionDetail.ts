@@ -8,9 +8,7 @@ import get from 'lodash/get';
 
 const EVM_TX_TYPE = 'ethermint.evm.v1.MsgEthereumTx';
 
-export default function useTransactionDetail(
-  txHash: string
-): [Transaction | null, boolean] {
+export default function useTransactionDetail(txHash: string): [Transaction | null, boolean] {
   const [loading, setLoading] = useState(true);
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [{ rpcService }] = useRollappStore();
@@ -30,11 +28,7 @@ export default function useTransactionDetail(
           let _transaction = await getResponseResult(result[0]);
 
           if (get(_transaction, 'msgs[0].type', null) === EVM_TX_TYPE) {
-            const evmTxHash = get(
-              _transaction,
-              'msgs[0].protoContent.hash',
-              null
-            );
+            const evmTxHash = get(_transaction, 'msgs[0].protoContent.hash', null);
             if (evmTxHash) {
               const result = rpcService.getTransactionByHash(evmTxHash);
               ac = result[1];
@@ -49,8 +43,7 @@ export default function useTransactionDetail(
             const evmTxReceipt = _transaction.evmReceipt;
             if (evmTxInfo && evmTxReceipt) {
               const hasInput = evmTxInfo.input && evmTxInfo.input.length >= 10;
-              const hasEvmLogs =
-                evmTxReceipt.logs && evmTxReceipt.logs.length > 0;
+              const hasEvmLogs = evmTxReceipt.logs && evmTxReceipt.logs.length > 0;
               const uniqueContractAddresses = new Set<string>();
               if (evmTxInfo.to) {
                 if (evmTxInfo.value && !hasInput && !hasEvmLogs) {
@@ -61,10 +54,7 @@ export default function useTransactionDetail(
                 }
               } else {
                 _transaction.mode = TxMode.EVM_CONTRACT_DEPLOY;
-                if (
-                  evmTxReceipt.contractAddress &&
-                  evmTxReceipt.contractAddress.length > 0
-                ) {
+                if (evmTxReceipt.contractAddress && evmTxReceipt.contractAddress.length > 0) {
                   uniqueContractAddresses.add(evmTxReceipt.contractAddress);
                 }
               }
@@ -75,23 +65,13 @@ export default function useTransactionDetail(
                 });
               }
 
-              if (
-                _transaction.result?.success &&
-                uniqueContractAddresses.size > 0
-              ) {
-                const contractAddressToErc20ContractInfo = new Map<
-                  string,
-                  Erc20ContractInfo
-                >();
+              if (_transaction.result?.success && uniqueContractAddresses.size > 0) {
+                const contractAddressToErc20ContractInfo = new Map<string, Erc20ContractInfo>();
                 const contractsAddress = Array.from(uniqueContractAddresses);
 
-                const result2 =
-                  rpcService.getErc20ContractInfo(contractsAddress);
+                const result2 = rpcService.getErc20ContractInfo(contractsAddress);
                 ac = result2[1];
-                const _erc20ContractsInfo = await getResponseResult(
-                  result2[0],
-                  false
-                );
+                const _erc20ContractsInfo = await getResponseResult(result2[0], false);
 
                 if (!(_erc20ContractsInfo as any).error) {
                   for (let i = 0; i < _erc20ContractsInfo.length; i++) {
@@ -99,14 +79,10 @@ export default function useTransactionDetail(
                     if (!erc20ContractInfo) {
                       continue;
                     }
-                    contractAddressToErc20ContractInfo.set(
-                      contractsAddress[i],
-                      erc20ContractInfo
-                    );
+                    contractAddressToErc20ContractInfo.set(contractsAddress[i], erc20ContractInfo);
                   }
                 }
-                _transaction.evmContractAddressToErc20ContractInfo =
-                  contractAddressToErc20ContractInfo;
+                _transaction.evmContractAddressToErc20ContractInfo = contractAddressToErc20ContractInfo;
               }
             }
           }

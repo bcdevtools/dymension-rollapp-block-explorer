@@ -37,24 +37,16 @@ import {
   getValidatorsParam,
 } from '@/utils/rpc';
 
-export function getResponseResult<T>(
-  rpcPromise: Promise<RpcResponse<T>>,
-  throwError?: boolean
-): Promise<T>;
-export function getResponseResult<T>(
-  rpcPromise: Promise<RpcResponse<any>[]>,
-  throwError?: boolean
-): Promise<any[]>;
+export function getResponseResult<T>(rpcPromise: Promise<RpcResponse<T>>, throwError?: boolean): Promise<T>;
+export function getResponseResult<T>(rpcPromise: Promise<RpcResponse<any>[]>, throwError?: boolean): Promise<any[]>;
 export async function getResponseResult<T>(
   rpcPromise: Promise<RpcResponse<T> | RpcResponse<any>[]>,
-  throwError = true
+  throwError = true,
 ) {
   const response = await rpcPromise;
   if (Array.isArray(response)) {
     if (response.some(res => res.error) && throwError)
-      throw new Error(
-        JSON.stringify(response.filter(res => res.error).map(res => res.error))
-      );
+      throw new Error(JSON.stringify(response.filter(res => res.error).map(res => res.error)));
     const result = response.map(res => res.result || { error: res.error });
     return result;
   } else {
@@ -79,119 +71,60 @@ export class RpcService {
     return this._rpcClient.callRpc(getChainInfoParam(), callRpcOptions);
   }
 
-  getLatestBlockNumber(
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<LatestBlockNumber> {
+  getLatestBlockNumber(callRpcOptions?: CallRpcOptions): RpcResult<LatestBlockNumber> {
     return this._rpcClient.callRpc(getLatestBlockNumber(), callRpcOptions);
   }
 
-  getBlockByNumber(
-    blockNumber: number,
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<Block>;
-  getBlockByNumber(
-    blockNumber: number[],
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<Block[]>;
-  getBlockByNumber(
-    blockNumbers: number | number[],
-    callRpcOptions?: CallRpcOptions
-  ) {
+  getBlockByNumber(blockNumber: number, callRpcOptions?: CallRpcOptions): RpcResult<Block>;
+  getBlockByNumber(blockNumber: number[], callRpcOptions?: CallRpcOptions): RpcResult<Block[]>;
+  getBlockByNumber(blockNumbers: number | number[], callRpcOptions?: CallRpcOptions) {
     if (Array.isArray(blockNumbers))
       return this._rpcClient.callRpc(
         blockNumbers.map(blockNo => getBlockByNumberParam(blockNo)),
-        callRpcOptions
+        callRpcOptions,
       );
-    else
-      return this._rpcClient.callRpc(
-        getBlockByNumberParam(blockNumbers),
-        callRpcOptions
-      );
+    else return this._rpcClient.callRpc(getBlockByNumberParam(blockNumbers), callRpcOptions);
   }
 
-  getRecentBlocks(
-    page: number,
-    pageSize: number,
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<RecentBlocks> {
-    return this._rpcClient.callRpc(
-      getRecentBlocksParam(page, pageSize),
-      callRpcOptions
-    );
+  getRecentBlocks(page: number, pageSize: number, callRpcOptions?: CallRpcOptions): RpcResult<RecentBlocks> {
+    return this._rpcClient.callRpc(getRecentBlocksParam(page, pageSize), callRpcOptions);
   }
 
-  getErc20ContractInfo(
-    contractAddress: string,
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<Erc20ContractInfo>;
-  getErc20ContractInfo(
-    contractAddress: string[],
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<Erc20ContractInfo[]>;
-  getErc20ContractInfo(
-    contractsAddress: string | string[],
-    callRpcOptions?: CallRpcOptions
-  ) {
+  getErc20ContractInfo(contractAddress: string, callRpcOptions?: CallRpcOptions): RpcResult<Erc20ContractInfo>;
+  getErc20ContractInfo(contractAddress: string[], callRpcOptions?: CallRpcOptions): RpcResult<Erc20ContractInfo[]>;
+  getErc20ContractInfo(contractsAddress: string | string[], callRpcOptions?: CallRpcOptions) {
     if (Array.isArray(contractsAddress))
       return this._rpcClient.callRpc(
-        contractsAddress.map(contractAddress =>
-          getErc20ContractInfo(contractAddress)
-        ),
-        callRpcOptions
+        contractsAddress.map(contractAddress => getErc20ContractInfo(contractAddress)),
+        callRpcOptions,
       );
-    else
-      return this._rpcClient.callRpc(
-        getErc20ContractInfo(contractsAddress),
-        callRpcOptions
-      );
+    else return this._rpcClient.callRpc(getErc20ContractInfo(contractsAddress), callRpcOptions);
   }
 
-  getTransactionByHash(
-    txHash: string,
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<Transaction> {
-    return this._rpcClient.callRpc(
-      getTransactionByHashParam(txHash),
-      callRpcOptions
-    );
+  getTransactionByHash(txHash: string, callRpcOptions?: CallRpcOptions): RpcResult<Transaction> {
+    return this._rpcClient.callRpc(getTransactionByHashParam(txHash), callRpcOptions);
   }
 
-  getAccountBalances(
-    address: string,
-    fetchOptions?: CallRpcOptions
-  ): RpcResult<AccountBalances> {
-    return this._rpcClient.callRpc(
-      getAccountBalancesParam(address),
-      fetchOptions
-    );
+  getAccountBalances(address: string, fetchOptions?: CallRpcOptions): RpcResult<AccountBalances> {
+    return this._rpcClient.callRpc(getAccountBalancesParam(address), fetchOptions);
   }
 
   getDenomsMetadata(fetchOptions?: CallRpcOptions): RpcResult<DenomsMetadata> {
     return this._rpcClient.callRpc(getDenomsMetadataParam(), fetchOptions);
   }
 
-  getAccount(
-    address: string,
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<Account>;
-  getAccount(
-    addresses: string[],
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<Account[]>;
+  getAccount(address: string, callRpcOptions?: CallRpcOptions): RpcResult<Account>;
+  getAccount(addresses: string[], callRpcOptions?: CallRpcOptions): RpcResult<Account[]>;
   getAccount(address: string | string[], callRpcOptions?: CallRpcOptions) {
     if (Array.isArray(address))
       return this._rpcClient.callRpc(
         address.map(a => getAccountParam(a)),
-        callRpcOptions
+        callRpcOptions,
       );
-    else
-      return this._rpcClient.callRpc(getAccountParam(address), callRpcOptions);
+    else return this._rpcClient.callRpc(getAccountParam(address), callRpcOptions);
   }
 
-  getValidator(
-    address: string,
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<Validator> {
+  getValidator(address: string, callRpcOptions?: CallRpcOptions): RpcResult<Validator> {
     return this._rpcClient.callRpc(getValidatorParam(address), callRpcOptions);
   }
 
@@ -199,49 +132,23 @@ export class RpcService {
     return this._rpcClient.callRpc(getValidatorsParam(), callRpcOptions);
   }
 
-  getGovProposals(
-    page: number,
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<GovProposals> {
+  getGovProposals(page: number, callRpcOptions?: CallRpcOptions): RpcResult<GovProposals> {
     return this._rpcClient.callRpc(getGovProposalsParam(page), callRpcOptions);
   }
 
-  getGovProposal(
-    id: number,
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<GovProposal> {
+  getGovProposal(id: number, callRpcOptions?: CallRpcOptions): RpcResult<GovProposal> {
     return this._rpcClient.callRpc(getGovProposalParam(id), callRpcOptions);
   }
 
-  getErc20Balance(
-    address: string,
-    tokenAddresses: string[],
-    fetchOptions?: CallRpcOptions
-  ): RpcResult<Erc20Balances> {
-    return this._rpcClient.callRpc(
-      getErc20BalanceParam(address, tokenAddresses),
-      fetchOptions
-    );
+  getErc20Balance(address: string, tokenAddresses: string[], fetchOptions?: CallRpcOptions): RpcResult<Erc20Balances> {
+    return this._rpcClient.callRpc(getErc20BalanceParam(address, tokenAddresses), fetchOptions);
   }
 
-  getCw20Balance(
-    address: string,
-    tokenAddresses: string[],
-    fetchOptions?: CallRpcOptions
-  ): RpcResult<Cw20Balances> {
-    return this._rpcClient.callRpc(
-      getCw20BalanceParam(address, tokenAddresses),
-      fetchOptions
-    );
+  getCw20Balance(address: string, tokenAddresses: string[], fetchOptions?: CallRpcOptions): RpcResult<Cw20Balances> {
+    return this._rpcClient.callRpc(getCw20BalanceParam(address, tokenAddresses), fetchOptions);
   }
 
-  getModuleParams(
-    module: string,
-    callRpcOptions?: CallRpcOptions
-  ): RpcResult<any> {
-    return this._rpcClient.callRpc(
-      getModuleParamsParam(module),
-      callRpcOptions
-    );
+  getModuleParams(module: string, callRpcOptions?: CallRpcOptions): RpcResult<any> {
+    return this._rpcClient.callRpc(getModuleParamsParam(module), callRpcOptions);
   }
 }

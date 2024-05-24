@@ -19,32 +19,26 @@ export default function ValidatorList() {
   const pathname = usePathname();
 
   const validatorAddresses = useMemo(
-    () =>
-      Object.keys(validators).sort((a, b) =>
-        compareNumberString(validators[b].tokens, validators[a].tokens)
-      ),
-    [validators]
+    () => Object.keys(validators).sort((a, b) => compareNumberString(validators[b].tokens, validators[a].tokens)),
+    [validators],
   );
 
   const totalTokens = useMemo(
     () =>
       Object.values(validators).reduce<Big>(
         (acc, v) => (v.tokens ? new Big(v.tokens).add(acc) : new Big(0)),
-        new Big(0)
+        new Big(0),
       ),
-    [validators]
+    [validators],
   );
 
   const [pageSize, page] = getPageAndPageSizeFromStringParam(
     searchParams.get(PAGE_SIZE_PARAM_NAME),
     searchParams.get(PAGE_PARAM_NAME),
-    validatorAddresses.length
+    validatorAddresses.length,
   );
 
-  const rowKeys = validatorAddresses.slice(
-    page * pageSize,
-    (page + 1) * pageSize
-  );
+  const rowKeys = validatorAddresses.slice(page * pageSize, (page + 1) * pageSize);
 
   const body = rowKeys.map(address => {
     const vpPercent = validators[address].tokens
@@ -58,17 +52,11 @@ export default function ValidatorList() {
         showCopyButton={false}
       />,
       <Box key={`${address}_power`}>
-        {formatBlockchainAmount(
-          validators[address].tokens,
-          validators[address].tokensDecimals,
-          0
-        )}{' '}
+        {formatBlockchainAmount(validators[address].tokens, validators[address].tokensDecimals, 0)}{' '}
         <Typography
           display="inline"
           fontSize="0.7rem"
-          color={
-            vpPercent.gt(33) ? 'red' : vpPercent.gt(10) ? 'orange' : 'grey'
-          }>
+          color={vpPercent.gt(33) ? 'red' : vpPercent.gt(10) ? 'orange' : 'grey'}>
           {formatBlockchainAmount(vpPercent, 0, 4)}%
         </Typography>
       </Box>,

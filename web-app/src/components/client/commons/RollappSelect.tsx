@@ -29,9 +29,7 @@ export default React.memo(function RollappSelect({
   return (
     <FormControl {...props} size={size}>
       {label && (
-        <InputLabel
-          id="select-rollapp-label"
-          size={size === 'medium' ? 'normal' : 'small'}>
+        <InputLabel id="select-rollapp-label" size={size === 'medium' ? 'normal' : 'small'}>
           Rollapps
         </InputLabel>
       )}
@@ -45,10 +43,7 @@ export default React.memo(function RollappSelect({
           const isSelected = rollapp.path === value;
           return (
             <MenuItem key={rollapp.chain_id} value={rollapp.path}>
-              <Typography
-                variant="button"
-                color={isSelected ? 'primary' : 'inherit'}
-                marginRight={1}>
+              <Typography variant="button" color={isSelected ? 'primary' : 'inherit'} marginRight={1}>
                 <strong>{rollapp.name}</strong>
               </Typography>
               <Typography variant="subtitle2" color="text.secondary">

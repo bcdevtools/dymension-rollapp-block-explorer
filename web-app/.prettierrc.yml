@@ -1,3 +1,4 @@
 singleQuote: true
 arrowParens: 'avoid'
-jsxBracketSameLine: true
+bracketSameLine: true
+printWidth: 120

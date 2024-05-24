@@ -45,12 +45,7 @@ function getVotingPercent(proposal: GovProposal | null): {
   }
 
   return {
-    result: [
-      formatNumber(a),
-      formatNumber(b),
-      formatNumber(c),
-      formatNumber(d),
-    ],
+    result: [formatNumber(a), formatNumber(b), formatNumber(c), formatNumber(d)],
     maxId: max,
   };
 }
@@ -109,9 +104,7 @@ export default function GovernanceDetail() {
   const [proposal, loading] = useGovProposal(id);
   const [denomsMetadata, denomsMetadataloading] = useDenomsMetadata();
 
-  const proposalTitle = proposal
-    ? proposal.messages[0].protoContent.plan.name
-    : '';
+  const proposalTitle = proposal ? proposal.messages[0].protoContent.plan.name : '';
 
   const depositBalances = useMemo(() => {
     if (!proposal) return [];
@@ -120,17 +113,12 @@ export default function GovernanceDetail() {
       if (!denomMetadata)
         return (
           <Typography key={denom}>
-            {formatBlockchainAmount(proposal.totalDeposit[denom])}{' '}
-            {denom.toUpperCase()}
+            {formatBlockchainAmount(proposal.totalDeposit[denom])} {denom.toUpperCase()}
           </Typography>
         );
       return (
         <Typography key={denom}>
-          {formatBlockchainAmount(
-            proposal.totalDeposit[denom],
-            denomMetadata.highestExponent
-          )}{' '}
-          {denomMetadata.symbol}
+          {formatBlockchainAmount(proposal.totalDeposit[denom], denomMetadata.highestExponent)} {denomMetadata.symbol}
         </Typography>
       );
     });
@@ -143,26 +131,16 @@ export default function GovernanceDetail() {
         <Grid container spacing={2}>
           <DetailItem
             label="Status"
-            value={
-              proposal ? <ProposalStatusText status={proposal.status} /> : '-'
-            }
+            value={proposal ? <ProposalStatusText status={proposal.status} /> : '-'}
             loading={loading}
           />
-          <DetailItem
-            label="Voting Result"
-            value={getVotingResult(proposal)}
-            loading={loading}
-          />
+          <DetailItem label="Voting Result" value={getVotingResult(proposal)} loading={loading} />
           <DetailItem
             label="Deposit End Time"
             value={proposal && formatUnixTime(proposal.depositEndTimeEpochUTC)}
             loading={loading}
           />
-          <DetailItem
-            label="Total Deposit"
-            value={depositBalances}
-            loading={loading}
-          />
+          <DetailItem label="Total Deposit" value={depositBalances} loading={loading} />
           <DetailItem
             label="Voting Start Time"
             value={proposal && formatUnixTime(proposal.votingStartTimeEpochUTC)}
@@ -173,11 +151,7 @@ export default function GovernanceDetail() {
             value={proposal && formatUnixTime(proposal.votingEndTimeEpochUTC)}
             loading={loading}
           />
-          <DetailItem
-            label="Metadata"
-            value={proposal && proposal.metadata}
-            loading={loading}
-          />
+          <DetailItem label="Metadata" value={proposal && proposal.metadata} loading={loading} />
           <DetailItem
             label="Message"
             value={

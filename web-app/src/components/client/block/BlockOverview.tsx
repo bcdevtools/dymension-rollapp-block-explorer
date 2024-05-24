@@ -40,17 +40,16 @@ function getBlockLoading() {
 
 export default function BlockOverview() {
   const [timeDisplay, setTimeDisplay] = useState<string[]>([]);
-  const [recentBlocks, recentBlocksLoading] = useRecentBlocks(
-    0,
-    DEFAULT_BLOCK_OVERVIEW_SIZE,
-    { useFallback: true, autoRefresh: true }
-  );
+  const [recentBlocks, recentBlocksLoading] = useRecentBlocks(0, DEFAULT_BLOCK_OVERVIEW_SIZE, {
+    useFallback: true,
+    autoRefresh: true,
+  });
 
   useEffect(() => {
     const getTimeDisplay = function () {
       if (recentBlocks) {
         const _timeDisplay = recentBlocks.blocks.map(recentBlock =>
-          getTimeDurationDisplay(dayjs.unix(recentBlock.timeEpochUTC))
+          getTimeDurationDisplay(dayjs.unix(recentBlock.timeEpochUTC)),
         );
         setTimeDisplay(_timeDisplay);
       }
@@ -60,8 +59,7 @@ export default function BlockOverview() {
     return () => clearInterval(intervalId);
   }, [recentBlocks]);
 
-  const loading =
-    recentBlocksLoading && !get(recentBlocks, 'blocks', []).length;
+  const loading = recentBlocksLoading && !get(recentBlocks, 'blocks', []).length;
 
   return (
     <Grid container spacing={2}>
@@ -80,18 +78,13 @@ export default function BlockOverview() {
                       {recentBlock.txsCount} Transactions{' • '}
                       {timeDisplay[idx]}
                     </Typography>
-                    <Typography
-                      color="text.secondary"
-                      display="inline"
-                      fontSize="inherit">
+                    <Typography color="text.secondary" display="inline" fontSize="inherit">
                       Proposer{' '}
                     </Typography>
                     <span>
                       {recentBlock.proposer
                         ? recentBlock.proposer.moniker || (
-                            <ShortAddress
-                              address={recentBlock.proposer.consensusAddress}
-                            />
+                            <ShortAddress address={recentBlock.proposer.consensusAddress} />
                           )
                         : '-'}
                     </span>

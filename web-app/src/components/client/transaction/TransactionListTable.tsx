@@ -3,11 +3,7 @@
 import { getNewPathByRollapp } from '@/utils/common';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import DataTable from '../../commons/DataTable';
-import {
-  DEFAULT_PAGINATION_SIZE,
-  PAGE_PARAM_NAME,
-  PAGE_SIZE_PARAM_NAME,
-} from '@/consts/setting';
+import { DEFAULT_PAGINATION_SIZE, PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 import React, { useEffect, useMemo, useState } from 'react';
 import LinkToBlockNo from '../block/LinkToBlockNo';
 import Chip from '@mui/material/Chip';
@@ -82,78 +78,67 @@ export default function TransactionListTable({
     }
   }, [router, autoRefresh]);
 
-  const body = transactions.map(
-    ({ hash, epoch, message_types, action, tx_type, height, value }) => {
-      const cells = [];
+  const body = transactions.map(({ hash, epoch, message_types, action, tx_type, height, value }) => {
+    const cells = [];
 
-      // Transaction Hash
+    // Transaction Hash
 
-      cells.push(
-        <Link
-          key={`${hash}_txHash`}
-          href={getNewPathByRollapp(pathname, `/${Path.TRANSACTION}/${hash}`)}>
-          <ShortTxHash txHash={hash} />
-        </Link>
-      );
+    cells.push(
+      <Link key={`${hash}_txHash`} href={getNewPathByRollapp(pathname, `/${Path.TRANSACTION}/${hash}`)}>
+        <ShortTxHash txHash={hash} />
+      </Link>,
+    );
 
-      // Messages
-      cells.push(getMessageLabel(hash, message_types, action, tx_type));
+    // Messages
+    cells.push(getMessageLabel(hash, message_types, action, tx_type));
 
-      // Value
-      if (includeValue) {
-        if (!value || !value.length) cells.push('-');
-        else {
-          let hasSomeToken = false;
-          const valueDisplay: React.ReactNode[] = [];
-          for (let i = 0; i < value.length; i++) {
-            const v = value[i];
-            const [amount, denom] = v.split(' ');
-            if (denomsMetadata[denom]) {
-              valueDisplay.push(
-                <Typography
-                  key={valueDisplay.length}>{`${formatBlockchainAmount(
-                  amount,
-                  denomsMetadata[denom].highestExponent
-                )} ${denomsMetadata[denom].symbol}`}</Typography>
-              );
-            } else {
-              hasSomeToken = true;
-              continue;
-            }
-          }
-          if (hasSomeToken) {
+    // Value
+    if (includeValue) {
+      if (!value || !value.length) cells.push('-');
+      else {
+        let hasSomeToken = false;
+        const valueDisplay: React.ReactNode[] = [];
+        for (let i = 0; i < value.length; i++) {
+          const v = value[i];
+          const [amount, denom] = v.split(' ');
+          if (denomsMetadata[denom]) {
             valueDisplay.push(
-              <Typography
-                key={valueDisplay.length}
-                fontStyle="italic"
-                fontSize="0.7rem"
-                color="text.secondary">
-                some token
-              </Typography>
+              <Typography key={valueDisplay.length}>{`${formatBlockchainAmount(
+                amount,
+                denomsMetadata[denom].highestExponent,
+              )} ${denomsMetadata[denom].symbol}`}</Typography>,
             );
+          } else {
+            hasSomeToken = true;
+            continue;
           }
-          cells.push(valueDisplay);
         }
+        if (hasSomeToken) {
+          valueDisplay.push(
+            <Typography key={valueDisplay.length} fontStyle="italic" fontSize="0.7rem" color="text.secondary">
+              some token
+            </Typography>,
+          );
+        }
+        cells.push(valueDisplay);
       }
-
-      // Block height
-      cells.push(
-        <LinkToBlockNo key={`${hash}_height`} blockNo={height.toString()} />
-      );
-
-      // Date Time
-      cells.push(
-        <DateWithTooltip
-          key={`${hash}_time`}
-          showDateTime={showDateTime}
-          unixTimestamp={Number(epoch)}
-          onClick={() => setShowDateTime(s => !s)}
-        />
-      );
-
-      return cells;
     }
-  );
+
+    // Block height
+    cells.push(<LinkToBlockNo key={`${hash}_height`} blockNo={height.toString()} />);
+
+    // Date Time
+    cells.push(
+      <DateWithTooltip
+        key={`${hash}_time`}
+        showDateTime={showDateTime}
+        unixTimestamp={Number(epoch)}
+        onClick={() => setShowDateTime(s => !s)}
+      />,
+    );
+
+    return cells;
+  });
 
   const headers = useMemo(() => {
     const headers = [];
@@ -162,13 +147,9 @@ export default function TransactionListTable({
     if (includeValue) headers.push(TxTableHeader.VALUE);
     headers.push(TxTableHeader.BLOCK);
     headers.push(
-      <MuiLink
-        key="mui-link"
-        component="button"
-        underline="none"
-        onClick={() => setShowDateTime(s => !s)}>
+      <MuiLink key="mui-link" component="button" underline="none" onClick={() => setShowDateTime(s => !s)}>
         {showDateTime ? TxTableHeader.DATE_TIME : TxTableHeader.Age}
-      </MuiLink>
+      </MuiLink>,
     );
 
     return headers;
@@ -206,34 +187,15 @@ export default function TransactionListTable({
   );
 }
 
-const getMessageLabel = function (
-  hash: string,
-  message_types: string[],
-  action: string | null,
-  tx_type: string
-) {
+const getMessageLabel = function (hash: string, message_types: string[], action: string | null, tx_type: string) {
   if (action) {
     const splitted = action.split(':');
     const label = splitted[1] || splitted[0];
     if (label) {
       if (tx_type === 'evm') {
-        return (
-          <Chip
-            key={`${hash}_message`}
-            label={label}
-            color="info"
-            variant="outlined"
-          />
-        );
+        return <Chip key={`${hash}_message`} label={label} color="info" variant="outlined" />;
       } else if (tx_type === 'wasm') {
-        return (
-          <Chip
-            key={`${hash}_message`}
-            label={label}
-            color="secondary"
-            variant="outlined"
-          />
-        );
+        return <Chip key={`${hash}_message`} label={label} color="secondary" variant="outlined" />;
       }
     }
   }

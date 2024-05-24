@@ -30,13 +30,11 @@ function getContent(
   evmAddress: string | null,
   accountInfo: DbAccount | null,
   accountRpcData: Account | null,
-  tab: AccountSummaryTab
+  tab: AccountSummaryTab,
 ) {
   switch (tab) {
     case AccountSummaryTab.TOKENS:
-      return (
-        <AddressTokens accountInfo={accountInfo!} evmAddress={evmAddress} />
-      );
+      return <AddressTokens accountInfo={accountInfo!} evmAddress={evmAddress} />;
     case AccountSummaryTab.NFTS:
       return <AddressNft accountInfo={accountInfo!} />;
     case AccountSummaryTab.STAKING:
@@ -57,27 +55,18 @@ export default React.memo(function AddressSummary({
 
   return (
     <Card sx={{ mb: 3 }}>
-      <Tabs
-        value={tab}
-        sx={{ mb: 3 }}
-        onChange={(e, value) => void setTab(value)}>
+      <Tabs value={tab} sx={{ mb: 3 }} onChange={(e, value) => void setTab(value)}>
         <Tab value={AccountSummaryTab.COINS} label={AccountSummaryTab.COINS} />
         {accountInfo && accountInfo.balance_on_erc20_contracts.length && (
-          <Tab
-            value={AccountSummaryTab.TOKENS}
-            label={AccountSummaryTab.TOKENS}
-          />
+          <Tab value={AccountSummaryTab.TOKENS} label={AccountSummaryTab.TOKENS} />
         )}
         {accountInfo && accountInfo.balance_on_nft_contracts.length && (
           <Tab value={AccountSummaryTab.NFTS} label={AccountSummaryTab.NFTS} />
         )}
-        {accountRpcData && accountRpcData.staking &&
-          (accountRpcData.staking.rewards ||
-            Object.keys(accountRpcData.staking.staking).length) && (
-            <Tab
-              value={AccountSummaryTab.STAKING}
-              label={AccountSummaryTab.STAKING}
-            />
+        {accountRpcData &&
+          accountRpcData.staking &&
+          (accountRpcData.staking.rewards || Object.keys(accountRpcData.staking.staking).length) && (
+            <Tab value={AccountSummaryTab.STAKING} label={AccountSummaryTab.STAKING} />
           )}
       </Tabs>
       {getContent(address, evmAddress, accountInfo, accountRpcData, tab)}

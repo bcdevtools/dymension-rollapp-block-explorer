@@ -13,19 +13,14 @@ import { useMountedState } from '@/hooks/useMountedState';
 import Box from '@mui/material/Box';
 import SearchResultContent from './_SearchResultContent';
 import CircularProgress from '@mui/material/CircularProgress';
-import SearchResultDisplayContext, {
-  Columns,
-} from '@/contexts/SearchResultDisplayContext';
+import SearchResultDisplayContext, { Columns } from '@/contexts/SearchResultDisplayContext';
 
 type SearchProps = Readonly<{
   onClear?: () => void;
   columns?: Columns;
 }>;
 
-export default function Search({
-  onClear = () => {},
-  columns = 1,
-}: SearchProps) {
+export default function Search({ onClear = () => {}, columns = 1 }: SearchProps) {
   const [searchValue, setSearchValue] = useState<string>('');
   const [{ rollappInfos, selectedRollappInfo }] = useRollappStore();
   const [loading, setLoading] = useState(false);
@@ -40,17 +35,13 @@ export default function Search({
   const handleSearch = useCallback(
     async (_searchValue: string) => {
       setLoading(true);
-      const result = await handleGlobalSearch(
-        _searchValue,
-        rollappInfos,
-        selectedRollappInfo
-      );
+      const result = await handleGlobalSearch(_searchValue, rollappInfos, selectedRollappInfo);
       if (mounted.current) {
         setSearchResult(result);
         setLoading(false);
       }
     },
-    [rollappInfos, selectedRollappInfo, mounted]
+    [rollappInfos, selectedRollappInfo, mounted],
   );
 
   useEffect(() => {
@@ -68,9 +59,7 @@ export default function Search({
     <SearchResultDisplayContext.Provider value={{ displayColumns: columns }}>
       <TextField
         value={searchValue}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setSearchValue(e.target.value)
-        }
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value)}
         fullWidth
         placeholder={SEARCH_PLACEHOLDER}
         inputRef={e => e && setTimeout(() => e.focus(), 0)}
@@ -94,10 +83,7 @@ export default function Search({
           <CircularProgress />
         </Box>
       ) : (
-        <SearchResultContent
-          searchResult={searchResult}
-          handleClickSearchItem={handleClear}
-        />
+        <SearchResultContent searchResult={searchResult} handleClickSearchItem={handleClear} />
       )}
     </SearchResultDisplayContext.Provider>
   );

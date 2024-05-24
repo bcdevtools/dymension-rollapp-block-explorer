@@ -46,9 +46,7 @@ export default React.memo(function DataTable({
   noDataTitle = 'No data',
 }: DataTableProps) {
   const _body: React.ReactNode[][] = loading
-    ? Array(loadingItems || pageSize).fill(
-        Array(headers.length).fill(<Skeleton />)
-      )
+    ? Array(loadingItems || pageSize).fill(Array(headers.length).fill(<Skeleton />))
     : body;
 
   if (!_body.length)
@@ -58,8 +56,7 @@ export default React.memo(function DataTable({
       </Box>
     );
 
-  const showPagination =
-    enablePagination && (total === undefined || total > pageSize);
+  const showPagination = enablePagination && (total === undefined || total > pageSize);
 
   const pagination = showPagination && (
     <TablePagination
@@ -69,9 +66,7 @@ export default React.memo(function DataTable({
       rowsPerPage={pageSize}
       page={page}
       onPageChange={(e, newPage: number) => onPageChange(newPage)}
-      onRowsPerPageChange={
-        onRowsPerPageChange && (e => onRowsPerPageChange(e.target.value))
-      }
+      onRowsPerPageChange={onRowsPerPageChange && (e => onRowsPerPageChange(e.target.value))}
       showFirstButton={total !== undefined}
       showLastButton={total !== undefined}
       labelDisplayedRows={total === undefined ? () => null : undefined}
@@ -98,12 +93,7 @@ export default React.memo(function DataTable({
               ))}
             </TableRow>
           </TableHead>
-          <TableBody
-            sx={
-              !showPagination
-                ? { '&:last-child td, &:last-child th': { border: 0 } }
-                : {}
-            }>
+          <TableBody sx={!showPagination ? { '&:last-child td, &:last-child th': { border: 0 } } : {}}>
             {_body.map((row, idx) => (
               <TableRow key={rowKeys[idx] ?? idx}>
                 {row.map((cell, idx) => (

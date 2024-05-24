@@ -7,13 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Link from '@mui/material/Link';
 import { useState } from 'react';
 
-export default function ErrorLayout({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function ErrorLayout({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const [retrying, setRetrying] = useState(false);
   const mounted = useMountedState();
 

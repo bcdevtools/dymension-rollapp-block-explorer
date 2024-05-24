@@ -29,19 +29,12 @@ export default async function Overview({ params }: RollappOverviewProps) {
 
   return (
     <>
-      <PageTitle
-        title={rollappInfo.name.toUpperCase()}
-        subtitle={rollappInfo.chain_id}
-      />
+      <PageTitle title={rollappInfo.name.toUpperCase()} subtitle={rollappInfo.chain_id} />
 
       <Card sx={{ mb: 2, width: '100%' }}>
         <Box display="flex" justifyContent="space-between" mb={3}>
           <Typography variant="h6">Blocks</Typography>
-          <Button
-            variant="outlined"
-            component={Link}
-            href={`${rollappInfo.path}${Path.BLOCKS}`}
-            size="small">
+          <Button variant="outlined" component={Link} href={`${rollappInfo.path}${Path.BLOCKS}`} size="small">
             View All Blocks
           </Button>
         </Box>
@@ -51,20 +44,11 @@ export default async function Overview({ params }: RollappOverviewProps) {
       <Card sx={{ width: '100%' }}>
         <Box display="flex" justifyContent="space-between" mb={3}>
           <Typography variant="h6">Transactions</Typography>
-          <Button
-            variant="outlined"
-            component={Link}
-            href={`${rollappInfo.path}${Path.TRANSACTIONS}`}
-            size="small">
+          <Button variant="outlined" component={Link} href={`${rollappInfo.path}${Path.TRANSACTIONS}`} size="small">
             View All Transactions
           </Button>
         </Box>
-        <TransactionListTable
-          transactions={transactions}
-          includeValue
-          enablePagination={false}
-          autoRefresh
-        />
+        <TransactionListTable transactions={transactions} includeValue enablePagination={false} autoRefresh />
       </Card>
     </>
   );

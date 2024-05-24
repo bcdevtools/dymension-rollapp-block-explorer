@@ -4,12 +4,7 @@ import Error from '@/components/client/commons/Error';
 import ErrorContainer from '@/components/client/commons/RollappErrorContainer';
 import Link from '@mui/material/Link';
 
-export default function ErrorLayout({
-  error,
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function ErrorLayout({ error }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <ErrorContainer>
       <Error

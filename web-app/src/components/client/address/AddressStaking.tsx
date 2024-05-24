@@ -11,44 +11,34 @@ import TableRow from '@mui/material/TableRow';
 import { JsonObject } from '@prisma/client/runtime/library';
 import { useMemo, useState } from 'react';
 
-export default function AddressStaking({
-  accountStakingInfo,
-}: Readonly<{ accountStakingInfo: AccountStakingInfo }>) {
+export default function AddressStaking({ accountStakingInfo }: Readonly<{ accountStakingInfo: AccountStakingInfo }>) {
   const [page, setPage] = useState(0);
   const [{ selectedRollappInfo }] = useRollappStore();
   const [denomsMetadata, denomsMetadataLoading] = useDenomsMetadata();
 
   const denomMetadata = useMemo(
-    () =>
-      denomsMetadata[
-        (selectedRollappInfo!.denoms as JsonObject).bond as string
-      ],
-    [selectedRollappInfo, denomsMetadata]
+    () => denomsMetadata[(selectedRollappInfo!.denoms as JsonObject).bond as string],
+    [selectedRollappInfo, denomsMetadata],
   );
   const validators = Object.keys(accountStakingInfo.staking);
   const body = Object.keys(accountStakingInfo.staking).map(validator => [
     validator,
     `${formatBlockchainAmount(
-      accountStakingInfo.staking[
-        validator as keyof AccountStakingInfo['staking']
-      ],
-      denomMetadata ? denomMetadata.highestExponent : 0
+      accountStakingInfo.staking[validator as keyof AccountStakingInfo['staking']],
+      denomMetadata ? denomMetadata.highestExponent : 0,
     )} ${denomMetadata?.symbol}`,
   ]);
 
   const totalReward = useMemo(
     () => formatRpcAmount(accountStakingInfo.rewards, denomsMetadata),
-    [accountStakingInfo.rewards, denomsMetadata]
+    [accountStakingInfo.rewards, denomsMetadata],
   );
 
   return (
     <>
       <DataTable
         headers={['Governor', 'Delegated Amount']}
-        body={body.slice(
-          page * ADDRESS_SUMMARY_COINS_PAGE_SIZE,
-          (page + 1) * ADDRESS_SUMMARY_COINS_PAGE_SIZE
-        )}
+        body={body.slice(page * ADDRESS_SUMMARY_COINS_PAGE_SIZE, (page + 1) * ADDRESS_SUMMARY_COINS_PAGE_SIZE)}
         rowKeys={validators}
         total={validators.length}
         page={page}

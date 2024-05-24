@@ -30,11 +30,7 @@ function SearchResultItem({
       {({ displayColumns }) => (
         <Grid item xs={12} md={12 / displayColumns}>
           <Card variant="outlined">
-            <CardActionArea
-              component={Link}
-              href={href}
-              prefetch={false}
-              onClick={handleClick}>
+            <CardActionArea component={Link} href={href} prefetch={false} onClick={handleClick}>
               <CardHeader
                 title={
                   <>
@@ -42,29 +38,18 @@ function SearchResultItem({
                       <strong>{rollappName}</strong>
                     </Typography>{' '}
                     {value && (
-                      <Typography
-                        width="100%"
-                        component="span"
-                        color="text.secondary"
-                        variant="subtitle2">
+                      <Typography width="100%" component="span" color="text.secondary" variant="subtitle2">
                         {chainId}
                       </Typography>
                     )}
                   </>
                 }
                 subheader={
-                  <Typography
-                    variant="subtitle1"
-                    color="text.secondary"
-                    sx={{ wordBreak: 'break-word' }}>
+                  <Typography variant="subtitle1" color="text.secondary" sx={{ wordBreak: 'break-word' }}>
                     {value || chainId}
                   </Typography>
                 }
-                avatar={
-                  <Avatar aria-label="recipe">
-                    {rollappName[0].toUpperCase()}{' '}
-                  </Avatar>
-                }
+                avatar={<Avatar aria-label="recipe">{rollappName[0].toUpperCase()} </Avatar>}
               />
             </CardActionArea>
           </Card>
@@ -74,10 +59,7 @@ function SearchResultItem({
   );
 }
 
-function SearchResultSection({
-  children,
-  title,
-}: Readonly<{ children: React.ReactNode; title: string }>) {
+function SearchResultSection({ children, title }: Readonly<{ children: React.ReactNode; title: string }>) {
   return (
     <Grid container item spacing={1}>
       <Grid item xs={12}>
@@ -97,12 +79,7 @@ export default function SearchResultContent({
 }>) {
   if (!Object.keys(searchResult).length) {
     return (
-      <Box
-        height="100%"
-        width="100%"
-        display="flex"
-        justifyContent="center"
-        alignItems="center">
+      <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
         No result found.
       </Box>
     );

@@ -5,9 +5,7 @@ import { useEffect, useState } from 'react';
 import { useThrowError } from './useThrowError';
 import { isAbortException } from '@/utils/common';
 
-export default function useBlockDetail(
-  blockNo: number
-): [Block | null, boolean] {
+export default function useBlockDetail(blockNo: number): [Block | null, boolean] {
   const [loading, setLoading] = useState(true);
   const [block, setBlock] = useState<Block | null>(null);
   const [{ rpcService }] = useRollappStore();

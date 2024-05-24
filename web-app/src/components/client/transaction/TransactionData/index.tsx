@@ -25,18 +25,13 @@ const enum TabValue {
   EVM_EVENT_LOGS = 4,
 }
 
-function getTabsByTransaction(
-  transaction: Transaction,
-  transactionType: TransactionType
-) {
+function getTabsByTransaction(transaction: Transaction, transactionType: TransactionType) {
   switch (transactionType) {
     case 'cosmos':
     default:
       return [
         {
-          label: transaction.msgs
-            ? `Messages (${transaction.msgs.length}) `
-            : 'Messages',
+          label: transaction.msgs ? `Messages (${transaction.msgs.length}) ` : 'Messages',
           value: TabValue.MESSAGES,
         },
         { label: 'Event Logs', value: TabValue.COSMOS_EVENT_LOGS },
@@ -68,15 +63,9 @@ function getDefaultTabValue(transactionType: TransactionType) {
 
 export default function TransactionData({ transaction }: TransactionDataProps) {
   const [currentTab, setCurrentTab] = useState<TabValue | null>(null);
-  const transactionType = useMemo(
-    () => (transaction ? getTransactionType(transaction) : null),
-    [transaction]
-  );
+  const transactionType = useMemo(() => (transaction ? getTransactionType(transaction) : null), [transaction]);
 
-  const tabValue = useMemo(
-    () => currentTab || getDefaultTabValue(transactionType!),
-    [transactionType, currentTab]
-  );
+  const tabValue = useMemo(() => currentTab || getDefaultTabValue(transactionType!), [transactionType, currentTab]);
 
   return (
     <Card>
@@ -85,9 +74,7 @@ export default function TransactionData({ transaction }: TransactionDataProps) {
       ) : (
         <>
           <Box mb={3} borderBottom={1} borderColor="divider">
-            <Tabs
-              value={tabValue}
-              onChange={(e, newValue) => setCurrentTab(newValue)}>
+            <Tabs value={tabValue} onChange={(e, newValue) => setCurrentTab(newValue)}>
               {getTabsByTransaction(transaction, transactionType!).map(tab => (
                 <Tab key={tab.value} label={tab.label} value={tab.value} />
               ))}

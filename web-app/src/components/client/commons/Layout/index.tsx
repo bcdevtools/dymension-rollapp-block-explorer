@@ -45,21 +45,11 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <Box display="flex">
-      <Header
-        handleMenuToggle={handleMenuToggle}
-        openSearch={() => setSearchOpen(true)}
-      />
+      <Header handleMenuToggle={handleMenuToggle} openSearch={() => setSearchOpen(true)} />
       <LayoutContext.Provider value={{ handleMenuClose }}>
-        <Sider
-          width={SIDER_WIDTH}
-          menuOpen={menuOpen}
-          handleDrawerTransitionEnd={handleDrawerTransitionEnd}
-        />
+        <Sider width={SIDER_WIDTH} menuOpen={menuOpen} handleDrawerTransitionEnd={handleDrawerTransitionEnd} />
       </LayoutContext.Provider>
-      <SearchModal
-        open={isSearchOpen}
-        handleClose={() => setSearchOpen(false)}
-      />
+      <SearchModal open={isSearchOpen} handleClose={() => setSearchOpen(false)} />
       {children}
     </Box>
   );

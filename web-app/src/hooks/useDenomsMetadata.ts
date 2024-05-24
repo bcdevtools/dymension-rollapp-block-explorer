@@ -6,11 +6,8 @@ import { useThrowError } from './useThrowError';
 import { isAbortException } from '@/utils/common';
 import { RollappActionTypes } from '@/consts/actionTypes';
 
-export default function useDenomsMetadata(
-  shouldThrowError: boolean = false
-): [DenomsMetadata, boolean] {
-  const [{ denomsMetadata, hasGottenDenomsMetadata }, dispatch] =
-    useRollappStore();
+export default function useDenomsMetadata(shouldThrowError: boolean = false): [DenomsMetadata, boolean] {
+  const [{ denomsMetadata, hasGottenDenomsMetadata }, dispatch] = useRollappStore();
   const [loading, setLoading] = useState(!hasGottenDenomsMetadata);
   const [{ rpcService }] = useRollappStore();
   const throwError = useThrowError();
@@ -47,15 +44,7 @@ export default function useDenomsMetadata(
     return () => {
       if (ac) ac.abort();
     };
-  }, [
-    denomsMetadata,
-    dispatch,
-    rpcService,
-    throwError,
-    shouldThrowError,
-    hasGottenDenomsMetadata,
-    loading,
-  ]);
+  }, [denomsMetadata, dispatch, rpcService, throwError, shouldThrowError, hasGottenDenomsMetadata, loading]);
 
   return [denomsMetadata, loading];
 }

@@ -24,21 +24,11 @@ function getTxsDisplay(blockDetail: RecentBlock, pathname: string) {
   return !txsCount ? (
     0
   ) : (
-    <Link
-      href={`${getNewPathByRollapp(pathname, Path.TRANSACTIONS)}?block=${
-        blockDetail.height
-      }`}>
-      {txsCount}
-    </Link>
+    <Link href={`${getNewPathByRollapp(pathname, Path.TRANSACTIONS)}?block=${blockDetail.height}`}>{txsCount}</Link>
   );
 }
 
-export default function BlockListTable({
-  recentBlocks,
-  recentBlocksLoading,
-  page,
-  pageSize,
-}: BlockListTableProps) {
+export default function BlockListTable({ recentBlocks, recentBlocksLoading, page, pageSize }: BlockListTableProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -57,11 +47,7 @@ export default function BlockListTable({
         unixTimestamp={b.timeEpochUTC}
         onClick={() => setShowDateTime(s => !s)}
       />,
-      b.proposer
-        ? b.proposer.moniker || (
-            <ShortAddress address={b.proposer.consensusAddress} />
-          )
-        : '-',
+      b.proposer ? b.proposer.moniker || <ShortAddress address={b.proposer.consensusAddress} /> : '-',
       getTxsDisplay(b, pathname),
     ];
   });
@@ -70,11 +56,7 @@ export default function BlockListTable({
     <DataTable
       headers={[
         'Block',
-        <MuiLink
-          key="mui-link"
-          component="button"
-          underline="none"
-          onClick={() => setShowDateTime(s => !s)}>
+        <MuiLink key="mui-link" component="button" underline="none" onClick={() => setShowDateTime(s => !s)}>
           {showDateTime ? 'Date Time' : 'Age'}
         </MuiLink>,
         'Proposer',

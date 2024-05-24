@@ -23,7 +23,7 @@ type Operation =
 function queryWithCache<T, A, F extends Operation>(
   this: T,
   action: F,
-  args?: Prisma.Exact<A, Prisma.Args<T, F> & CustomCacheStrategy>
+  args?: Prisma.Exact<A, Prisma.Args<T, F> & CustomCacheStrategy>,
 ): Prisma.PrismaPromise<Prisma.Result<T, A, F>> {
   const context = Prisma.getExtensionContext(this) as any;
   if (!args) return context[action]();
@@ -41,7 +41,7 @@ function queryWithCache<T, A, F extends Operation>(
         return context[action](actionQuery);
       },
       ['prisma', (this as any).name, action].join(),
-      revalidate
+      revalidate,
     )(queryArgs);
   }
 }
@@ -52,37 +52,23 @@ export function withCache() {
       $allModels: {
         findManyWithCache<T, A>(
           this: T,
-          args?:
-            | Prisma.Exact<A, Prisma.Args<T, 'findMany'> & CustomCacheStrategy>
-            | undefined
+          args?: Prisma.Exact<A, Prisma.Args<T, 'findMany'> & CustomCacheStrategy> | undefined,
         ): Prisma.PrismaPromise<Prisma.Result<T, A, 'findMany'>> {
-          return queryWithCache.bind(this)(
-            'findMany',
-            args
-          ) as Prisma.PrismaPromise<Prisma.Result<T, A, 'findMany'>>;
+          return queryWithCache.bind(this)('findMany', args) as Prisma.PrismaPromise<Prisma.Result<T, A, 'findMany'>>;
         },
         findUniqueWithCache<T, A>(
           this: T,
-          args: Prisma.Exact<
-            A,
-            Prisma.Args<T, 'findUnique'> & CustomCacheStrategy
-          >
+          args: Prisma.Exact<A, Prisma.Args<T, 'findUnique'> & CustomCacheStrategy>,
         ): Prisma.PrismaPromise<Prisma.Result<T, A, 'findUnique'>> {
-          return queryWithCache.bind(this)(
-            'findUnique',
-            args
-          ) as Prisma.PrismaPromise<Prisma.Result<T, A, 'findUnique'>>;
+          return queryWithCache.bind(this)('findUnique', args) as Prisma.PrismaPromise<
+            Prisma.Result<T, A, 'findUnique'>
+          >;
         },
         countWithCache<T, A>(
           this: T,
-          args?:
-            | Prisma.Exact<A, Prisma.Args<T, 'count'> & CustomCacheStrategy>
-            | undefined
+          args?: Prisma.Exact<A, Prisma.Args<T, 'count'> & CustomCacheStrategy> | undefined,
         ): Prisma.PrismaPromise<Prisma.Result<T, A, 'count'>> {
-          return queryWithCache.bind(this)(
-            'count',
-            args
-          ) as Prisma.PrismaPromise<Prisma.Result<T, A, 'count'>>;
+          return queryWithCache.bind(this)('count', args) as Prisma.PrismaPromise<Prisma.Result<T, A, 'count'>>;
         },
       },
     },

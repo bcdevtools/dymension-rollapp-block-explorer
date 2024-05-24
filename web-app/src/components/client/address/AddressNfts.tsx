@@ -5,9 +5,7 @@ import useAccounts from '@/hooks/useAccounts';
 import { Account } from '@/services/db/accounts';
 import React, { useMemo, useState } from 'react';
 
-export default function AddressNft({
-  accountInfo,
-}: Readonly<{ accountInfo: Account }>) {
+export default function AddressNft({ accountInfo }: Readonly<{ accountInfo: Account }>) {
   const [page, setPage] = useState(0);
   const [nfts, loading] = useAccounts(accountInfo.balance_on_nft_contracts);
 
@@ -19,10 +17,7 @@ export default function AddressNft({
       if (aName && bName) return aName.localeCompare(bName);
       else if (aName && !bName) return -1;
       else if (!aName && bName) return 1;
-      else
-        return (a.address.evm || a.address.cosmos).localeCompare(
-          b.address.evm || b.address.cosmos
-        );
+      else return (a.address.evm || a.address.cosmos).localeCompare(b.address.evm || b.address.cosmos);
     });
     return [
       sorted.map(a => a.address.cosmos),
@@ -40,10 +35,7 @@ export default function AddressNft({
   return (
     <DataTable
       headers={['NFT Contract']}
-      body={body.slice(
-        page * ADDRESS_SUMMARY_COINS_PAGE_SIZE,
-        (page + 1) * ADDRESS_SUMMARY_COINS_PAGE_SIZE
-      )}
+      body={body.slice(page * ADDRESS_SUMMARY_COINS_PAGE_SIZE, (page + 1) * ADDRESS_SUMMARY_COINS_PAGE_SIZE)}
       rowKeys={rowKeys}
       total={rowKeys.length}
       page={page}

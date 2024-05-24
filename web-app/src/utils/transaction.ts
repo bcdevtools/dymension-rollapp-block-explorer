@@ -65,8 +65,7 @@ export function getMessageName(messageType: string) {
       return 'Create Validator';
     case '/cosmos.staking.v1beta1.MsgEditValidator':
       return 'Edit Validator';
-    case '/cosmos.gov.v1beta1.MsgSubmitProposal' ||
-      'cosmos.gov.v1.MsgSubmitProposal':
+    case '/cosmos.gov.v1beta1.MsgSubmitProposal' || 'cosmos.gov.v1.MsgSubmitProposal':
       return 'Submit Proposal';
     case '/cosmos.slashing.v1beta1.MsgUnjail':
       return 'Unjail';
@@ -120,7 +119,7 @@ export const ctsRegex = /{\[{\s.\[address].\[([a-z\d]+)].\s}]}/g;
 
 export const translateCts = (
   ctm: string,
-  convertAddressToLink: (address: string, idx: number) => React.ReactNode
+  convertAddressToLink: (address: string, idx: number) => React.ReactNode,
 ): React.ReactNode[] => {
   const splitted = ctm.split(ctsRegex);
 
@@ -165,7 +164,7 @@ export function translateEvmLogIfPossible(
   topics: string[],
   data: string,
   emitter: string,
-  contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined
+  contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined,
 ) {
   if (
     topics.length === 3 &&
@@ -183,10 +182,7 @@ export function translateEvmLogIfPossible(
       action: 'Transfer (ERC-20)',
       from: from,
       to: to,
-      amount:
-        erc20ContractInfo && decimals
-          ? divideAmountByDecimals(hexToDec(data), decimals).toString()
-          : data,
+      amount: erc20ContractInfo && decimals ? divideAmountByDecimals(hexToDec(data), decimals).toString() : data,
       isRawAmount: decimals === undefined,
     };
   } else if (
@@ -205,10 +201,7 @@ export function translateEvmLogIfPossible(
       action: 'Approve (ERC-20)',
       from: from,
       to: to,
-      amount:
-        erc20ContractInfo && decimals
-          ? divideAmountByDecimals(hexToDec(data), decimals).toString()
-          : data,
+      amount: erc20ContractInfo && decimals ? divideAmountByDecimals(hexToDec(data), decimals).toString() : data,
       isRawAmount: decimals === undefined,
     };
   }

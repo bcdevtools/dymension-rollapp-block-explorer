@@ -1,15 +1,6 @@
 import { searchByTxHash } from '@/actions/transaction';
-import {
-  RollappAddress,
-  isCosmosAddress,
-  isEvmAddress,
-  isTxHash,
-} from '@/utils/address';
-import {
-  getChainInfoByPrefix,
-  getEvmChainInfo,
-  searchChainInfoByMultipleFields,
-} from './chainInfo';
+import { RollappAddress, isCosmosAddress, isEvmAddress, isTxHash } from '@/utils/address';
+import { getChainInfoByPrefix, getEvmChainInfo, searchChainInfoByMultipleFields } from './chainInfo';
 
 export const handleGlobalSearchOnServer = async function (value: string) {
   if (isTxHash(value)) {

@@ -19,9 +19,7 @@ export default async function RootLayout({
 }>) {
   const cookieStore = cookies();
   const themeCookie = cookieStore.get('theme');
-  const themeMode = themeCookie
-    ? (themeCookie.value as ThemeMode)
-    : ThemeMode.DARK;
+  const themeMode = themeCookie ? (themeCookie.value as ThemeMode) : ThemeMode.DARK;
 
   const chainInfos = await getChainInfos();
 
@@ -34,9 +32,7 @@ export default async function RootLayout({
       <body>
         <AppRouterCacheProvider>
           <StoreProvider initialState={initialState}>
-            <ThemeProvider initialThemeMode={themeMode}>
-              {children}
-            </ThemeProvider>
+            <ThemeProvider initialThemeMode={themeMode}>{children}</ThemeProvider>
           </StoreProvider>
         </AppRouterCacheProvider>
       </body>

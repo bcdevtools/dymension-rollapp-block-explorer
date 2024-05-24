@@ -1,11 +1,6 @@
 import { getChainIdAndTxHashByHash } from '@/actions/transaction';
 import { ChainType } from '@/consts/setting';
-import {
-  RollappAddress,
-  isCosmosAddress,
-  isEvmAddress,
-  isTxHash,
-} from '@/utils/address';
+import { RollappAddress, isCosmosAddress, isEvmAddress, isTxHash } from '@/utils/address';
 import { isBlockNo } from '@/utils/common';
 import { RollappInfoMap, rollappInfosToObject } from '@/utils/rollapp';
 import { RollappInfo } from '@/utils/rollapp';
@@ -34,16 +29,11 @@ export type SearchResult = Partial<{
   accounts: AccountSearchResult;
 }>;
 
-function getBlockSearchResult(
-  searchText: string,
-  allRollappInfos: RollappInfo[]
-): BlockSearchResult | null {
+function getBlockSearchResult(searchText: string, allRollappInfos: RollappInfo[]): BlockSearchResult | null {
   if (!isBlockNo(searchText)) return null;
   const blockNo = parseInt(searchText);
 
-  const rollappInfos = allRollappInfos.filter(
-    i => i.latest_indexed_block >= blockNo
-  );
+  const rollappInfos = allRollappInfos.filter(i => i.latest_indexed_block >= blockNo);
   return rollappInfos.length
     ? {
         block: blockNo,
@@ -52,23 +42,15 @@ function getBlockSearchResult(
     : null;
 }
 
-function getRollappSearchResult(
-  searchText: string,
-  allRollappInfos: RollappInfo[]
-) {
+function getRollappSearchResult(searchText: string, allRollappInfos: RollappInfo[]) {
   searchText = searchText.toLowerCase();
   const result = allRollappInfos.filter(
-    i =>
-      i.name.toLowerCase().includes(searchText) ||
-      i.chain_id.toLowerCase().includes(searchText)
+    i => i.name.toLowerCase().includes(searchText) || i.chain_id.toLowerCase().includes(searchText),
   );
   return result.length ? result : null;
 }
 
-function getAccountSearchResult(
-  searchText: string,
-  allRollappInfos: RollappInfo[]
-): AccountSearchResult | null {
+function getAccountSearchResult(searchText: string, allRollappInfos: RollappInfo[]): AccountSearchResult | null {
   if (isEvmAddress(searchText)) {
     return {
       account: getAddress(searchText),
@@ -82,8 +64,7 @@ function getAccountSearchResult(
           rollappInfos: allRollappInfos.filter(i => {
             const bech32 = i.bech32 as JsonObject;
             return (
-              (bech32.addr as string) === rollappAddress.prefix ||
-              (bech32.val as string) === rollappAddress.prefix
+              (bech32.addr as string) === rollappAddress.prefix || (bech32.val as string) === rollappAddress.prefix
             );
           }),
         }
@@ -93,7 +74,7 @@ function getAccountSearchResult(
 
 async function getTransactionSearchResult(
   searchText: string,
-  rollappInfoMap: RollappInfoMap
+  rollappInfoMap: RollappInfoMap,
 ): Promise<TxSearchResult[] | null> {
   if (!isTxHash(searchText)) return null;
   const txs = await getChainIdAndTxHashByHash(searchText);
@@ -108,7 +89,7 @@ async function getTransactionSearchResult(
 export async function handleGlobalSearch(
   searchText: string,
   allRollappInfos: RollappInfo[],
-  selectedRollappInfo?: RollappInfo | null
+  selectedRollappInfo?: RollappInfo | null,
 ): Promise<SearchResult> {
   allRollappInfos = [...allRollappInfos].sort((a, b) => {
     if (a.chain_id === selectedRollappInfo?.chain_id) return -1;
@@ -123,12 +104,7 @@ export async function handleGlobalSearch(
   searchText = searchText.trim();
 
   if (searchText) {
-    const [
-      searchByBlockResult,
-      searchByTxResult,
-      searchByAccountResult,
-      searchByRollappResult,
-    ] = await Promise.all([
+    const [searchByBlockResult, searchByTxResult, searchByAccountResult, searchByRollappResult] = await Promise.all([
       getBlockSearchResult(searchText, allRollappInfos),
       getTransactionSearchResult(searchText, rollappInfoMap),
       getAccountSearchResult(searchText, allRollappInfos),

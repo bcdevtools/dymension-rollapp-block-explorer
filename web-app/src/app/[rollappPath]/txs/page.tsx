@@ -22,10 +22,7 @@ type TransactionsProps = Readonly<{
   };
 }>;
 
-export default async function Transactions({
-  params,
-  searchParams,
-}: TransactionsProps) {
+export default async function Transactions({ params, searchParams }: TransactionsProps) {
   const rollappInfo = (await getRollAppInfoByRollappPath(params.rollappPath))!;
 
   const blockNo = getNumberFromStringParam(searchParams.block) || null;
@@ -37,7 +34,7 @@ export default async function Transactions({
     const [pageSize, page] = getPageAndPageSizeFromStringParam(
       searchParams[PAGE_SIZE_PARAM_NAME],
       searchParams[PAGE_PARAM_NAME],
-      total
+      total,
     );
 
     const transactions = await getTransactions(rollappInfo.chain_id, {
