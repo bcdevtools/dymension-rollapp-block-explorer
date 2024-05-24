@@ -20,6 +20,6 @@ export async function GET() {
   const result = await getIndexingFallBehindChains();
 
   return Response.json(result, {
-    status: result.some((r: any) => r.epoch_diff > 180) ? 503 : 200,
+    status: result.some((r: any) => r.epoch_diff > 360) ? 503 : 200,
   });
 }
