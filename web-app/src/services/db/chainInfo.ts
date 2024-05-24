@@ -7,23 +7,14 @@ import dayjs from 'dayjs';
 
 export type ChainInfo = Pick<
   chain_info,
-  | 'name'
-  | 'chain_id'
-  | 'be_json_rpc_urls'
-  | 'bech32'
-  | 'chain_type'
-  | 'latest_indexed_block'
-  | 'denoms'
+  'name' | 'chain_id' | 'be_json_rpc_urls' | 'bech32' | 'chain_type' | 'latest_indexed_block' | 'denoms'
 >;
 
 function getExcludePostponedChainCondition(): Prisma.chain_infoWhereInput[] {
   return [
     { OR: [{ postponed: null }, { postponed: false }] },
     {
-      OR: [
-        { expiry_at_epoch: null },
-        { expiry_at_epoch: { gt: dayjs().unix() } },
-      ],
+      OR: [{ expiry_at_epoch: null }, { expiry_at_epoch: { gt: dayjs().unix() } }],
     },
   ];
 }
@@ -82,10 +73,7 @@ export const getChainInfoByPrefix = function (prefix: string) {
     select: { chain_id: true, name: true },
     where: {
       AND: getExcludePostponedChainCondition(),
-      OR: [
-        { bech32: { path: ['addr'], equals: prefix } },
-        { bech32: { path: ['val'], equals: prefix } },
-      ],
+      OR: [{ bech32: { path: ['addr'], equals: prefix } }, { bech32: { path: ['val'], equals: prefix } }],
     },
     cacheStrategy: { enabled: true },
   });
@@ -96,8 +84,7 @@ export const searchChainInfoByMultipleFields = function (searchValue: string) {
     { chain_id: { contains: searchValue } },
     { name: { contains: searchValue } },
   ];
-  if (isBlockNo(searchValue))
-    OR.push({ latest_indexed_block: { gte: parseInt(searchValue) } });
+  if (isBlockNo(searchValue)) OR.push({ latest_indexed_block: { gte: parseInt(searchValue) } });
   return prisma.chain_info.findMany({
     select: { chain_id: true, name: true, latest_indexed_block: true },
     where: { AND: getExcludePostponedChainCondition(), OR },

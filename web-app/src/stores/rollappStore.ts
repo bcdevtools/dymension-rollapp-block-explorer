@@ -3,10 +3,7 @@ import { DenomsMetadata } from '@/consts/rpcResTypes';
 import { Store, useStore } from '@/hooks/useStore';
 import { RpcService } from '@/services/rpc.service';
 import { RollappInfo } from '@/utils/rollapp';
-import {
-  getRpcServiceFromSelectedRollappInfo,
-  getSelectedRollappInfoByPathname,
-} from '@/utils/store';
+import { getRpcServiceFromSelectedRollappInfo, getSelectedRollappInfoByPathname } from '@/utils/store';
 
 export type RollappState = {
   rollappInfos: RollappInfo[];
@@ -25,17 +22,10 @@ export const defaultRollappState: RollappState = {
 };
 
 const actions = {
-  [RollappActionTypes.POPULATE_CHAIN_DATA_BY_PATHNAME]: (
-    currentState: RollappState,
-    rollappPath: string
-  ) => {
+  [RollappActionTypes.POPULATE_CHAIN_DATA_BY_PATHNAME]: (currentState: RollappState, rollappPath: string) => {
     if (rollappPath === currentState.selectedRollappInfo?.path) return {};
-    const selectedRollappInfo = getSelectedRollappInfoByPathname(
-      currentState.rollappInfos,
-      rollappPath
-    );
-    const rpcService =
-      getRpcServiceFromSelectedRollappInfo(selectedRollappInfo);
+    const selectedRollappInfo = getSelectedRollappInfoByPathname(currentState.rollappInfos, rollappPath);
+    const rpcService = getRpcServiceFromSelectedRollappInfo(selectedRollappInfo);
 
     return {
       selectedRollappInfo,
@@ -44,10 +34,7 @@ const actions = {
       hasGottenDenomsMetadata: false,
     };
   },
-  [RollappActionTypes.UPDATE_DENOMS_METADATA]: (
-    currentState: RollappState,
-    denomsMetadata: DenomsMetadata
-  ) => {
+  [RollappActionTypes.UPDATE_DENOMS_METADATA]: (currentState: RollappState, denomsMetadata: DenomsMetadata) => {
     return { denomsMetadata, hasGottenDenomsMetadata: true };
   },
 };

@@ -20,12 +20,7 @@ function BlockSummaryCard({
   return (
     <Grid item xs={6} lg={3}>
       <Paper sx={{ p: 1, height: 80 }} variant="outlined">
-        <Box
-          display="flex"
-          flexDirection="column"
-          height="100%"
-          width="100%"
-          justifyContent="space-between">
+        <Box display="flex" flexDirection="column" height="100%" width="100%" justifyContent="space-between">
           <Typography variant="subtitle2" color="text.secondary" gutterBottom>
             {label}
           </Typography>
@@ -40,7 +35,7 @@ export default function BlockListPage() {
   const searchParams = useSearchParams();
   const [pageSize, page] = getPageAndPageSizeFromStringParam(
     searchParams.get(PAGE_SIZE_PARAM_NAME),
-    searchParams.get(PAGE_PARAM_NAME)
+    searchParams.get(PAGE_PARAM_NAME),
   );
   const [recentBlocks, loading] = useRecentBlocks(page, pageSize, {
     useFallback: true,
@@ -71,12 +66,7 @@ export default function BlockListPage() {
         </BlockSummaryCard>
       </Grid>
       <Card>
-        <BlockListTable
-          recentBlocks={recentBlocks}
-          recentBlocksLoading={loading}
-          page={page}
-          pageSize={pageSize}
-        />
+        <BlockListTable recentBlocks={recentBlocks} recentBlocksLoading={loading} page={page} pageSize={pageSize} />
       </Card>
     </>
   );

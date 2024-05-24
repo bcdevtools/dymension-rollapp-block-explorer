@@ -90,11 +90,7 @@ const MenuItem = React.memo(function _MenuItem({
   );
 });
 
-export default React.memo(function Sider({
-  width,
-  menuOpen,
-  handleDrawerTransitionEnd,
-}: SiderProps) {
+export default React.memo(function Sider({ width, menuOpen, handleDrawerTransitionEnd }: SiderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [{ selectedRollappInfo }] = useRollappStore(true);
@@ -110,27 +106,13 @@ export default React.memo(function Sider({
             size="small"
             value={selectedRollappInfo?.path || ''}
             onValueChange={e => {
-              router.push(
-                isNotFoundPath(pathname)
-                  ? e.target.value
-                  : pathname.replace(/^\/[^\/]*/, e.target.value!)
-              );
+              router.push(isNotFoundPath(pathname) ? e.target.value : pathname.replace(/^\/[^\/]*/, e.target.value!));
             }}
           />
         </ListItem>
         <MenuItem name="Overview" path={Path.OVERVIEW} Icon={Summarize} />
-        <MenuItem
-          name="Blocks"
-          path={Path.BLOCKS}
-          Icon={Widgets}
-          selectedPath={[Path.BLOCK]}
-        />
-        <MenuItem
-          name="Transactions"
-          path={Path.TRANSACTIONS}
-          Icon={Receipt}
-          selectedPath={[Path.TRANSACTION]}
-        />
+        <MenuItem name="Blocks" path={Path.BLOCKS} Icon={Widgets} selectedPath={[Path.BLOCK]} />
+        <MenuItem name="Transactions" path={Path.TRANSACTIONS} Icon={Receipt} selectedPath={[Path.TRANSACTION]} />
         <Divider />
 
         <ListItemButton onClick={() => setGovernanceOpen(!governanceOpen)}>
@@ -142,41 +124,22 @@ export default React.memo(function Sider({
         </ListItemButton>
         <Collapse in={governanceOpen} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <MenuItem
-              name="Governors"
-              path={Path.VALIDATORS}
-              Icon={FactCheckIcon}
-              isNested
-            />
-            <MenuItem
-              name="Proposals"
-              path={Path.PROPOSALS}
-              Icon={FeedIcon}
-              selectedPath={[Path.PROPOSAL]}
-              isNested
-            />
+            <MenuItem name="Governors" path={Path.VALIDATORS} Icon={FactCheckIcon} isNested />
+            <MenuItem name="Proposals" path={Path.PROPOSALS} Icon={FeedIcon} selectedPath={[Path.PROPOSAL]} isNested />
           </List>
         </Collapse>
         <Divider />
-        <MenuItem
-          name="Params"
-          path={`${Path.PARAMS}/${MODULES[0]}`}
-          selectedPath={[Path.PARAMS]}
-          Icon={TuneIcon}
-        />
+        <MenuItem name="Params" path={`${Path.PARAMS}/${MODULES[0]}`} selectedPath={[Path.PARAMS]} Icon={TuneIcon} />
       </List>
     </>
   );
 
-  const container =
-    typeof window !== 'undefined' ? () => window.document.body : undefined;
+  const container = typeof window !== 'undefined' ? () => window.document.body : undefined;
 
   return (
     <LayoutContext.Consumer>
       {({ handleMenuClose }) => (
-        <Box
-          component="nav"
-          sx={{ width: { md: width }, flexShrink: { md: 0 } }}>
+        <Box component="nav" sx={{ width: { md: width }, flexShrink: { md: 0 } }}>
           {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
           <Drawer
             container={container}

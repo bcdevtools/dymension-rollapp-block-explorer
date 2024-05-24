@@ -24,9 +24,7 @@ export default function CosmosEventLogs({
         <Grid container spacing={1}>
           {event.attributes.map((attr, idx) => {
             const isAmount = attr.key === 'amount' || attr.key === 'fee';
-            const value = isAmount
-                ? formatRpcAmount(attr.value, denomsMetadata)
-                : attr.value;
+            const value = isAmount ? formatRpcAmount(attr.value, denomsMetadata) : attr.value;
             return (
               <Grid key={idx} container item xs={12}>
                 <Grid item xs={12} lg={3}>
@@ -35,10 +33,7 @@ export default function CosmosEventLogs({
                 <Grid item xs={12} lg={9}>
                   <Typography>{value}</Typography>
                   {isAmount && (
-                    <Typography
-                      fontStyle="italic"
-                      fontSize="0.7rem"
-                      color="text.secondary">
+                    <Typography fontStyle="italic" fontSize="0.7rem" color="text.secondary">
                       {attr.value}
                     </Typography>
                   )}

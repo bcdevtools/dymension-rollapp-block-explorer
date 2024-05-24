@@ -18,17 +18,11 @@ type ValidatorProps = Readonly<{
   bondDenom: string;
 }>;
 
-export default function ValidatorDetail({
-  bech32Address,
-  evmAddress,
-  bondDenom,
-}: ValidatorProps) {
+export default function ValidatorDetail({ bech32Address, evmAddress, bondDenom }: ValidatorProps) {
   const [validator, validatorLoading] = useValidator(bech32Address);
   const [denomsMetadata, denomsMetadataLoading] = useDenomsMetadata();
 
-  const bondDecimals = denomsMetadata[bondDenom]
-    ? denomsMetadata[bondDenom].highestExponent
-    : 0;
+  const bondDecimals = denomsMetadata[bondDenom] ? denomsMetadata[bondDenom].highestExponent : 0;
   const bondSymbol = denomsMetadata[bondDenom]?.symbol;
 
   const loading = validatorLoading || denomsMetadataLoading;
@@ -46,9 +40,7 @@ export default function ValidatorDetail({
             label="Website"
             value={
               validator?.validator.description.website ? (
-                <Link href={validator.validator.description.website}>
-                  {validator.validator.description.website}
-                </Link>
+                <Link href={validator.validator.description.website}>{validator.validator.description.website}</Link>
               ) : (
                 '-'
               )
@@ -56,29 +48,18 @@ export default function ValidatorDetail({
             loading={loading}
           />
 
-          <DetailItem
-            label="Details"
-            value={validator?.validator.description.details || '-'}
-            loading={loading}
-          />
+          <DetailItem label="Details" value={validator?.validator.description.details || '-'} loading={loading} />
           <Grid item xs={12} sx={{ my: 2 }}>
             <Divider />
           </Grid>
           <DetailItem
             label="Voting Power"
-            value={formatBlockchainAmount(
-              validator?.validator.tokens,
-              bondDecimals,
-              0
-            )}
+            value={formatBlockchainAmount(validator?.validator.tokens, bondDecimals, 0)}
             loading={loading}
           />
           <DetailItem
             label="Comissions"
-            value={`${formatBlockchainAmount(
-              validator?.validator.commission.commission_rates.rate,
-              -2
-            )}%`}
+            value={`${formatBlockchainAmount(validator?.validator.commission.commission_rates.rate, -2)}%`}
             loading={loading}
           />
           <Grid item xs={12} sx={{ my: 2 }}>
@@ -86,27 +67,22 @@ export default function ValidatorDetail({
           </Grid>
           <DetailItem
             label="Self Stake"
-            value={`${formatBlockchainAmount(
-              validator?.staking.staking[bech32Address],
-              bondDecimals
-            )} ${bondSymbol}`}
+            value={`${formatBlockchainAmount(validator?.staking.staking[bech32Address], bondDecimals)} ${bondSymbol}`}
             loading={loading}
           />
           <DetailItem
             label="Rewards"
             value={`${formatBlockchainAmount(
               getAmount(get(validator, 'staking.rewards', '0')),
-              bondDecimals
+              bondDecimals,
             )} ${bondSymbol}`}
             loading={loading}
           />
           <DetailItem
             label="Governor Outstanding Rewards"
             value={`${formatBlockchainAmount(
-              getAmount(
-                get(validator, 'staking.validatorOutstandingRewards', '0')
-              ),
-              bondDecimals
+              getAmount(get(validator, 'staking.validatorOutstandingRewards', '0')),
+              bondDecimals,
             )} ${bondSymbol}`}
             loading={loading}
           />
@@ -114,7 +90,7 @@ export default function ValidatorDetail({
             label="Governor Commission"
             value={`${formatBlockchainAmount(
               getAmount(get(validator, 'staking.validatorCommission', '0')),
-              bondDecimals
+              bondDecimals,
             )} ${bondSymbol}`}
             loading={loading}
           />

@@ -8,9 +8,7 @@ import Chip from '@mui/material/Chip';
 import { getNewPathByRollapp, getPrototypeFromTypeUrl } from '@/utils/common';
 import CardActionArea from '@mui/material/CardActionArea';
 import { formatUnixTime } from '@/utils/datetime';
-import LinearProgress, {
-  linearProgressClasses,
-} from '@mui/material/LinearProgress';
+import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 import Big from 'big.js';
 import React from 'react';
 import Skeleton from '@mui/material/Skeleton';
@@ -41,10 +39,7 @@ function getLinearGradientPercent(proposal: GovProposal): string[] {
   return [a, b, c, d];
 }
 
-export default React.memo(function ProposalItem({
-  proposal,
-  idx,
-}: Readonly<{ proposal: GovProposal; idx: number }>) {
+export default React.memo(function ProposalItem({ proposal, idx }: Readonly<{ proposal: GovProposal; idx: number }>) {
   const pathname = usePathname();
   const vp = getLinearGradientPercent(proposal);
 
@@ -62,17 +57,9 @@ export default React.memo(function ProposalItem({
           </Grid>
           <Grid display="flex" item justifyContent="end" xs={6} px={1}>
             <Typography variant="subtitle2">
-              {Array.from(new Set(proposal.messages.map(i => i.type))).map(
-                (type, idx) => (
-                  <Chip
-                    size="small"
-                    key={idx}
-                    label={getPrototypeFromTypeUrl(type)}
-                    color="default"
-                    variant="outlined"
-                  />
-                )
-              )}
+              {Array.from(new Set(proposal.messages.map(i => i.type))).map((type, idx) => (
+                <Chip size="small" key={idx} label={getPrototypeFromTypeUrl(type)} color="default" variant="outlined" />
+              ))}
             </Typography>
           </Grid>
           <Grid item xs={6} px={1} alignItems="end">
@@ -80,18 +67,9 @@ export default React.memo(function ProposalItem({
               <b>{`#${proposal.id} ${proposal.messages[0].protoContent.plan.name}`}</b>
             </Typography>
           </Grid>
-          <Grid
-            display="flex"
-            item
-            justifyContent="end"
-            alignItems="end"
-            xs={6}
-            px={1}>
+          <Grid display="flex" item justifyContent="end" alignItems="end" xs={6} px={1}>
             <Typography color="text.secondary" variant="subtitle2">
-              Voting end on{' '}
-              <StyledSpan>
-                {formatUnixTime(proposal.votingEndTimeEpochUTC)}
-              </StyledSpan>
+              Voting end on <StyledSpan>{formatUnixTime(proposal.votingEndTimeEpochUTC)}</StyledSpan>
             </Typography>
           </Grid>
           <Grid item xs={12}>
@@ -127,13 +105,7 @@ function ProposalLoadingItem({ idx }: { idx: number }) {
         <Grid item xs={6} px={1} alignItems="end">
           <Skeleton width="65%" />
         </Grid>
-        <Grid
-          display="flex"
-          item
-          justifyContent="end"
-          alignItems="end"
-          xs={6}
-          px={1}>
+        <Grid display="flex" item justifyContent="end" alignItems="end" xs={6} px={1}>
           <Skeleton width="40%" />
         </Grid>
         <Grid item xs={12}>
@@ -145,7 +117,5 @@ function ProposalLoadingItem({ idx }: { idx: number }) {
 }
 
 export function getLoadingItems(count: number) {
-  return Array.from(Array(count)).map((n, idx) => (
-    <ProposalLoadingItem key={idx} idx={idx} />
-  ));
+  return Array.from(Array(count)).map((n, idx) => <ProposalLoadingItem key={idx} idx={idx} />);
 }

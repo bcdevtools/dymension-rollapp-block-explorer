@@ -15,9 +15,5 @@ export default function Link({
   prefetch = false,
   ...props
 }: LinkProps) {
-  return (
-    <MuiLink {...{ ...props, fontWeight, underline, prefetch }}>
-      {children}
-    </MuiLink>
-  );
+  return <MuiLink {...{ ...props, fontWeight, underline, prefetch }}>{children}</MuiLink>;
 }

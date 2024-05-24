@@ -25,13 +25,8 @@ export function normalizeRollappsInfo(chainInfos: ChainInfo[]): RollappInfo[] {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export function getRollappInfoByPath(
-  chainInfos: ChainInfo[],
-  path: string
-): RollappInfo | undefined {
-  return normalizeRollappsInfo(chainInfos).find(
-    rollappInfo => rollappInfo.path === path
-  );
+export function getRollappInfoByPath(chainInfos: ChainInfo[], path: string): RollappInfo | undefined {
+  return normalizeRollappsInfo(chainInfos).find(rollappInfo => rollappInfo.path === path);
 }
 
 export function rollappInfosToObject(rollappInfos: RollappInfo[]) {
@@ -40,6 +35,6 @@ export function rollappInfosToObject(rollappInfos: RollappInfo[]) {
       ...finalObj,
       [rollappInfo.chain_id]: rollappInfo,
     }),
-    {}
+    {},
   );
 }

@@ -15,24 +15,16 @@ export default function AddressTokens({
     () =>
       accountInfo.balance_on_erc20_contracts.slice(
         page * ADDRESS_SUMMARY_COINS_PAGE_SIZE,
-        (page + 1) * ADDRESS_SUMMARY_COINS_PAGE_SIZE
+        (page + 1) * ADDRESS_SUMMARY_COINS_PAGE_SIZE,
       ),
-    [page, accountInfo.balance_on_erc20_contracts]
+    [page, accountInfo.balance_on_erc20_contracts],
   );
 
-  const [tokenBalances, loading] = useTokenBalances(
-    evmAddress || accountInfo.bech32_address,
-    slicedErc20Contract
-  );
+  const [tokenBalances, loading] = useTokenBalances(evmAddress || accountInfo.bech32_address, slicedErc20Contract);
 
-  const [rowKeys, body] = useMemo((): [
-    string[],
-    [React.ReactNode, string][]
-  ] => {
+  const [rowKeys, body] = useMemo((): [string[], [React.ReactNode, string][]] => {
     if (!tokenBalances) return [[], []];
-    const _rowKeys = tokenBalances.map<string>(
-      tokenBalance => tokenBalance.contract
-    );
+    const _rowKeys = tokenBalances.map<string>(tokenBalance => tokenBalance.contract);
     const _body = tokenBalances.map<[React.ReactNode, string]>(tokenBalance => [
       <AddressLink
         key={tokenBalance.contract}

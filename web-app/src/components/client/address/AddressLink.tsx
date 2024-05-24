@@ -13,11 +13,7 @@ type AddressLinkProps = Readonly<{
   showCopyButton?: boolean;
 }>;
 
-export default function AddressLink({
-  address,
-  display,
-  showCopyButton = true,
-}: AddressLinkProps) {
+export default function AddressLink({ address, display, showCopyButton = true }: AddressLinkProps) {
   const pathname = usePathname();
   return (
     <>

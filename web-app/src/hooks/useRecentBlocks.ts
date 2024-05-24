@@ -16,11 +16,10 @@ export function useRecentBlocks(
   {
     useFallback = false,
     autoRefresh = false,
-  }: { useFallback?: boolean; autoRefresh?: boolean; reverse?: boolean } = {}
+  }: { useFallback?: boolean; autoRefresh?: boolean; reverse?: boolean } = {},
 ): [RecentBlocksHookResult | null, boolean] {
   const [loading, setLoading] = useState(true);
-  const [recentBlocks, setRecentBlocks] =
-    useState<RecentBlocksHookResult | null>(null);
+  const [recentBlocks, setRecentBlocks] = useState<RecentBlocksHookResult | null>(null);
   const [{ rpcService }] = useRollappStore();
   const throwError = useThrowError();
 
@@ -58,26 +57,20 @@ export function useRecentBlocks(
       try {
         const latestBlockNumberResult = rpcService.getLatestBlockNumber();
         ac = latestBlockNumberResult[1];
-        const lastestBlockRes = await getResponseResult(
-          latestBlockNumberResult[0]
-        );
+        const lastestBlockRes = await getResponseResult(latestBlockNumberResult[0]);
 
         const { latestBlock } = lastestBlockRes;
 
         const topBlockNoInPage = latestBlock - page * pageSize;
 
         const getBlockByNumberResult = rpcService.getBlockByNumber(
-          Array.from(Array(Math.min(topBlockNoInPage, pageSize))).map(
-            (i, idx) => topBlockNoInPage - idx
-          )
+          Array.from(Array(Math.min(topBlockNoInPage, pageSize))).map((i, idx) => topBlockNoInPage - idx),
         );
         ac = getBlockByNumberResult[1];
         const _blocks = await getResponseResult(getBlockByNumberResult[0]);
 
         setRecentBlocks({
-          blocks: [..._blocks]
-            .reverse()
-            .map(b => ({ ...b, txsCount: b.txs.length })),
+          blocks: [..._blocks].reverse().map(b => ({ ...b, txsCount: b.txs.length })),
           latestBlock,
         });
 

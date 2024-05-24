@@ -1,22 +1,11 @@
 import AddressTransactionsSection from '@/components/client/address/AddressTransactionsSection';
-import {
-  AddressPageSearchParams,
-  AddressTransactionType,
-} from '@/consts/addressPage';
+import { AddressPageSearchParams, AddressTransactionType } from '@/consts/addressPage';
 import { getRollAppInfoByRollappPath } from '@/services/chain.service';
 import { RollappAddress, isEvmAddress } from '@/utils/address';
-import {
-  SearchParam,
-  getOffsetFromPageAndPageSize,
-  getPageAndPageSizeFromStringParam,
-} from '@/utils/common';
+import { SearchParam, getOffsetFromPageAndPageSize, getPageAndPageSizeFromStringParam } from '@/utils/common';
 import { redirect } from 'next/navigation';
 import { JsonObject } from '@prisma/client/runtime/library';
-import {
-  ChainType,
-  PAGE_PARAM_NAME,
-  PAGE_SIZE_PARAM_NAME,
-} from '@/consts/setting';
+import { ChainType, PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 import {
   AccountTransactionFilterOption,
   countAccountTransactions,
@@ -37,9 +26,7 @@ type AddressProps = Readonly<{
   tokenMode: boolean;
 }>;
 
-function getFilterOptionsFromTxType(
-  txType: SearchParam
-): AccountTransactionFilterOption {
+function getFilterOptionsFromTxType(txType: SearchParam): AccountTransactionFilterOption {
   switch (txType) {
     case AddressTransactionType.SENT_TRANSACTIONS:
       return { signer: true };
@@ -53,11 +40,7 @@ function getFilterOptionsFromTxType(
   }
 }
 
-export default async function Address({
-  params,
-  searchParams,
-  tokenMode = false,
-}: AddressProps) {
+export default async function Address({ params, searchParams, tokenMode = false }: AddressProps) {
   const rollappInfo = (await getRollAppInfoByRollappPath(params.rollappPath))!;
 
   let { address } = params;
@@ -92,9 +75,7 @@ export default async function Address({
 
   if (!rollappAddress) return redirect(`/${params.rollappPath}`);
 
-  const bech32Address = valAddress
-    ? valAddress.toBech32()
-    : rollappAddress.toBech32();
+  const bech32Address = valAddress ? valAddress.toBech32() : rollappAddress.toBech32();
   const evmAddress = isEVMChain ? rollappAddress.toHex() : null;
   if (valAddress) {
     return (
@@ -109,37 +90,25 @@ export default async function Address({
   const [accountInfo, transactionResult] = await Promise.all([
     getAccount(rollappInfo.chain_id, bech32Address),
     (async function () {
-      const filterOptions = getFilterOptionsFromTxType(
-        searchParams[AddressPageSearchParams.TX_TYPE]
-      );
-      const totalTransactions = await countAccountTransactions(
-        rollappInfo.chain_id,
-        bech32Address,
-        filterOptions
-      );
+      const filterOptions = getFilterOptionsFromTxType(searchParams[AddressPageSearchParams.TX_TYPE]);
+      const totalTransactions = await countAccountTransactions(rollappInfo.chain_id, bech32Address, filterOptions);
 
       const [pageSize, page] = getPageAndPageSizeFromStringParam(
         searchParams[PAGE_SIZE_PARAM_NAME],
         searchParams[PAGE_PARAM_NAME],
-        totalTransactions
+        totalTransactions,
       );
 
-      const accountTransactions = await getAccountTransactions(
-        rollappInfo.chain_id,
-        bech32Address,
-        filterOptions,
-        {
-          take: pageSize,
-          skip: getOffsetFromPageAndPageSize(page, pageSize),
-        }
-      );
+      const accountTransactions = await getAccountTransactions(rollappInfo.chain_id, bech32Address, filterOptions, {
+        take: pageSize,
+        skip: getOffsetFromPageAndPageSize(page, pageSize),
+      });
 
       return { accountTransactions, totalTransactions, pageSize, page };
     })(),
   ]);
 
-  const { accountTransactions, totalTransactions, pageSize, page } =
-    transactionResult!;
+  const { accountTransactions, totalTransactions, pageSize, page } = transactionResult!;
 
   return (
     <>
@@ -149,8 +118,7 @@ export default async function Address({
         accountInfo={accountInfo}
         tokenMode={tokenMode}
       />
-      <AddressTransactionsSection
-        txType={searchParams.txType as AddressTransactionType}>
+      <AddressTransactionsSection txType={searchParams.txType as AddressTransactionType}>
         <TransactionListTable
           transactions={accountTransactions.map(i => ({
             ...i.recent_accounts_transaction,

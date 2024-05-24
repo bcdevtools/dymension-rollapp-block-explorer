@@ -11,7 +11,7 @@ export type AccountTransactionFilterOption = Partial<{
 function getAccountTransactionsWhereCondition(
   chain_id: string,
   bech32_address: string,
-  options: AccountTransactionFilterOption = {}
+  options: AccountTransactionFilterOption = {},
 ) {
   const where: Prisma.ref_account_to_recent_txWhereInput = {
     chain_id,
@@ -26,13 +26,9 @@ function getAccountTransactionsWhereCondition(
 export const countAccountTransactions = async function (
   chain_id: string,
   bech32_address: string,
-  options: AccountTransactionFilterOption = {}
+  options: AccountTransactionFilterOption = {},
 ) {
-  const where = getAccountTransactionsWhereCondition(
-    chain_id,
-    bech32_address,
-    options
-  );
+  const where = getAccountTransactionsWhereCondition(chain_id, bech32_address, options);
 
   return prisma.ref_account_to_recent_tx.countWithCache({
     where,
@@ -73,13 +69,9 @@ export const getAccountTransactions = function (
   chain_id: string,
   bech32_address: string,
   options: AccountTransactionFilterOption = {},
-  paginationOptions: QueryPaginationOption = {}
+  paginationOptions: QueryPaginationOption = {},
 ): Promise<RefAccountToRecentTx[]> {
-  const where = getAccountTransactionsWhereCondition(
-    chain_id,
-    bech32_address,
-    options
-  );
+  const where = getAccountTransactionsWhereCondition(chain_id, bech32_address, options);
 
   return prisma.ref_account_to_recent_tx.findManyWithCache({
     select,
@@ -92,16 +84,10 @@ export const getAccountTransactions = function (
 
 export type Account = Pick<
   account,
-  | 'chain_id'
-  | 'bech32_address'
-  | 'balance_on_erc20_contracts'
-  | 'balance_on_nft_contracts'
+  'chain_id' | 'bech32_address' | 'balance_on_erc20_contracts' | 'balance_on_nft_contracts'
 >;
 
-export const getAccount = function (
-  chain_id: string,
-  bech32_address: string
-): Promise<Account | null> {
+export const getAccount = function (chain_id: string, bech32_address: string): Promise<Account | null> {
   return prisma.account.findUniqueWithCache({
     select: {
       chain_id: true,

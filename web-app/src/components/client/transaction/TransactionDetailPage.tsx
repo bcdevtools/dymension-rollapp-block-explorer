@@ -46,16 +46,11 @@ export default function TransactionDetailPage() {
               transactionDetail && (
                 <>
                   <Typography sx={{ wordBreak: 'break-word' }}>
-                    {transactionDetail.hash}{' '}
-                    <CopyButton
-                      size="small"
-                      textToCopy={transactionDetail.hash}
-                    />
+                    {transactionDetail.hash} <CopyButton size="small" textToCopy={transactionDetail.hash} />
                   </Typography>
                   {params.txHash !== transactionDetail.hash && (
                     <Typography sx={{ wordBreak: 'break-word' }}>
-                      {params.txHash}{' '}
-                      <CopyButton size="small" textToCopy={params.txHash} />
+                      {params.txHash} <CopyButton size="small" textToCopy={params.txHash} />
                     </Typography>
                   )}
                 </>
@@ -65,19 +60,12 @@ export default function TransactionDetailPage() {
           />
           <DetailItem
             label="Status"
-            value={
-              transactionDetail &&
-              getStatusDisplay(transactionDetail.result.success)
-            }
+            value={transactionDetail && getStatusDisplay(transactionDetail.result.success)}
             loading={loading}
           />
           <DetailItem
             label="Block"
-            value={
-              transactionDetail && (
-                <LinkToBlockNo blockNo={transactionDetail.height} />
-              )
-            }
+            value={transactionDetail && <LinkToBlockNo blockNo={transactionDetail.height} />}
             loading={loading}
           />
           <Grid item xs={12} sx={{ my: 2 }}>
@@ -88,8 +76,7 @@ export default function TransactionDetailPage() {
             value={
               transactionDetail && (
                 <Typography>
-                  {formatNumber(used)} | {formatNumber(limit)} (
-                  {round((used / limit) * 100, 2)}%)
+                  {formatNumber(used)} | {formatNumber(limit)} ({round((used / limit) * 100, 2)}%)
                 </Typography>
               )
             }

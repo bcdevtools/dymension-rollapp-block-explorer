@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  Transaction,
-  EvmTx,
-  EvmReceipt,
-  TxMode,
-  Erc20ContractInfo,
-  EvmLog,
-} from '@/consts/rpcResTypes';
+import { Transaction, EvmTx, EvmReceipt, TxMode, Erc20ContractInfo, EvmLog } from '@/consts/rpcResTypes';
 import TextField from '@mui/material/TextField';
 import { ItemContainer, RowItem } from './_Common';
 import {
@@ -41,17 +34,9 @@ export default function EvmDetails({
   if (transaction.mode === TxMode.EVM_GENERAL_TRANSFER) {
     return <EvmDetailsGeneralTransfer evmTx={evmTxInfo} />;
   } else if (transaction.mode === TxMode.EVM_CONTRACT_CALL) {
-    return EvmDetailsContractCall(
-      evmTxInfo,
-      evmTxReceipt,
-      transaction.evmContractAddressToErc20ContractInfo
-    );
+    return EvmDetailsContractCall(evmTxInfo, evmTxReceipt, transaction.evmContractAddressToErc20ContractInfo);
   } else if (transaction.mode === TxMode.EVM_CONTRACT_DEPLOY) {
-    return EvmDetailsDeployContract(
-      evmTxInfo,
-      evmTxReceipt,
-      transaction.evmContractAddressToErc20ContractInfo
-    );
+    return EvmDetailsDeployContract(evmTxInfo, evmTxReceipt, transaction.evmContractAddressToErc20ContractInfo);
   } else {
     return `Unknown EVM Tx mode ${transaction.mode}`;
   }
@@ -60,25 +45,18 @@ export default function EvmDetails({
 function EvmDetailsDeployContract(
   evmTx: EvmTx,
   evmTxReceipt: EvmReceipt,
-  contractAddressToErc20ContractInfo?: Map<string, Erc20ContractInfo>
+  contractAddressToErc20ContractInfo?: Map<string, Erc20ContractInfo>,
 ) {
   return (
     <ItemContainer>
-      <RowItem
-        label="Deployer"
-        value={<AddressLink address={getAddress(evmTx.from)} />}
-      />
+      <RowItem label="Deployer" value={<AddressLink address={getAddress(evmTx.from)} />} />
       {evmTxReceipt.contractAddress ? (
         <RowItem
           label="Deploy New Contract"
           value={
             <AddressLink
               address={getAddress(evmTxReceipt.contractAddress)}
-              display={
-                contractAddressToErc20ContractInfo?.get(
-                  evmTxReceipt.contractAddress
-                )?.name
-              }
+              display={contractAddressToErc20ContractInfo?.get(evmTxReceipt.contractAddress)?.name}
             />
           }
         />
@@ -99,12 +77,7 @@ function EvmDetailsDeployContract(
           }
         />
       )}
-      <RowItem
-        label="Gas Price"
-        value={formatNumber(
-          fromHexStringToEthereumGasPriceValue(evmTx.gasPrice)
-        )}
-      />
+      <RowItem label="Gas Price" value={formatNumber(fromHexStringToEthereumGasPriceValue(evmTx.gasPrice))} />
     </ItemContainer>
   );
 }
@@ -131,35 +104,11 @@ function EvmDetailsGeneralTransfer({ evmTx }: { evmTx: EvmTx }) {
           )
         }
       />
-      <RowItem
-        label="From"
-        value={
-          loading ? (
-            <Skeleton />
-          ) : (
-            <AddressLink address={getAddress(evmTx.from)} />
-          )
-        }
-      />
-      <RowItem
-        label="To"
-        value={
-          loading ? (
-            <Skeleton />
-          ) : (
-            evmTx.to && <AddressLink address={getAddress(evmTx.to)} />
-          )
-        }
-      />
+      <RowItem label="From" value={loading ? <Skeleton /> : <AddressLink address={getAddress(evmTx.from)} />} />
+      <RowItem label="To" value={loading ? <Skeleton /> : evmTx.to && <AddressLink address={getAddress(evmTx.to)} />} />
       <RowItem
         label="Gas Price"
-        value={
-          loading ? (
-            <Skeleton />
-          ) : (
-            formatNumber(fromHexStringToEthereumGasPriceValue(evmTx.gasPrice))
-          )
-        }
+        value={loading ? <Skeleton /> : formatNumber(fromHexStringToEthereumGasPriceValue(evmTx.gasPrice))}
       />
     </ItemContainer>
   );
@@ -168,23 +117,13 @@ function EvmDetailsGeneralTransfer({ evmTx }: { evmTx: EvmTx }) {
 function EvmDetailsContractCall(
   evmTx: EvmTx,
   evmTxReceipt: EvmReceipt,
-  contractAddressToErc20ContractInfo?: Map<string, Erc20ContractInfo>
+  contractAddressToErc20ContractInfo?: Map<string, Erc20ContractInfo>,
 ) {
   return (
     <ItemContainer>
-      {evmTxReceipt.logs.length > 0 &&
-        renderEvmTxActions(
-          evmTxReceipt.logs,
-          contractAddressToErc20ContractInfo
-        )}
-      <RowItem
-        label="Caller"
-        value={<AddressLink address={getAddress(evmTx.from)} />}
-      />
-      <RowItem
-        label="Contract"
-        value={evmTx.to && <AddressLink address={getAddress(evmTx.to)} />}
-      />
+      {evmTxReceipt.logs.length > 0 && renderEvmTxActions(evmTxReceipt.logs, contractAddressToErc20ContractInfo)}
+      <RowItem label="Caller" value={<AddressLink address={getAddress(evmTx.from)} />} />
+      <RowItem label="Contract" value={evmTx.to && <AddressLink address={getAddress(evmTx.to)} />} />
       <RowItem label="Method" value={evmTx.input!.substring(0, 10)} />
       <RowItem
         label="Input"
@@ -203,23 +142,15 @@ function EvmDetailsContractCall(
           )
         }
       />
-      <RowItem
-        label="Tx Value"
-        value={formatNumber(fromHexStringToEthereumValue(evmTx.value!))}
-      />
-      <RowItem
-        label="Gas Price"
-        value={formatNumber(
-          fromHexStringToEthereumGasPriceValue(evmTx.gasPrice)
-        )}
-      />
+      <RowItem label="Tx Value" value={formatNumber(fromHexStringToEthereumValue(evmTx.value!))} />
+      <RowItem label="Gas Price" value={formatNumber(fromHexStringToEthereumGasPriceValue(evmTx.gasPrice))} />
     </ItemContainer>
   );
 }
 
 function renderEvmTxActions(
   evmTxLogs: EvmLog[],
-  contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined
+  contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined,
 ) {
   let renderedAny = false;
   return (
@@ -230,7 +161,7 @@ function renderEvmTxActions(
           log.data,
           log.address,
           contractAddressToErc20ContractInfo,
-          idx
+          idx,
         );
         renderedAny = renderedAny || !!renderElement;
         return renderElement;
@@ -250,17 +181,10 @@ function renderEvmTxAction(
   topics: string[],
   data: string,
   emitter: string,
-  contractAddressToErc20ContractInfo:
-    | Map<string, Erc20ContractInfo>
-    | undefined,
-  key: number
+  contractAddressToErc20ContractInfo: Map<string, Erc20ContractInfo> | undefined,
+  key: number,
 ) {
-  const translated = translateEvmLogIfPossible(
-    topics,
-    data,
-    emitter,
-    contractAddressToErc20ContractInfo
-  );
+  const translated = translateEvmLogIfPossible(topics, data, emitter, contractAddressToErc20ContractInfo);
   if (!translated) return null;
 
   switch (translated.type) {
@@ -272,17 +196,9 @@ function renderEvmTxAction(
           value={
             <>
               Transfer {translated.isRawAmount && `(Raw) `} {translated.amount}{' '}
-              {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''}{' '}
-              from{' '}
-              <AddressLink
-                address={translated.from}
-                display={getAddress(translated.from)}
-              />{' '}
-              to{' '}
-              <AddressLink
-                address={translated.to}
-                display={getAddress(translated.to)}
-              />
+              {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''} from{' '}
+              <AddressLink address={translated.from} display={getAddress(translated.from)} /> to{' '}
+              <AddressLink address={translated.to} display={getAddress(translated.to)} />
             </>
           }
         />
@@ -295,17 +211,10 @@ function renderEvmTxAction(
           value={
             <>
               Granted spend up to {translated.isRawAmount && `(Raw) `} {translated.amount}{' '}
-              {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''}{' '}
-              from{' '}
-              <AddressLink
-                address={translated.from}
-                display={getAddress(translated.from)}
-              />{', '}
-              grant to{' '}
-              <AddressLink
-                address={translated.to}
-                display={getAddress(translated.to)}
-              />
+              {contractAddressToErc20ContractInfo?.get(emitter)?.symbol || ''} from{' '}
+              <AddressLink address={translated.from} display={getAddress(translated.from)} />
+              {', '}
+              grant to <AddressLink address={translated.to} display={getAddress(translated.to)} />
             </>
           }
         />

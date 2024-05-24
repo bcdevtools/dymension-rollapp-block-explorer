@@ -52,10 +52,7 @@ type HeaderProps = Readonly<{
   openSearch: () => void;
 }>;
 
-export default React.memo(function Header({
-  handleMenuToggle,
-  openSearch,
-}: HeaderProps) {
+export default React.memo(function Header({ handleMenuToggle, openSearch }: HeaderProps) {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
@@ -68,11 +65,7 @@ export default React.memo(function Header({
           aria-label="open drawer"
           onClick={handleMenuToggle}
           sx={{ mr: 2, display: { md: 'none' } }}>
-          {isDark ? (
-            <MenuIcon color="primary" />
-          ) : (
-            <MenuIcon sx={{ color: 'white' }} />
-          )}
+          {isDark ? <MenuIcon color="primary" /> : <MenuIcon sx={{ color: 'white' }} />}
         </IconButton>
         <Logo isDark={isDark} />
         <StyledTextField

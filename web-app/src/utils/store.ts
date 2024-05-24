@@ -3,32 +3,19 @@ import { getRollappPathFromPathname } from './common';
 import { RollappInfo } from './rollapp';
 import { RpcService } from '@/services/rpc.service';
 
-export function getSelectedRollappInfoByPathname(
-  rollappInfos: RollappInfo[],
-  rollappPath: string
-) {
-  return (
-    rollappInfos.find(rollappInfo => rollappInfo.path === rollappPath) || null
-  );
+export function getSelectedRollappInfoByPathname(rollappInfos: RollappInfo[], rollappPath: string) {
+  return rollappInfos.find(rollappInfo => rollappInfo.path === rollappPath) || null;
 }
 
-export function getRpcServiceFromSelectedRollappInfo(
-  selectedRollappInfo: RollappInfo | null
-) {
+export function getRpcServiceFromSelectedRollappInfo(selectedRollappInfo: RollappInfo | null) {
   return selectedRollappInfo && selectedRollappInfo.be_json_rpc_urls.length
     ? new RpcService(selectedRollappInfo.be_json_rpc_urls[0])
     : null;
 }
 
-export function getInitialRollappState(
-  rollappInfos: RollappInfo[],
-  pathname: string
-): RollappState {
+export function getInitialRollappState(rollappInfos: RollappInfo[], pathname: string): RollappState {
   const rollappPath = getRollappPathFromPathname(pathname);
-  const selectedRollappInfo = getSelectedRollappInfoByPathname(
-    rollappInfos,
-    rollappPath
-  );
+  const selectedRollappInfo = getSelectedRollappInfoByPathname(rollappInfos, rollappPath);
   const rpcService = getRpcServiceFromSelectedRollappInfo(selectedRollappInfo);
   return {
     rollappInfos,

@@ -14,10 +14,7 @@ import DateWithTooltip from '@/components/commons/DateWithTooltip';
 function getTxsDisplay(blockDetail: Block | null, pathname: string) {
   const txCount = blockDetail ? blockDetail.txs.length : 0;
   return txCount ? (
-    <Link
-      href={`${getNewPathByRollapp(pathname, Path.TRANSACTIONS)}?block=${
-        blockDetail!.height
-      }`}>
+    <Link href={`${getNewPathByRollapp(pathname, Path.TRANSACTIONS)}?block=${blockDetail!.height}`}>
       {txCount} transaction{txCount > 1 && 's'}
     </Link>
   ) : (
@@ -41,18 +38,13 @@ export default function BlockDetailPage() {
         value={
           blockDetail && (
             <>
-              <DateWithTooltip unixTimestamp={blockDetail.timeEpochUTC} /> (
-              {formatUnixTime(blockDetail.timeEpochUTC)})
+              <DateWithTooltip unixTimestamp={blockDetail.timeEpochUTC} /> ({formatUnixTime(blockDetail.timeEpochUTC)})
             </>
           )
         }
         loading={loading}
       />
-      <DetailItem
-        label="Transactions"
-        value={<>{txsDisplay} in this block</>}
-        loading={loading}
-      />
+      <DetailItem label="Transactions" value={<>{txsDisplay} in this block</>} loading={loading} />
     </Grid>
   );
 }

@@ -27,11 +27,7 @@ export default function ParamsPage() {
         value={params.module}
         label="Module"
         variant="standard"
-        onChange={e =>
-          router.push(
-            `${getNewPathByRollapp(pathname, Path.PARAMS)}/${e.target.value}`
-          )
-        }>
+        onChange={e => router.push(`${getNewPathByRollapp(pathname, Path.PARAMS)}/${e.target.value}`)}>
         {MODULES.map(i => (
           <MenuItem key={i} value={i}>
             {i}

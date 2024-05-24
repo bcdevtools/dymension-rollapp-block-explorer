@@ -1,9 +1,6 @@
 'use server';
 
-import {
-  getChainIdAndTxHashByTxHashes,
-  getTxHashAndChainInfoByTxHashes,
-} from '@/services/db/transactions';
+import { getChainIdAndTxHashByTxHashes, getTxHashAndChainInfoByTxHashes } from '@/services/db/transactions';
 import { getTxHashesQueryValue } from '@/utils/transaction';
 
 export async function getChainIdAndTxHashByHash(txHash: string) {

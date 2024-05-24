@@ -19,10 +19,7 @@ export default function Block({ params }: BlockProps) {
         <BlockDetailPage />
       </Card>
       <Card>
-        <TransactionListByBlockNo
-          blockNo={+params.blockNo}
-          showPaginationOnTop={false}
-        />
+        <TransactionListByBlockNo blockNo={+params.blockNo} showPaginationOnTop={false} />
       </Card>
     </>
   );

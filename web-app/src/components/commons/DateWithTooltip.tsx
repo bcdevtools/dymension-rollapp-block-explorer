@@ -27,10 +27,7 @@ export default React.memo(function DateWithTooltip({
   }, [unixTimestamp, showDateTime]);
 
   return (
-    <Tooltip
-      title={!showDateTime ? timeUtc : age}
-      placement="top"
-      onClick={onClick}>
+    <Tooltip title={!showDateTime ? timeUtc : age} placement="top" onClick={onClick}>
       <span style={{ cursor: 'pointer' }}>{showDateTime ? timeUtc : age}</span>
     </Tooltip>
   );

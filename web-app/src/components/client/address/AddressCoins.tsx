@@ -7,8 +7,7 @@ import { useContext, useMemo, useState } from 'react';
 
 export default function AddressCoins() {
   const [page, setPage] = useState(0);
-  const { balancesWithMetadata: accountBalances, loading } =
-    useContext(AccountContext);
+  const { balancesWithMetadata: accountBalances, loading } = useContext(AccountContext);
 
   const [rowKeys, body] = useMemo((): [string[], [string, string][]] => {
     if (!accountBalances) return [[], []];
@@ -20,10 +19,7 @@ export default function AddressCoins() {
         _denom = accountBalances[denom].metadata!.symbol;
         _decimals = accountBalances[denom].metadata!.highestExponent;
       }
-      return [
-        _denom,
-        formatBlockchainAmount(accountBalances[denom].balance, _decimals),
-      ];
+      return [_denom, formatBlockchainAmount(accountBalances[denom].balance, _decimals)];
     });
     return [_rowKeys, _body];
   }, [accountBalances]);
@@ -31,10 +27,7 @@ export default function AddressCoins() {
   return (
     <DataTable
       headers={['Denom', 'Balance']}
-      body={body.slice(
-        page * ADDRESS_SUMMARY_COINS_PAGE_SIZE,
-        (page + 1) * ADDRESS_SUMMARY_COINS_PAGE_SIZE
-      )}
+      body={body.slice(page * ADDRESS_SUMMARY_COINS_PAGE_SIZE, (page + 1) * ADDRESS_SUMMARY_COINS_PAGE_SIZE)}
       rowKeys={rowKeys}
       total={rowKeys.length}
       page={page}

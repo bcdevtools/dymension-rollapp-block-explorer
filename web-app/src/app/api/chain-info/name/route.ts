@@ -5,13 +5,10 @@ export async function GET(request: Request) {
   const chainIds = searchParams.getAll('chain-id');
   const chainInfos = await getChainNamesByChainIds(chainIds);
 
-  const result = chainInfos.reduce<{ [chainId: string]: string }>(
-    (final, chainInfo) => {
-      final[chainInfo.chain_id] = chainInfo.name;
-      return final;
-    },
-    {}
-  );
+  const result = chainInfos.reduce<{ [chainId: string]: string }>((final, chainInfo) => {
+    final[chainInfo.chain_id] = chainInfo.name;
+    return final;
+  }, {});
 
   return Response.json(result);
 }

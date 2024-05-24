@@ -35,10 +35,10 @@ export default function GovernanceList() {
                 proposal.status === ProposalStatus.PROPOSAL_STATUS_VOTING_PERIOD
                   ? [[...r1, proposal], r2]
                   : [r1, [...r2, proposal]],
-              [[], []]
+              [[], []],
             )
         : [[], []],
-    [govProposals]
+    [govProposals],
   );
 
   return (
@@ -50,14 +50,10 @@ export default function GovernanceList() {
         {loading ? (
           getLoadingItems(3)
         ) : liveProposals.length ? (
-          liveProposals.map((proposal, idx) => (
-            <ProposalItem key={proposal.id} proposal={proposal} idx={idx} />
-          ))
+          liveProposals.map((proposal, idx) => <ProposalItem key={proposal.id} proposal={proposal} idx={idx} />)
         ) : (
           <Box display="flex" justifyContent="center">
-            <Typography color="text.secondary">
-              There is currently no live proposal
-            </Typography>
+            <Typography color="text.secondary">There is currently no live proposal</Typography>
           </Box>
         )}
       </Card>
@@ -68,9 +64,7 @@ export default function GovernanceList() {
         {loading ? (
           getLoadingItems(PAGE_SIZE)
         ) : allProposals.length ? (
-          allProposals.map((proposal, idx) => (
-            <ProposalItem key={proposal.id} proposal={proposal} idx={idx} />
-          ))
+          allProposals.map((proposal, idx) => <ProposalItem key={proposal.id} proposal={proposal} idx={idx} />)
         ) : (
           <Box display="flex" justifyContent="center">
             <Typography color="text.secondary">No data</Typography>
@@ -95,9 +89,7 @@ export default function GovernanceList() {
           slotProps={{
             actions: {
               nextButton: {
-                disabled:
-                  !allProposals.length ||
-                  allProposals[allProposals.length - 1].id === 1,
+                disabled: !allProposals.length || allProposals[allProposals.length - 1].id === 1,
               },
             },
           }}

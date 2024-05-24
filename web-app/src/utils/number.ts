@@ -28,11 +28,7 @@ export function divideAmountByDecimals(amount: Big | string, decimals: number) {
   return amount.div(new Big(10 ** decimals));
 }
 
-export function formatBlockchainAmount(
-  value: string | Big = new Big(0),
-  decimals: number = 0,
-  fixed?: number
-) {
+export function formatBlockchainAmount(value: string | Big = new Big(0), decimals: number = 0, fixed?: number) {
   const result = divideAmountByDecimals(value, decimals);
   return formatNumber(fixed === undefined ? result : result.round(fixed));
 }

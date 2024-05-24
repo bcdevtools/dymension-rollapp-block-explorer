@@ -16,7 +16,7 @@ export default function TransactionListByBlockNo({
   const [pageSize, page] = getPageAndPageSizeFromStringParam(
     searchParams.get(PAGE_SIZE_PARAM_NAME),
     searchParams.get(PAGE_PARAM_NAME),
-    block?.txs.length || 0
+    block?.txs.length || 0,
   );
 
   return (

@@ -19,10 +19,7 @@ export class RpcClient {
   constructor(rpcUrl: string) {
     this._rpcUrl = rpcUrl;
   }
-  protected async _callRpc(
-    fetchOptions: FetchOptions = {},
-    body: RpcCallParamFull | RpcCallParamFull[]
-  ) {
+  protected async _callRpc(fetchOptions: FetchOptions = {}, body: RpcCallParamFull | RpcCallParamFull[]) {
     const res = await fetch(this._rpcUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -32,27 +29,15 @@ export class RpcClient {
     return res.json();
   }
 
-  callRpc(
-    param: RpcCallParam,
-    callRpcOptions?: CallRpcOptions
-  ): [Promise<any>, AbortController];
-  callRpc(
-    params: RpcCallParam[],
-    callRpcOptions?: CallRpcOptions
-  ): [Promise<any[]>, AbortController];
-  callRpc(
-    params: RpcCallParam | RpcCallParam[],
-    callRpcOptions?: CallRpcOptions
-  ) {
+  callRpc(param: RpcCallParam, callRpcOptions?: CallRpcOptions): [Promise<any>, AbortController];
+  callRpc(params: RpcCallParam[], callRpcOptions?: CallRpcOptions): [Promise<any[]>, AbortController];
+  callRpc(params: RpcCallParam | RpcCallParam[], callRpcOptions?: CallRpcOptions) {
     const ac = new AbortController();
     const paramFulls = !Array.isArray(params)
       ? { ...params, id: 1 }
       : params.map((param, i) => ({ ...param, id: i + 1 }));
 
-    return [
-      this._callRpc({ ...callRpcOptions, signal: ac.signal }, paramFulls),
-      ac,
-    ];
+    return [this._callRpc({ ...callRpcOptions, signal: ac.signal }, paramFulls), ac];
   }
 }
 
@@ -80,10 +65,7 @@ export function getBlockByNumberParam(blockNo: number): RpcCallParam {
   };
 }
 
-export function getRecentBlocksParam(
-  page: number,
-  pageSize: number
-): RpcCallParam {
+export function getRecentBlocksParam(page: number, pageSize: number): RpcCallParam {
   return {
     method: 'be_getRecentBlocks',
     params: [page, pageSize],
@@ -155,10 +137,7 @@ export function getGovProposalParam(id: number): RpcCallParam {
   };
 }
 
-export function getErc20BalanceParam(
-  address: string,
-  tokenAddresses: string[]
-): RpcCallParam {
+export function getErc20BalanceParam(address: string, tokenAddresses: string[]): RpcCallParam {
   return {
     method: 'evm_getErc20Balance',
     params: [address, tokenAddresses],
@@ -166,10 +145,7 @@ export function getErc20BalanceParam(
   };
 }
 
-export function getCw20BalanceParam(
-  address: string,
-  tokenAddresses: string[]
-): RpcCallParam {
+export function getCw20BalanceParam(address: string, tokenAddresses: string[]): RpcCallParam {
   return {
     method: 'evm_getCw20Balance',
     params: [address, tokenAddresses],

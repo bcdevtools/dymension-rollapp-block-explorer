@@ -1,10 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 export type StoreActions<S> = {
-  [key: string]: (
-    globalState: S,
-    payload?: any
-  ) => Promise<Partial<S>> | Partial<S>;
+  [key: string]: (globalState: S, payload?: any) => Promise<Partial<S>> | Partial<S>;
 };
 
 export class Store<S, A extends StoreActions<S>> {
@@ -22,21 +19,18 @@ type Dispatch<A> = (actionIdentifier: keyof A, payload?: any) => Promise<void>;
 
 export const useStore = <S, A extends StoreActions<S>>(
   store: Store<S, A>,
-  shouldListen: boolean = true
+  shouldListen: boolean = true,
 ): [S, Dispatch<A>] => {
   const [, setState] = useState(store.state);
 
   const dispatch: Dispatch<A> = useCallback(
     async function (actionIdentifier, payload) {
-      const newState = await store.actions[actionIdentifier](
-        store.state,
-        payload
-      );
+      const newState = await store.actions[actionIdentifier](store.state, payload);
       store.state = { ...store.state, ...newState };
 
       store.listeners.forEach(listener => listener(store.state));
     },
-    [store]
+    [store],
   );
 
   useEffect(() => {
