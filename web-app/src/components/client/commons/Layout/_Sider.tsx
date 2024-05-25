@@ -106,6 +106,7 @@ export default React.memo(function Sider({ width, menuOpen, handleDrawerTransiti
             size="small"
             value={selectedRollappInfo?.path || ''}
             onValueChange={e => {
+              //eslint-disable-next-line
               router.push(isNotFoundPath(pathname) ? e.target.value : pathname.replace(/^\/[^\/]*/, e.target.value!));
             }}
           />

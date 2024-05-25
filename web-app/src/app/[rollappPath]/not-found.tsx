@@ -6,9 +6,9 @@ export default function NotFound() {
   return (
     <ErrorContainer>
       <Error
-        //@ts-ignore
+        //@ts-expect-error error.message might not be a number
         statusCode={'Not found'}
-        //@ts-ignore
+        //@ts-expect-error title might not expect a JSX element
         title={
           <>
             Could not find requested resource. <LinkBack />

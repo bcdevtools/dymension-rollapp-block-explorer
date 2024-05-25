@@ -5,10 +5,12 @@ import { formatBlockchainAmount } from './number';
 export type SearchParam = string | undefined | null;
 
 export function getRollappPathFromPathname(pathname: string) {
+  //eslint-disable-next-line
   return pathname.match(/^\/[^\/]*/)![0];
 }
 
 export function isNotFoundPath(pathname: string) {
+  //eslint-disable-next-line
   return /(?<=^\/[^\/]*\/)not-found$/.test(pathname);
 }
 
@@ -71,6 +73,7 @@ function addSpaceBetweenWords(word: string) {
 }
 
 export function getPrototypeFromTypeUrl(typeUrl: string) {
+  //eslint-disable-next-line
   const matched = typeUrl.match(/(?<=\.)[^\.]+$/);
   if (!matched) return addSpaceBetweenWords(typeUrl);
   else return addSpaceBetweenWords(matched[0]);

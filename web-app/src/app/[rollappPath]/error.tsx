@@ -14,9 +14,9 @@ export default function ErrorLayout({ error, reset }: { error: Error & { digest?
   return (
     <ErrorContainer>
       <Error
-        //@ts-ignore
+        //@ts-expect-error error.message might not be a number
         statusCode={error.message}
-        //@ts-ignore
+        //@ts-expect-error title might not expect a JSX element
         title={
           !retrying ? (
             <Link

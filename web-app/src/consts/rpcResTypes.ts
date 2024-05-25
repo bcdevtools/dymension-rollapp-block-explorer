@@ -197,7 +197,7 @@ export interface Staking {
 
 export interface AccountStaking {
   rewards: string;
-  staking: Staking | {};
+  staking: Staking | Record<string, never>;
 }
 export interface Account {
   address: { cosmos: string; evm: string };
