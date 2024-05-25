@@ -7,6 +7,7 @@ const nodeCache = new NodeCache({
   useClones: false,
 });
 
+// eslint-disable-next-line
 export function cache(funcToCache: Function, key: Key, revalidateInSecond?: number): any {
   return async function (...args: any[]) {
     const cacheKey = [key, stringify(args)].join();

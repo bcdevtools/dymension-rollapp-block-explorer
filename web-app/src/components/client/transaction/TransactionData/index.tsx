@@ -37,18 +37,20 @@ function getTabsByTransaction(transaction: Transaction, transactionType: Transac
         { label: 'Event Logs', value: TabValue.COSMOS_EVENT_LOGS },
       ];
     case 'evm':
-      const tabs = [
-        { label: 'Details', value: TabValue.EVM_DETAILS },
-        { label: 'Receipt', value: TabValue.EVM_RECEIPT },
-      ];
-      if (transaction.evmReceipt?.logs?.length) {
-        tabs.push({ label: 'EVM Event Logs', value: TabValue.EVM_EVENT_LOGS });
-      }
-      tabs.push({
-        label: 'Cosmos Event Logs',
-        value: TabValue.COSMOS_EVENT_LOGS,
-      });
-      return tabs;
+      return (function () {
+        const tabs = [
+          { label: 'Details', value: TabValue.EVM_DETAILS },
+          { label: 'Receipt', value: TabValue.EVM_RECEIPT },
+        ];
+        if (transaction.evmReceipt?.logs?.length) {
+          tabs.push({ label: 'EVM Event Logs', value: TabValue.EVM_EVENT_LOGS });
+        }
+        tabs.push({
+          label: 'Cosmos Event Logs',
+          value: TabValue.COSMOS_EVENT_LOGS,
+        });
+        return tabs;
+      })();
   }
 }
 
@@ -94,8 +96,6 @@ export default function TransactionData({ transaction }: TransactionDataProps) {
                   return <EvmReceiptDetails transaction={transaction} />;
                 case TabValue.EVM_EVENT_LOGS:
                   return <EvmEventLogs transaction={transaction} />;
-                case TabValue.COSMOS_EVENT_LOGS:
-                  return <CosmosEventLogs transaction={transaction} />;
               }
             })()}
           </Box>

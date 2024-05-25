@@ -4,7 +4,7 @@ import { AccountStaking as AccountStakingInfo } from '@/consts/rpcResTypes';
 import { ADDRESS_SUMMARY_COINS_PAGE_SIZE } from '@/consts/setting';
 import useDenomsMetadata from '@/hooks/useDenomsMetadata';
 import { useRollappStore } from '@/stores/rollappStore';
-import { formatRpcAmount, getAmount, getDenom } from '@/utils/common';
+import { formatRpcAmount } from '@/utils/common';
 import { formatBlockchainAmount } from '@/utils/number';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';

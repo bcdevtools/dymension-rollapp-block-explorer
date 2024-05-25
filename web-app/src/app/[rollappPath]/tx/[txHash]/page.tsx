@@ -1,11 +1,7 @@
 import PageTitle from '@/components/commons/PageTitle';
 import TransactionDetailPage from '@/components/client/transaction/TransactionDetailPage';
 
-type TransactionsProps = Readonly<{
-  params: { txHash: string };
-}>;
-
-export default function Transaction({ params }: TransactionsProps) {
+export default function Transaction() {
   return (
     <>
       <PageTitle title="Transaction" />

@@ -23,7 +23,7 @@ function getVotingPercent(proposal: GovProposal | null): {
 } {
   const defaultResult = { result: ['0', '0', '0', '0'], maxId: -1 };
   if (!proposal) return defaultResult;
-  let { yes, no, noWithVeto, abstain } = proposal.finalTallyResult;
+  const { yes, no, noWithVeto, abstain } = proposal.finalTallyResult;
 
   const total = new Big(yes).add(no).add(noWithVeto).add(abstain);
   if (total.eq(0)) return defaultResult;
@@ -102,7 +102,7 @@ export default function GovernanceDetail() {
   const params = useParams<{ id: string }>();
   const id = parseInt(params.id);
   const [proposal, loading] = useGovProposal(id);
-  const [denomsMetadata, denomsMetadataloading] = useDenomsMetadata();
+  const [denomsMetadata] = useDenomsMetadata();
 
   const proposalTitle = proposal ? proposal.messages[0].protoContent.plan.name : '';
 

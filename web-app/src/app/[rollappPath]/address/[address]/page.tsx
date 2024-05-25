@@ -48,8 +48,8 @@ export default async function Address({ params, searchParams, tokenMode = false 
 
   const isEVMChain = rollappInfo.chain_type === ChainType.EVM;
 
-  let bech32 = rollappInfo.bech32 as JsonObject;
-  let prefix = bech32.addr as string;
+  const bech32 = rollappInfo.bech32 as JsonObject;
+  const prefix = bech32.addr as string;
 
   let rollappAddress: RollappAddress | null;
   let valAddress: RollappAddress | null = null;
@@ -57,8 +57,8 @@ export default async function Address({ params, searchParams, tokenMode = false 
     rollappAddress = RollappAddress.fromHex(address, prefix);
   } else {
     const parsedAddress = RollappAddress.fromBech32(address);
-    let val = bech32.val as string;
-    let cons = bech32.cons as string;
+    const val = bech32.val as string;
+    const cons = bech32.cons as string;
     switch (parsedAddress.prefix) {
       case prefix:
         rollappAddress = parsedAddress;

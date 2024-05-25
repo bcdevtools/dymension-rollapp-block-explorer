@@ -28,7 +28,7 @@ function queryWithCache<T, A, F extends Operation>(
   const context = Prisma.getExtensionContext(this) as any;
   if (!args) return context[action]();
 
-  //@ts-ignore
+  //@ts-expect-error will work
   const { cacheStrategy, ...queryArgs } = args;
 
   if (!cacheStrategy || !cacheStrategy.enabled) {

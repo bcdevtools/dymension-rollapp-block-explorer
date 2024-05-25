@@ -38,7 +38,7 @@ import {
 } from '@/utils/rpc';
 
 export function getResponseResult<T>(rpcPromise: Promise<RpcResponse<T>>, throwError?: boolean): Promise<T>;
-export function getResponseResult<T>(rpcPromise: Promise<RpcResponse<any>[]>, throwError?: boolean): Promise<any[]>;
+export function getResponseResult(rpcPromise: Promise<RpcResponse<any>[]>, throwError?: boolean): Promise<any[]>;
 export async function getResponseResult<T>(
   rpcPromise: Promise<RpcResponse<T> | RpcResponse<any>[]>,
   throwError = true,

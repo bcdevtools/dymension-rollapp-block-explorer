@@ -23,7 +23,7 @@ const StyledSpan = styled('span')(({ theme }) => ({
 }));
 
 function getLinearGradientPercent(proposal: GovProposal): string[] {
-  let { yes, no, noWithVeto, abstain } = proposal.finalTallyResult;
+  const { yes, no, noWithVeto, abstain } = proposal.finalTallyResult;
 
   const yesWithNo = new Big(yes).add(no);
   const yesWithNoWithNoWithVeto = yesWithNo.add(noWithVeto);

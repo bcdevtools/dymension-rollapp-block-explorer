@@ -110,8 +110,10 @@ export function getMessageName(messageType: string) {
     case '/osmosis.lockup.MsgForceUnlock':
       return 'Force Unlock';
     default:
-      const matched = messageType.match(/[^.]+$/);
-      return matched ? matched[0] : '';
+      return (function () {
+        const matched = messageType.match(/[^.]+$/);
+        return matched ? matched[0] : '';
+      })();
   }
 }
 
