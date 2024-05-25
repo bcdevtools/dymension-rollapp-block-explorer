@@ -15,7 +15,14 @@ const getIndexingFallBehindChains = cache(
 export async function GET() {
   const result = await getIndexingFallBehindChains();
 
+  let status = 200;
+  if (result.some((r: any) => r.epoch_diff > 1800)) {
+    status = 530;
+  } else if (result.some((r: any) => r.epoch_diff > 360)) {
+    status = 503;
+  }
+
   return Response.json(result, {
-    status: result.some((r: any) => r.epoch_diff > 360) ? 503 : 200,
+    status: status,
   });
 }
