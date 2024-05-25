@@ -14,13 +14,19 @@ sudo npm i pm2 -g
 npm i
 ```
 
-3. Build
+3. Generate Prisma Client model
+
+```shell
+npm run prisma:generate
+```
+
+4. Build
 
 ```shell
 npm run build
 ```
 
-4. Start
+5. Start
 
 ```shell
 pm2 start pm2.config.js
@@ -28,13 +34,19 @@ pm2 start pm2.config.js
 
 ### Update Web-app
 
-1. Rebuild
+1. Update new Prisma Client model
+
+```shell
+npm run prisma:generate
+```
+
+2. Rebuild
 
 ```shell
 npm run build
 ```
 
-2. Restart web-app
+3. Restart web-app
 
 ```shell
 pm2 restart web-app
