@@ -6,8 +6,8 @@ export const dynamic = 'force-dynamic';
 
 type IndexingFallbehindChains = Required<{ epoch_diff: number }>;
 
-const getIndexingFallBehindChains = cache(
-  (): Promise<IndexingFallbehindChains[]> => prisma.$queryRaw`SELECT * FROM get_indexing_fallbehind_chains(4)`,
+const getIndexingFallBehindChains: () => Promise<IndexingFallbehindChains[]> = cache(
+  () => prisma.$queryRaw`SELECT * FROM get_indexing_fallbehind_chains(4)`,
   'get_indexing_fallbehind_chains',
   DEFAULT_CACHE_DURATION,
 );
@@ -16,13 +16,15 @@ export async function GET() {
   const result = await getIndexingFallBehindChains();
 
   let status = 200;
-  if (result.some((r: any) => r.epoch_diff > 1800)) {
-    status = 530;
-  } else if (result.some((r: any) => r.epoch_diff > 360)) {
-    status = 503;
+  for (const r of result) {
+    if (r.epoch_diff > 1800) {
+      status = 530;
+      break;
+    }
+    if (r.epoch_diff > 360) {
+      status = 503;
+    }
   }
 
-  return Response.json(result, {
-    status: status,
-  });
+  return Response.json(result, { status });
 }
