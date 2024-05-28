@@ -12,6 +12,8 @@ import { PAGE_PARAM_NAME, PAGE_SIZE_PARAM_NAME } from '@/consts/setting';
 import { useSearchParams } from 'next/navigation';
 import { useRecentBlocks } from '@/hooks/useRecentBlocks';
 
+type BlockListPageProps = Readonly<{ txsIn24h: number }>;
+
 function BlockSummaryCard({
   label,
   loading = false,
@@ -31,7 +33,7 @@ function BlockSummaryCard({
   );
 }
 
-export default function BlockListPage() {
+export default function BlockListPage({ txsIn24h }: BlockListPageProps) {
   const searchParams = useSearchParams();
   const [pageSize, page] = getPageAndPageSizeFromStringParam(
     searchParams.get(PAGE_SIZE_PARAM_NAME),
@@ -56,7 +58,7 @@ export default function BlockListPage() {
         </BlockSummaryCard>
         <BlockSummaryCard label="Tx Count (Last 24H)" loading={loading}>
           <Typography variant="h6">
-            <strong>-</strong>
+            <strong>{txsIn24h}</strong>
           </Typography>
         </BlockSummaryCard>
         <BlockSummaryCard label="Block Time" loading={loading}>
