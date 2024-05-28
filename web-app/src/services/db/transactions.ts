@@ -53,3 +53,10 @@ export const getTxHashAndChainInfoByTxHashes = async function (txHashes: string[
     where: { hash: { in: txHashes.sort() } },
   });
 };
+
+export const countTransactionsSinceTimestamp = async function (chain_id: string, since: number) {
+  return prisma.transaction.countWithCache({
+    where: { chain_id, epoch: { gt: since } },
+    cacheStrategy: { enabled: true },
+  });
+};
