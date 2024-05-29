@@ -38,3 +38,14 @@ export function rollappInfosToObject(rollappInfos: RollappInfo[]) {
     {},
   );
 }
+
+export function getFavoriteRollapps(): Record<string, boolean> {
+  const favoriteRollapps = localStorage.getItem('favoriteRollapps');
+  return favoriteRollapps ? JSON.parse(favoriteRollapps) : {};
+}
+
+export function setFavoriteRollapp(chainId: string, isFavorite: boolean) {
+  const favoriteRollapps = getFavoriteRollapps();
+  favoriteRollapps[chainId] = isFavorite;
+  localStorage.setItem('favoriteRollapps', JSON.stringify(favoriteRollapps));
+}
