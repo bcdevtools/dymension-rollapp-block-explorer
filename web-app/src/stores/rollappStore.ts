@@ -37,6 +37,9 @@ const actions = {
   [RollappActionTypes.UPDATE_DENOMS_METADATA]: (currentState: RollappState, denomsMetadata: DenomsMetadata) => {
     return { denomsMetadata, hasGottenDenomsMetadata: true };
   },
+  [RollappActionTypes.RE_ORDER_ROLLAPPS]: (currentState: RollappState) => {
+    return { rollappInfos: [...currentState.rollappInfos].sort() };
+  },
 };
 
 let rollappStore: Store<RollappState, typeof actions>;
