@@ -17,6 +17,7 @@ import ProposalStatusText from './ProposalStatusText';
 import Link from 'next/link';
 import { Path } from '@/consts/path';
 import { usePathname } from 'next/navigation';
+import { getProposalTitle } from '@/utils/proposal';
 
 const StyledSpan = styled('span')(({ theme }) => ({
   color: theme.palette.text.primary,
@@ -64,7 +65,7 @@ export default React.memo(function ProposalItem({ proposal, idx }: Readonly<{ pr
           </Grid>
           <Grid item xs={6} px={1} alignItems="end">
             <Typography fontSize="1.4rem">
-              <b>{`#${proposal.id} ${proposal.messages[0].protoContent.plan.name}`}</b>
+              <b>{`#${proposal.id} ${getProposalTitle(proposal)}`}</b>
             </Typography>
           </Grid>
           <Grid display="flex" item justifyContent="end" alignItems="end" xs={6} px={1}>
