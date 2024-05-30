@@ -2,12 +2,12 @@
 
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import FormControl, { FormControlProps } from '@mui/material/FormControl';
-import { useRollappStore } from '@/stores/rollappStore';
 import MenuItem from '@mui/material/MenuItem';
 import React from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import Typography from '@mui/material/Typography';
+import { useRollappStore } from '@/stores/rollappStore';
 
 type RollappSelectProps = Readonly<
   FormControlProps & {
@@ -24,7 +24,7 @@ export default React.memo(function RollappSelect({
   size = 'medium',
   ...props
 }: RollappSelectProps) {
-  const [{ rollappInfos }] = useRollappStore(true);
+  const [{ rollappInfos }] = useRollappStore();
 
   return (
     <FormControl {...props} size={size}>

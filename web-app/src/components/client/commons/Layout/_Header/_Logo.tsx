@@ -9,8 +9,7 @@ import { usePathname } from 'next/navigation';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import StarIcon from '@mui/icons-material/Star';
 import Box from '@mui/material/Box';
-import { useEffect, useState } from 'react';
-import { getFavoriteRollapps, setFavoriteRollapp } from '@/utils/rollapp';
+import { RollappActionTypes } from '@/consts/actionTypes';
 
 const baseStyle = {
   fontFamily: 'monospace',
@@ -19,26 +18,17 @@ const baseStyle = {
 };
 
 export default function Logo({ isDark }: Readonly<{ isDark: boolean }>) {
-  const [{ selectedRollappInfo }] = useRollappStore();
-  const [isFavorite, setFavorite] = useState(false);
+  const [{ selectedRollappInfo }, dispatch] = useRollappStore();
   const pathname = usePathname();
   const logoHref = getNewPathByRollapp(pathname, Path.OVERVIEW);
   const appName = selectedRollappInfo?.name.toUpperCase();
 
-  useEffect(() => {
-    if (!selectedRollappInfo) {
-      setFavorite(false);
-      return;
-    }
-    const favoriteRollapps = getFavoriteRollapps();
-    setFavorite(favoriteRollapps[selectedRollappInfo.chain_id]);
-  }, [selectedRollappInfo]);
-
   const handleClickFavorite = () => {
     if (!selectedRollappInfo) return;
-    const newFavorite = !isFavorite;
-    setFavoriteRollapp(selectedRollappInfo!.chain_id, newFavorite);
-    setFavorite(newFavorite);
+    dispatch(RollappActionTypes.RE_ORDER_ROLLAPPS, {
+      chainId: selectedRollappInfo.chain_id,
+      isFavorite: !selectedRollappInfo.isFavorite,
+    });
   };
 
   return (
@@ -54,7 +44,11 @@ export default function Logo({ isDark }: Readonly<{ isDark: boolean }>) {
         mr={1}>
         {appName}
       </Typography>
-      {isFavorite ? <StarIcon onClick={handleClickFavorite} /> : <StarOutlineIcon onClick={handleClickFavorite} />}
+      {selectedRollappInfo?.isFavorite ? (
+        <StarIcon onClick={handleClickFavorite} />
+      ) : (
+        <StarOutlineIcon onClick={handleClickFavorite} />
+      )}
     </Box>
   );
 }

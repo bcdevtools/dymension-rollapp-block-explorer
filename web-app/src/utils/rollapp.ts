@@ -2,6 +2,7 @@ import { ChainInfo } from '@/services/db/chainInfo';
 
 export type RollappInfo = {
   path: string;
+  isFavorite: boolean;
 } & ChainInfo;
 
 export interface RollappInfoMap {
@@ -17,12 +18,11 @@ export function getRollappPathByName(name: string) {
 }
 
 export function normalizeRollappsInfo(chainInfos: ChainInfo[]): RollappInfo[] {
-  return chainInfos
-    .map(chainInfo => ({
-      ...chainInfo,
-      path: getRollappPathByName(chainInfo.name),
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  return chainInfos.map(chainInfo => ({
+    ...chainInfo,
+    path: getRollappPathByName(chainInfo.name),
+    isFavorite: false,
+  }));
 }
 
 export function getRollappInfoByPath(chainInfos: ChainInfo[], path: string): RollappInfo | undefined {
@@ -39,13 +39,14 @@ export function rollappInfosToObject(rollappInfos: RollappInfo[]) {
   );
 }
 
-export function getFavoriteRollapps(): Record<string, boolean> {
-  const favoriteRollapps = localStorage.getItem('favoriteRollapps');
+type FavoriteRollapps = Record<string, boolean>;
+const FAVORITE_ROLLAPPS_KEYS = 'favoriteRollapps';
+
+export function getFavoriteRollapps(): FavoriteRollapps {
+  const favoriteRollapps = localStorage.getItem(FAVORITE_ROLLAPPS_KEYS);
   return favoriteRollapps ? JSON.parse(favoriteRollapps) : {};
 }
 
-export function setFavoriteRollapp(chainId: string, isFavorite: boolean) {
-  const favoriteRollapps = getFavoriteRollapps();
-  favoriteRollapps[chainId] = isFavorite;
-  localStorage.setItem('favoriteRollapps', JSON.stringify(favoriteRollapps));
+export function setFavoriteRollapps(favoriteRollapps: FavoriteRollapps) {
+  localStorage.setItem(FAVORITE_ROLLAPPS_KEYS, JSON.stringify(favoriteRollapps));
 }
