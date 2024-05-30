@@ -17,6 +17,7 @@ import ProposalStatusText from './ProposalStatusText';
 import Link from 'next/link';
 import { Path } from '@/consts/path';
 import { usePathname } from 'next/navigation';
+import get from 'lodash/get';
 
 const StyledSpan = styled('span')(({ theme }) => ({
   color: theme.palette.text.primary,
@@ -37,6 +38,18 @@ function getLinearGradientPercent(proposal: GovProposal): string[] {
   const d = yesWithNoWithNoWithVeto.div(total).mul(100).toString();
 
   return [a, b, c, d];
+}
+
+function getProposalTitle(proposal: GovProposal) {
+  const { protoContent } = proposal.messages[0];
+  let title = '';
+  if (!title && protoContent.plan) {
+    title = get(protoContent, 'plan.name', '');
+  }
+  if (!title && protoContent.content) {
+    title = get(protoContent, 'content.title', '');
+  }
+  return title;
 }
 
 export default React.memo(function ProposalItem({ proposal, idx }: Readonly<{ proposal: GovProposal; idx: number }>) {
@@ -64,7 +77,7 @@ export default React.memo(function ProposalItem({ proposal, idx }: Readonly<{ pr
           </Grid>
           <Grid item xs={6} px={1} alignItems="end">
             <Typography fontSize="1.4rem">
-              <b>{`#${proposal.id} ${proposal.messages[0].protoContent.plan.name}`}</b>
+              <b>{`#${proposal.id} ${getProposalTitle(proposal)}`}</b>
             </Typography>
           </Grid>
           <Grid display="flex" item justifyContent="end" alignItems="end" xs={6} px={1}>

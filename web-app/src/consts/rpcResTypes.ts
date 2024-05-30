@@ -302,12 +302,18 @@ export interface GovProposal {
     protoContent: {
       '@type': string;
       authority: string;
-      plan: {
+      plan?: {
         height: string;
         info: string;
         name: string;
         time: string;
         upgraded_client_state: null;
+      };
+      content?: {
+        '@type': string;
+        description: string;
+        title: string;
+        changes: { key: string; subspace: string; value: string }[];
       };
     };
     type: string;
