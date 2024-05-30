@@ -37,7 +37,7 @@ function getVotingPercent(proposal: GovProposal | null): {
   const a = yesBig.div(total).mul(100).round(2);
   const b = noBig.div(total).mul(100).round(2);
   const c = noWithVetoBig.div(total).mul(100).round(2);
-  const d = total.sub(a).sub(b).sub(c).round(2);
+  const d = new Big(100).sub(a).sub(b).sub(c).round(2);
 
   let max = 0;
   const dataInArray = [yesBig, noBig, noWithVetoBig, abstainBig];
