@@ -1,9 +1,10 @@
 'use client';
-import { initRollappStore } from '@/stores/rollappStore';
+import { RollappActionTypes } from '@/consts/actionTypes';
+import { initRollappStore, useRollappStore } from '@/stores/rollappStore';
 import { RollappInfo } from '@/utils/rollapp';
 import { getInitialRollappState } from '@/utils/store';
 import { usePathname } from 'next/navigation';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 type StoreProviderProps = Readonly<{
   children: React.ReactNode;
@@ -19,5 +20,7 @@ export function StoreProvider({ children, initialState }: StoreProviderProps) {
     initRollappStore(getInitialRollappState(initialState.rollappInfos, pathname));
     hasInitStore.current = true;
   }
+  const [, dispatch] = useRollappStore(false);
+  useEffect(() => void dispatch(RollappActionTypes.RE_ORDER_ROLLAPPS), [dispatch]);
   return children;
 }

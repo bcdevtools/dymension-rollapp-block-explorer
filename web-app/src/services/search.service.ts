@@ -91,23 +91,25 @@ export async function handleGlobalSearch(
   allRollappInfos: RollappInfo[],
   selectedRollappInfo?: RollappInfo | null,
 ): Promise<SearchResult> {
-  allRollappInfos = [...allRollappInfos].sort((a, b) => {
+  const _allRollappInfos = [...allRollappInfos].sort((a, b) => {
     if (a.chain_id === selectedRollappInfo?.chain_id) return -1;
     else if (b.chain_id === selectedRollappInfo?.chain_id) return 1;
+    else if (a.isFavorite && !b.isFavorite) return -1;
+    else if (b.isFavorite && !a.isFavorite) return 1;
     return a.name.localeCompare(b.name);
   });
 
   const result: SearchResult = {};
 
-  const rollappInfoMap = rollappInfosToObject(allRollappInfos);
+  const rollappInfoMap = rollappInfosToObject(_allRollappInfos);
 
   searchText = searchText.trim();
 
   if (searchText) {
     const [searchByBlockResult, searchByTxResult, searchByAccountResult, searchByRollappResult] = await Promise.all([
-      getBlockSearchResult(searchText, allRollappInfos),
+      getBlockSearchResult(searchText, _allRollappInfos),
       getTransactionSearchResult(searchText, rollappInfoMap),
-      getAccountSearchResult(searchText, allRollappInfos),
+      getAccountSearchResult(searchText, _allRollappInfos),
       getRollappSearchResult(searchText, allRollappInfos),
     ]);
 

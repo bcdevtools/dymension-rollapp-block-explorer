@@ -22,7 +22,7 @@ type SearchProps = Readonly<{
 
 export default function Search({ onClear = () => {}, columns = 1 }: SearchProps) {
   const [searchValue, setSearchValue] = useState<string>('');
-  const [{ rollappInfos, selectedRollappInfo }] = useRollappStore();
+  const [{ selectedRollappInfo, rollappInfos }] = useRollappStore();
   const [loading, setLoading] = useState(false);
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const mounted = useMountedState();

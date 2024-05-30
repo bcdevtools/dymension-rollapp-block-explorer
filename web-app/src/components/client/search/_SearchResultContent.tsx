@@ -11,6 +11,8 @@ import Typography from '@mui/material/Typography';
 import { Path } from '@/consts/path';
 import SearchResultDisplayContext from '@/contexts/SearchResultDisplayContext';
 import Link from 'next/link';
+import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import StarIcon from '@mui/icons-material/Star';
 
 function SearchResultItem({
   rollappName,
@@ -18,12 +20,14 @@ function SearchResultItem({
   value,
   handleClick,
   href,
+  isFavourite,
 }: Readonly<{
   rollappName: string;
   chainId: string;
   value?: string;
   handleClick: () => void;
   href: string;
+  isFavourite?: boolean;
 }>) {
   return (
     <SearchResultDisplayContext.Consumer>
@@ -50,6 +54,7 @@ function SearchResultItem({
                   </Typography>
                 }
                 avatar={<Avatar aria-label="recipe">{rollappName[0].toUpperCase()} </Avatar>}
+                action={isFavourite !== undefined && (isFavourite ? <StarIcon /> : <StarOutlineIcon />)}
               />
             </CardActionArea>
           </Card>
@@ -98,6 +103,7 @@ export default function SearchResultContent({
                 chainId={rollapp.chain_id}
                 href={rollapp.path}
                 handleClick={handleClickSearchItem}
+                isFavourite={rollapp.isFavorite}
               />
             ))}
           </SearchResultSection>
