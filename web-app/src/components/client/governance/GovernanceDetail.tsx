@@ -16,6 +16,7 @@ import TextField from '@mui/material/TextField';
 import useDenomsMetadata from '@/hooks/useDenomsMetadata';
 import { useMemo } from 'react';
 import Typography from '@mui/material/Typography';
+import { getProposalTitle } from '@/utils/proposal';
 
 function getVotingPercent(proposal: GovProposal | null): {
   result: string[];
@@ -104,7 +105,7 @@ export default function GovernanceDetail() {
   const [proposal, loading] = useGovProposal(id);
   const [denomsMetadata] = useDenomsMetadata();
 
-  const proposalTitle = proposal ? proposal.messages[0].protoContent.plan.name : '';
+  const proposalTitle = getProposalTitle(proposal);
 
   const depositBalances = useMemo(() => {
     if (!proposal) return [];
