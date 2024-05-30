@@ -44,10 +44,10 @@ const actions = {
     const favoriteRollapps = getFavoriteRollapps();
     const getSortedRollappInfos = function () {
       return currentState.rollappInfos
-        .map(rollappInfo => ({
-          ...rollappInfo,
-          isFavorite: favoriteRollapps[rollappInfo.chain_id] || false,
-        }))
+        .map(rollappInfo => {
+          rollappInfo.isFavorite = favoriteRollapps[rollappInfo.chain_id] || false;
+          return rollappInfo;
+        })
         .sort((a, b) => {
           if (a.isFavorite && !b.isFavorite) return -1;
           if (b.isFavorite && !a.isFavorite) return 1;
