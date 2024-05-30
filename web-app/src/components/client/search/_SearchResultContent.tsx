@@ -13,7 +13,6 @@ import SearchResultDisplayContext from '@/contexts/SearchResultDisplayContext';
 import Link from 'next/link';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import StarIcon from '@mui/icons-material/Star';
-import { getFavoriteRollapps } from '@/utils/rollapp';
 
 function SearchResultItem({
   rollappName,
@@ -92,8 +91,6 @@ export default function SearchResultContent({
   }
   const { blocks, txs, accounts, rollapps } = searchResult;
 
-  const favoriteRollapps = getFavoriteRollapps();
-
   return (
     <Box p={2} overflow="auto" height="100%">
       <Grid container spacing={2}>
@@ -106,7 +103,7 @@ export default function SearchResultContent({
                 chainId={rollapp.chain_id}
                 href={rollapp.path}
                 handleClick={handleClickSearchItem}
-                isFavourite={!!favoriteRollapps[rollapp.chain_id]}
+                isFavourite={rollapp.isFavorite}
               />
             ))}
           </SearchResultSection>
