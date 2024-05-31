@@ -3,6 +3,7 @@ import _Home from '@/components/client/Home';
 import Image from 'next/image';
 import Typography from '@mui/material/Typography';
 import { APP_NAME } from '@/consts/setting';
+import Footer from '@/components/commons/Footer';
 
 const { BASE_PATH = '' } = process.env;
 
@@ -29,6 +30,7 @@ export default async function Home() {
         {APP_NAME}
       </Typography>
       <_Home />
+      <Footer />
     </Box>
   );
 }

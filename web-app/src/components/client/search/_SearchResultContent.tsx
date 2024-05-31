@@ -92,7 +92,7 @@ export default function SearchResultContent({
   const { blocks, txs, accounts, rollapps } = searchResult;
 
   return (
-    <Box p={2} overflow="auto" height="100%">
+    <Box p={2} overflow="auto" height="calc(100% - 32px)">
       <Grid container spacing={2}>
         {rollapps && (
           <SearchResultSection title={`Rollapps (${rollapps.length})`}>
