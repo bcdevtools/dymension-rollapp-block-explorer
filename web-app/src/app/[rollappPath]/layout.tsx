@@ -1,10 +1,11 @@
 import { getRollAppInfoByRollappPath } from '@/services/chain.service';
-import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import { CustomToolbar } from '@/components/client/commons/Layout/_Header';
 import Layout from '@/components/client/commons/Layout';
 import { SIDER_WIDTH } from '@/consts/theme';
 import { redirect } from 'next/navigation';
+import LayoutContainer from '@/components/client/commons/LayoutContainer';
+import Footer from '@/components/commons/Footer';
 
 type RollappLayoutProps = Readonly<{
   params: { rollappPath: string };
@@ -27,7 +28,8 @@ export default async function RollappLayout({ children, params }: RollappLayoutP
     <Layout>
       <Box width={{ xs: '100vw', md: `calc(100vw - ${SIDER_WIDTH}px)` }} component="main" flexGrow={1}>
         <CustomToolbar />
-        <Container sx={{ py: 1 }}>{children}</Container>
+        <LayoutContainer sx={{ py: 1 }}>{children}</LayoutContainer>
+        <Footer />
       </Box>
     </Layout>
   );
