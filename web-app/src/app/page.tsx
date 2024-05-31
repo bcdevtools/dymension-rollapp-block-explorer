@@ -6,6 +6,10 @@ import { APP_NAME } from '@/consts/setting';
 
 const { BASE_PATH = '' } = process.env;
 
+export const dynamic = 'force-static';
+
+export const revalidate = 1800;
+
 export default async function Home() {
   return (
     <Box display="flex" alignItems="center" flexDirection="column" marginTop={5} width="100vw">
