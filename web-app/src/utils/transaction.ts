@@ -117,7 +117,7 @@ export function getMessageName(messageType: string) {
   }
 }
 
-export const ctsRegex = /{\[{\s.\[address].\[([a-z\d]+)].\s}]}/g;
+export const ctsRegex = /{\[{\s.\[address\].\[([a-z\d]+)\].\s}]}/g;
 
 export const translateCts = (
   ctm: string,
