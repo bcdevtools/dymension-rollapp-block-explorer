@@ -18,7 +18,7 @@ import { DetailItem } from '@/components/commons/DetailItem';
 import Divider from '@mui/material/Divider';
 import get from 'lodash/get';
 import { Event as TxEvent } from '@/consts/rpcResTypes';
-import { DYM_ESCAN_ADDRESS_URL } from '@/consts/address';
+import { DYM_ESCAN_URL } from '@/consts/address';
 
 function getStatusDisplay(success: boolean) {
   return success ? (
@@ -136,7 +136,7 @@ export default function TransactionDetailPage() {
                       return (
                         <>
                           {idx > 0 && <br/>}
-                          <Link key={idx} href={`${DYM_ESCAN_ADDRESS_URL.replace('/address', '/eibc')}/${e.port}/${e.channel}/${e.sequence}`} sx={{ fontStyle: 'normal' }} target='_blank'>
+                          <Link key={idx} href={`${DYM_ESCAN_URL}/eibc/${e.port}/${e.channel}/${e.sequence}`} sx={{ fontStyle: 'normal' }} target='_blank'>
                             Packet {e.sequence} on Dymension
                           </Link>
                         </>
