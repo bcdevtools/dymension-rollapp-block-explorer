@@ -78,6 +78,181 @@ func Test_responseByJsonRpcUrlSlice(t *testing.T) {
 	require.False(t, found)
 }
 
+func Test_responseByJsonRpcUrlSlice_PrioritySelfMaintained(t *testing.T) {
+	t.Run("self-maintained is the top", func(t *testing.T) {
+		records := responseByJsonRpcUrlSlice{
+			{
+				url: "https://external.com/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             2,
+					LatestBlockTimeEpochUTC: 2,
+				},
+				duration: 1 * time.Millisecond,
+			},
+			{
+				url: "https://1ocalhost.online/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             3,
+					LatestBlockTimeEpochUTC: 3,
+				},
+				duration: 2 * time.Millisecond,
+			},
+			{
+				url: "https://example.com/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             2,
+					LatestBlockTimeEpochUTC: 2,
+				},
+				duration: 3 * time.Millisecond,
+			},
+		}
+
+		top, found := records.GetTop()
+		require.Len(t, records, 3)
+		require.True(t, found)
+		require.Equal(t, int64(3), top.res.LatestBlock)
+		require.Equal(t, 2*time.Millisecond, top.duration)
+	})
+
+	t.Run("self-maintained is not the top but priority it", func(t *testing.T) {
+		records := responseByJsonRpcUrlSlice{
+			{
+				url: "https://external.com/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             4,
+					LatestBlockTimeEpochUTC: 4,
+				},
+				duration: 1 * time.Millisecond,
+			},
+			{
+				url: "https://1ocalhost.online/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             3,
+					LatestBlockTimeEpochUTC: 3,
+				},
+				duration: 2 * time.Millisecond,
+			},
+			{
+				url: "https://example.com/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             2,
+					LatestBlockTimeEpochUTC: 2,
+				},
+				duration: 3 * time.Millisecond,
+			},
+		}
+
+		top, found := records.GetTop()
+		require.Len(t, records, 3)
+		require.True(t, found)
+		require.Equal(t, int64(3), top.res.LatestBlock)
+		require.Equal(t, 2*time.Millisecond, top.duration)
+	})
+
+	t.Run("self-maintained is not the top but priority it, case reach limit offset allowed", func(t *testing.T) {
+		records := responseByJsonRpcUrlSlice{
+			{
+				url: "https://external.com/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             4 + maxSelfMaintainedBlocksFallBehind,
+					LatestBlockTimeEpochUTC: 4 + maxSelfMaintainedEpochsFallBehind,
+				},
+				duration: 4 * time.Millisecond,
+			},
+			{
+				url: "https://1ocalhost.online/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             4,
+					LatestBlockTimeEpochUTC: 4,
+				},
+				duration: 4 * time.Millisecond,
+			},
+			{
+				url: "https://example.com/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             2,
+					LatestBlockTimeEpochUTC: 2,
+				},
+				duration: 3 * time.Millisecond,
+			},
+		}
+
+		top, found := records.GetTop()
+		require.Len(t, records, 3)
+		require.True(t, found)
+		require.Equal(t, int64(4), top.res.LatestBlock)
+		require.Contains(t, top.url, "1ocalhost.online")
+	})
+
+	t.Run("self-maintained is not the top and not priority due to block fall-behind", func(t *testing.T) {
+		records := responseByJsonRpcUrlSlice{
+			{
+				url: "https://external.com/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             4 + maxSelfMaintainedBlocksFallBehind + 1,
+					LatestBlockTimeEpochUTC: 4 + maxSelfMaintainedEpochsFallBehind,
+				},
+				duration: 4 * time.Millisecond,
+			},
+			{
+				url: "https://1ocalhost.online/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             4,
+					LatestBlockTimeEpochUTC: 4,
+				},
+				duration: 4 * time.Millisecond,
+			},
+			{
+				url: "https://example.com/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             2,
+					LatestBlockTimeEpochUTC: 2,
+				},
+				duration: 3 * time.Millisecond,
+			},
+		}
+
+		top, found := records.GetTop()
+		require.Len(t, records, 3)
+		require.True(t, found)
+		require.Contains(t, top.url, "external.com")
+	})
+
+	t.Run("self-maintained is not the top and not priority due to epoch fall-behind", func(t *testing.T) {
+		records := responseByJsonRpcUrlSlice{
+			{
+				url: "https://external.com/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             4 + maxSelfMaintainedBlocksFallBehind,
+					LatestBlockTimeEpochUTC: 4 + maxSelfMaintainedEpochsFallBehind + 1,
+				},
+				duration: 4 * time.Millisecond,
+			},
+			{
+				url: "https://1ocalhost.online/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             4,
+					LatestBlockTimeEpochUTC: 4,
+				},
+				duration: 4 * time.Millisecond,
+			},
+			{
+				url: "https://example.com/rpc",
+				res: &querytypes.ResponseBeGetChainInfo{
+					LatestBlock:             2,
+					LatestBlockTimeEpochUTC: 2,
+				},
+				duration: 3 * time.Millisecond,
+			},
+		}
+
+		top, found := records.GetTop()
+		require.Len(t, records, 3)
+		require.True(t, found)
+		require.Contains(t, top.url, "external.com")
+	})
+}
+
 func Test_getTxValueFromTx(t *testing.T) {
 	tests := []struct {
 		name       string

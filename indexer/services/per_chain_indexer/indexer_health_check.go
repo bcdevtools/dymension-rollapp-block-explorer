@@ -6,6 +6,7 @@ import (
 	querytypes "github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/services/query/types"
 	"github.com/bcdevtools/dymension-rollapp-block-explorer/indexer/types"
 	"slices"
+	"strings"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func (d *defaultIndexer) refreshActiveJsonRpcUrl() (updated bool, beGetChainInfo
 				return d.querySvc.BeGetChainInfo()
 			},
 			querytypes.DefaultRetryOption().
-				MinCount(3). // maximum number of retry
+				MinCount(3).                // maximum number of retry
 				MaxDuration(3*time.Second), /*RPC is not good if response time is too long*/
 		)
 		if err != nil {
@@ -136,6 +137,11 @@ func (s responseByJsonRpcUrlSlice) Sort() {
 	})
 }
 
+const (
+	maxSelfMaintainedBlocksFallBehind = 10
+	maxSelfMaintainedEpochsFallBehind = 50
+)
+
 // GetTop performs sorting (using Sort) then returns the best response among the list, if any.
 func (s responseByJsonRpcUrlSlice) GetTop() (theBest responseByJsonRpcUrl, found bool) {
 	if len(s) == 0 {
@@ -146,5 +152,28 @@ func (s responseByJsonRpcUrlSlice) GetTop() (theBest responseByJsonRpcUrl, found
 
 	theBest = s[0]
 	found = true
+
+	// custom logic to select self-maintained RPC URL over the others
+	const selfDomain = "1ocalhost.online"
+	if len(s) > 1 && !strings.Contains(theBest.url, selfDomain) {
+		// when top is not self-maintained, check if there is any self-maintained URL
+		var selfMaintained responseByJsonRpcUrlSlice
+		for _, res := range s[1:] {
+			if strings.Contains(res.url, selfDomain) {
+				selfMaintained = append(selfMaintained, res)
+			}
+		}
+		if len(selfMaintained) > 0 {
+			theBestSelfMaintained := selfMaintained[0]
+			if theBestSelfMaintained.res != nil {
+				notFarHeight := theBest.res.LatestBlock-theBestSelfMaintained.res.LatestBlock <= maxSelfMaintainedBlocksFallBehind
+				notFarEpoch := theBest.res.LatestBlockTimeEpochUTC-theBestSelfMaintained.res.LatestBlockTimeEpochUTC <= maxSelfMaintainedEpochsFallBehind
+				if notFarHeight && notFarEpoch {
+					theBest = theBestSelfMaintained
+				}
+			}
+		}
+	}
+
 	return
 }
