@@ -17,11 +17,11 @@ export async function GET() {
 
   let status = 200;
   for (const r of result) {
-    if (r.epoch_diff > 3610) {
+    if (r.epoch_diff > 7200) {
       status = 530;
       break;
     }
-    if (r.epoch_diff > 2400) {
+    if (r.epoch_diff > 3610) {
       status = 503;
     }
   }
