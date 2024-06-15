@@ -8,5 +8,4 @@ export const IBC_COIN_PREFIX = 'ibc/';
 
 export const DYM_ADDRESS_PREFIX = 'dym1';
 
-export const DYM_ESCAN_ADDRESS_URL = process.env.NEXT_PUBLIC_DYM_ESCAN_ADDRESS_URL ?? 'https://dym.fyi/address';
 export const DYM_ESCAN_URL = process.env.NEXT_PUBLIC_DYM_ESCAN_URL ?? 'https://dym.fyi';
