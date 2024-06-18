@@ -89,10 +89,10 @@ export function getAccountBalancesParam(address: string): RpcCallParam {
   };
 }
 
-export function getDenomsMetadataParam(): RpcCallParam {
+export function getDenomsMetadataParam(pageNumber: number = 1): RpcCallParam {
   return {
     method: 'be_getDenomsMetadata',
-    params: [],
+    params: [ pageNumber ],
     jsonrpc: '2.0',
   };
 }

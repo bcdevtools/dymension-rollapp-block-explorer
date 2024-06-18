@@ -109,8 +109,8 @@ export class RpcService {
     return this._rpcClient.callRpc(getAccountBalancesParam(address), fetchOptions);
   }
 
-  getDenomsMetadata(fetchOptions?: CallRpcOptions): RpcResult<DenomsMetadata> {
-    return this._rpcClient.callRpc(getDenomsMetadataParam(), fetchOptions);
+  getDenomsMetadata(pageNumber?: number, fetchOptions?: CallRpcOptions): RpcResult<DenomsMetadata> {
+    return this._rpcClient.callRpc(getDenomsMetadataParam(pageNumber), fetchOptions);
   }
 
   getAccount(address: string, callRpcOptions?: CallRpcOptions): RpcResult<Account>;

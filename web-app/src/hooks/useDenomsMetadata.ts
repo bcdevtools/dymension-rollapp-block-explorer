@@ -23,11 +23,30 @@ export default function useDenomsMetadata(shouldThrowError: boolean = false): [D
       try {
         if (!rpcService) throw new Error('Rpc Service is not available');
         setLoading(true);
-        const result = rpcService.getDenomsMetadata();
-        ac = result[1];
 
-        const _denomsMetadata = await getResponseResult(result[0]);
-        dispatch(RollappActionTypes.UPDATE_DENOMS_METADATA, _denomsMetadata);
+        const denomsMetadata: DenomsMetadata = {};
+
+        let pageNumber: number = 1;
+        for(;;) {
+          const result = rpcService.getDenomsMetadata(pageNumber);
+          ac = result[1];
+  
+          const _denomsMetadata = await getResponseResult(result[0]);
+          const keys = Object.keys(_denomsMetadata);
+
+          for (const key of keys) {
+            denomsMetadata[key] = _denomsMetadata[key];
+          }
+  
+          if (keys.length >= 20) {
+            pageNumber++;
+            continue;
+          }
+
+          break;
+        }
+
+        dispatch(RollappActionTypes.UPDATE_DENOMS_METADATA, denomsMetadata);
         setLoading(false);
       } catch (e: any) {
         if (!isAbortException(e)) {
