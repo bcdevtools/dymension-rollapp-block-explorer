@@ -38,7 +38,7 @@ export default function useDenomsMetadata(shouldThrowError: boolean = false): [D
             denomsMetadata[key] = _denomsMetadata[key];
           }
   
-          if (keys.length >= 20) {
+          if (keys.length >= 20) { // magic number: 20 is the maximum records per page returned by API, read: https://github.com/bcdevtools/block-explorer-rpc-cosmos/blob/main/be_rpc/backend/utils.go#L7C1-L7C6
             pageNumber++;
             continue;
           }
