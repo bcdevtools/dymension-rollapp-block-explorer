@@ -15,11 +15,13 @@ make install
 beid init
 
 # Setup database
+## Install PostgresSQL
+## Init database schema
 cd ./database/schema
 ./init-local.sh
 ```
 
-## Indexing data
+## Start data indexer
 
 1. Configure the indexer and connection to database by editing the `~/.beid/config.yaml` file.
 2. Setting the RollApps list by editing the `~/.beid/chains.yaml` file.
@@ -27,3 +29,7 @@ cd ./database/schema
    > beid check
 4. Start the indexer by running the following command:
    > beid start
+
+## Start web server
+
+Check [this](https://github.com/bcdevtools/dymension-rollapp-block-explorer/blob/main/web-app/README.md)
